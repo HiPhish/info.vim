@@ -1,0 +1,136 @@
+.. default-role:: code
+
+####################################
+ Working on the info plugin for Vim
+####################################
+
+This document is intended for programmers who want to work on info.vim, add new
+features,  fix bugs or just  learn how it works and why  certain decisions have
+been made. I will assume the reader to be familiar with how Vim plugins work in
+general.  All files  follow the  usual directory  hierarchy,  so you  will find
+everything where you expect it.
+
+
+Overview of the plugin design
+#############################
+
+The basic idea of info.vim is to make  Vim a first-class reader for text in the
+Info format, just like the standalone info and Emacs's info mode. This includes
+and is not limited  to finding info  files in the same  directories as info and
+Emacs do,  skipping to the  beginning o f the first node,  hiding or  replacing
+markup information, and offering easy navigation.
+
+Non-goals are the generation or organisation of info files.  Editing info files
+is no priority,  but should not be inhibited.  Users are themselves responsible
+for compiling info files and deciding where to install them.
+
+The most important aspect is that we are not trying to write another info.  Vim
+is a text editor,  not an  operating system,  our goal is to make  browsing and
+reading info files more pleasant, not to embed an entire program into Vim.  Use
+Vim's own features and add as little as possible of your own.  If something can
+be achieved with less than five  lines of VimScript then chances are that it is
+best left to the user to set.
+
+
+The info file format
+====================
+
+The following is an informal format description suitable for our needs. An info
+file is a plain-text  file (ASCII or Unicode?) that  contains some light markup
+so the reader can  identify parts of it.  Here is a  list of some of  the terms
+used, the names are made-up by me because there is no formal specification.
+
+Node
+   Nodes are elements  of the table of  contents (toc) tree.  There is always a
+   root node  called `Top` by convention.  Each node can directly reference any
+   (including none) of the following nodes:  the parent `Up`,  and the siblings
+   `Next` and `Previous`.  Not all of these related nodes exist for every node.
+
+   If indirection is  used the `File` value is  not necessarily the actual file
+   the node is stored in, but the file of the topic.
+
+Node header
+   This line marks  the beginning of a node.  It consists of a  number of `Key:
+   Value` pairs separated by comma (`,`) and (opional?) whitespace.
+
+Node separator
+   This marks the border between two  nodes and is used by readers to know when
+   to stop displaying text and pad the remaining lines on the screen with empty
+   lines.  The separator is  always one single  line consisting  of the control
+   character `^_` (ASCII `0x1F`) and  a newline control character (ASCII 0x0A).
+
+File header
+   Some basic information about  the file itself before the first node, such as
+   author or license.  Since the header  comes before  any node  it will  no be
+   displayed by the reader
+
+Indirect
+   If an info file is split over multiple  files it is necessary to know how to
+   find the nodes.  This list contains the partial  files and the offsets which
+   need to be subtracted from the global offset when looking for a node.
+
+   .. code-block::
+
+      Indirect:
+      <topic>.info-1: 781
+      <topic>.info-2: 303374
+      <topic>.info-3: 603289
+      <topic>.info-4: 901483
+      ...
+
+   This list has to come before the tag table.
+
+Tag table
+   A table of tags occurring in the file along with their byte offsets into the
+   file. A tag can be either a note or a reference.  The format of the table is
+   as follows:
+
+   .. code-block::
+
+      ^_
+      Tag Table:
+      <tag>: <name>^?<offset>
+      ...
+      <tag>: <name>^?<offset>
+      ^_
+      End Tag Table
+
+   Where `<tag>` is the type of tag,  `<name>` its name,  `<offset>` the offset
+   into  the  info file,  and `^?`  the  ASCII  control  character  `0x7F`.  If
+   indirection is used the first three lines look like this:
+
+   .. code-block::
+
+      ^_
+      Tag Table:
+      (Indirect)
+
+Local variables
+   I don't know what exactly this does, format is as follows:
+
+   .. code-block::
+
+      ^_
+      Local Variables:
+      <variable>: <value>
+      End:
+
+   They might be used by Emacs to set buffer-specific settings,  similar to the
+   `vim:..` last line in files used by Vim.
+
+
+One format, two purposes
+========================
+
+There are  two purposes to  info files:  reading and writing  them as the plain
+text files  they are,  or treating  them as  a complete work  of documentation.
+Supporting the former only requires some light support for the syntax.
+
+The latter however is more complex.  Such info buffers  will not be read from a
+file,  instead they will be  generated by reading  the contents  of one or more
+files,  assembling  them  into one  buffer,  building a  table of  contents and
+replacing or  hiding markup elements.  This is  similar to  how a  plugin would
+display manpages.
+
+Both types of buffer have the same type,  but generated buffers need some extra
+options set.
