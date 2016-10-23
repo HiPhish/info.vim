@@ -58,20 +58,31 @@ endif
 let s:nodeHeaderRegex = '^\s*((File|Node|Next|Prev|Up)\:\s*.+\,?\s*)+$'
 
 
-syntax keyword infoKeyword File contained
-syntax keyword infoKeyword Node contained
-syntax keyword infoKeyword Next contained
-syntax keyword infoKeyword Prev contained
-syntax keyword infoKeyword Up   contained
+" Inline markup may appear anywhere in text {{{
+
+" References look like *Note topic reference :: or *Note topic reference:
+" (foo)Bar.
+syntax region infoReference start='\v\*[Nn]ote\s' end='\v\:(\:)|(\s\(\w+\)\w+\.)'
+
+" URLs are enclosed in angle brackets: <https://example.com/herp-derp/>
+" syntax region infoURL start=/\v\<\S@=/ end=/\v\S@=\>/
+syntax match infoURL /\v\<\S+\>/
+
+" File path, code literals and so on
+syntax region infoLiteral start='\v‘' end='\v’'
+" This one can abort too early in literal Lisp code: `(cons 'a 12)', but it's
+" better than skipping the inner tick, or else we would match beyond the
+" literal in a sentence like 'These two values are `cons'ed together'.
+syntax region infoLiteral start='\v\`' end='\v\''
+
+" }}}
+
 
 " Header at the beginning of every node
 execute 'syntax match infoNodeHeader /\v'.s:nodeHeaderRegex.'/'
 
 " Section titles, normal text followed by underline characters on next line
 syntax match infoSection '\v^(\s*).+\n\1[*.=-]+$'
-
-" URLs are enclosed in angle brackets: <https://example.com/herp-derp/>
-syntax match infoURL '\v\<.+\>'
 
 " these are really just regular strings, but inside a toc menu
 syntax match infoMenuTitle '\v^[^*	].+$' contained
@@ -93,18 +104,15 @@ syntax region infoMenuEntry start='\v\*\s+' end='\v\:\:' contained
 
 " Footnotes
 execute 'syntax region infoFootnotes start=/\v^ {3}-+\s+Footnotes?\s+-+$/ '
-	\ . 'end=/\v('.s:nodeHeaderRegex.')@=/ keepend'
+	\ . 'end=/\v('.s:nodeHeaderRegex.')@=/ '
+	\ . 'contains=infoReference,infoLiteralBlock,infoLiteral,infoURL keepend'
 
-" References look like *Note topic reference :: or *Note topic reference:
-" (foo)Bar.
-syntax region infoReference start='\v\*[Nn]ote\s' end='\v\:(\:)|(\s\(\w+\)\w+\.)'
-
-" File path, code literals and so on
-syntax region infoLiteral start='\v‘' end='\v’'
+" This causes problems when the '_' is used as a subscript like i_0
+" syntax region infoEmphasis start=/\v_/ end=/\v_/
 
 " Indented piece of text, but not a list, terminated by an empty line
 syntax region infoLiteralBlock
-      \ start='\v^\n\z(\s{5,})' skip='^$' end='^\v\z1@!'
+      \ start='\v^\n\z(\s{5,})' skip='^$' end='\v(^\s{,3}\S)@='
 
 " Three spaces, a bullet and one more space. We need to match lists to not
 " confuse paragraphs inside lists with literal blocks.
@@ -124,6 +132,7 @@ highlight link infoURL         Identifier
 highlight link infoReference   Identifier
 highlight link infoList              None
 highlight link infoLiteral         String
+" highlight def  infoEmphasis        term=italic cterm=italic gui=italic
 highlight link infoLiteralBlock    String
 highlight link infoMenuTitle        Label
 highlight link infoMenuEntry   Identifier
