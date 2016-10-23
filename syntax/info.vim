@@ -54,25 +54,27 @@ if exists("b:current_syntax")
 	finish
 endif
 
+" Commonly used regex are stored here for later use
+let s:nodeHeaderRegex = '^\s*((File|Node|Next|Prev|Up)\:\s*.+\,?\s*)+$'
+
+
 syntax keyword infoKeyword File contained
 syntax keyword infoKeyword Node contained
 syntax keyword infoKeyword Next contained
 syntax keyword infoKeyword Prev contained
 syntax keyword infoKeyword Up   contained
 
-
 " Header at the beginning of every node
-syntax match infoNodeHeader '\v^\s*((File|Node|Next|Prev|Up)\:\s*.+\,?\s*)+$'
+execute 'syntax match infoNodeHeader /\v'.s:nodeHeaderRegex.'/'
 
 " Section titles, normal text followed by underline characters on next line
 syntax match infoSection '\v^(\s*).+\n\1[*.=-]+$'
 
 " URLs are enclosed in angle brackets: <https://example.com/herp-derp/>
-syntax match infoURL '\v\<\w+\:\/\/((\w|\.|\-|_|\,|\;|\?|\=)+\/?)+\>'
-syntax match infoURL '\v\<(\w|\.|\-|_|\,|\;|\?|\=)+\@(\w|\.|\-|_|\,|\;|\?|\=)+\>'
+syntax match infoURL '\v\<.+\>'
 
 " these are really just regular strings, but inside a toc menu
-syntax match infoMenuTitle '\v^[^*].+$' contained
+syntax match infoMenuTitle '\v^[^*	].+$' contained
 
 " Function definitions start with two leading dashes: -- Function print(s)
 syntax match infoFunctionDef '\v^ -- .+$'
@@ -82,14 +84,16 @@ syntax match infoFunctionDef '\v^ -- .+$'
 
 
 " A table of contents menu
-syntax region infoMenu matchgroup=Label
-	\ start='\v^\* Menu\:$' end='\v^$'
-	\ contains=infoMenuEntry,infoMenuTitle,infoFootnotes keepend
+execute 'syntax region infoMenu matchgroup=Label '
+			\ . 'start=/\v^\* Menu\:$/ end=/\v('.s:nodeHeaderRegex.')@=/ '
+			\ . 'contains=infoMenuEntry,infoMenuTitle,infoFootnotes keepend'
+
 " Similar to a reference, except inside the menu
 syntax region infoMenuEntry start='\v\*\s+' end='\v\:\:' contained
 
 " Footnotes
-syntax region infoFootnotes start='\v^ {3}-+\s+Footnotes?\s+-+$' end='\v^$' keepend
+execute 'syntax region infoFootnotes start=/\v^ {3}-+\s+Footnotes?\s+-+$/ '
+	\ . 'end=/\v('.s:nodeHeaderRegex.')@=/ keepend'
 
 " References look like *Note topic reference :: or *Note topic reference:
 " (foo)Bar.

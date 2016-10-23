@@ -16,8 +16,9 @@ not indented.
 * Menu:
 
 * First entry::
-* Second entry::
-* Third entry::
+* Second entry::	Items can have descriptions
+* Third entry::		Items can have descriptions which can span multiple
+			lines. They are aligned using tabs.
 * Comic swearing works as well #-°@:_!?::
 
 A label inside the menu
@@ -111,6 +112,18 @@ indentation than the root of the block.
      	print('Hello' + name)
 
    This is no longer a literal block because the indentation level is lower.
+
+   Description list have one non-indented line followed by a newline and lots
+of indented lines
+
+First list item
+   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
+   ullamcorper metus quis pulvinar luctus. Nunc in mi in ipsum sollicitudin
+   rhoncus non et justo.
+
+Second list item
+   Praesent quam nibh, tempus sit amet lacus in, volutpat elementum urna.
+   Donec ullamcorper dictum lectus at gravida.  Maecenas non congue massa.
 
    Function definitions are used for functions, commands, macros and so on.
 They start with a space, two dashes and one more space.
