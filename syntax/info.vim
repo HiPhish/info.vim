@@ -55,7 +55,7 @@ if exists("b:current_syntax")
 endif
 
 " Commonly used regex are stored here for later use
-let s:nodeHeaderRegex = '^\s*((File|Node|Next|Prev|Up)\:\s*.+\,?\s*)+$'
+let s:nodeHeaderRegex = '^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'
 
 
 " Inline markup may appear anywhere in text {{{
@@ -138,3 +138,5 @@ highlight link infoMenuTitle        Label
 highlight link infoMenuEntry   Identifier
 
 let b:current_syntax = "info"
+
+" vim:tw=78:ts=4:noexpandtab:norl:

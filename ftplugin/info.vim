@@ -5,3 +5,10 @@ setlocal tabstop=8
 setlocal softtabstop=8
 setlocal shiftwidth=8
 
+
+command! -buffer Toc call info#toc()
+command! -buffer TOC :Toc
+
+command! -buffer -nargs=1 Node call info#node(<q-args>)
+
+" vim:tw=78:ts=4:noexpandtab:norl:

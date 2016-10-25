@@ -134,3 +134,155 @@ display manpages.
 
 Both types of buffer have the same type,  but generated buffers need some extra
 options set.
+
+
+The meat and bones of info.vim
+##############################
+
+With the technicalities out of the way let's focus on the actual plugin. I will
+skip syntax highlighting,  the syntax code  says it all.  The important code is
+found in the following files:
+
+`plugin/info.vim`
+   Commands and auto-commands are defined here, nothing else.
+
+`autoload/info.vim`
+   Most of the code that does the actual heavy lifting.
+
+`after/ftplugin/info/folding.vim`
+   Folding and TOC construction
+
+`ftplugin/info.vim`
+   File-type settings for info files.  These settings apply to  all info files,
+   whether they are opened manually or through the info interface. Files opened
+   through the  info  interface  have  additional  options which  as  set  upon
+   opening.
+
+   This file also contains  definitions for any commands  and mappings that are
+   exclusive to info files.
+
+From now  on I  will be  making a  distinction between  info *files*  which are
+actual files  in the  file system,  and info  *documents*  which  is what  info
+displays. An info document can be an info file, but it can also be assembled on
+the fly from multiple files.
+
+Reading an info document
+========================
+
+We will  not be  assembling the  info  document  out of  the individual  files.
+Instead we read the  output from the `info`  command-line tool into the buffer.
+There are two ways to open an info document: by passing its name to the `:Info`
+command and by editing a buffer with a URI that begins with `info://<topic>`.
+
+When using the `:Info` a window is chosen based on some rules and a buffer with
+a generated URI is edited.  From that point on the  flow of control is the same
+as opening an info document by URI. Here is a simplified code draft:
+
+.. code-block:: vim
+
+   function! info#info(topic)
+       let uri = 'info://' . a.topic
+       " This line files an autocommand
+       execute 'split' l:uri
+   endfunction
+
+   function! info#read_doc(uri)
+      let topic = substitute(matchstr(a:uri, 'info://\zs.*'), '\v\/$', '', '')
+      call read_topic(l:topic)
+   endfunction
+
+Once we have a new  buffer and a topic it's just  a matter of setting the extra
+options for  documents  and  reading in  the output  of `info`.  Make  sure  to
+write-lock the buffer only after the document has been written.
+
+
+The table of contents
+=====================
+
+Info documents  can get  very large,  so it is  important to  have some  way of
+navigating them. We need to be able to do two things: find a node very quickly,
+and maintain the  tree structure of the TOC.  The former can be achieved with a
+dictionary `b:nodes` that gives us fast access to any node, while the latter is
+achieved using  a list  (with nested  lists) `b:toc`.  This means  we have  two
+variables at any point.
+
+
+Data structures
+---------------
+
+The keys of `b:nodes` are the names of  the nodes and the values are themselves
+dictionaries with the node's data. Here is an example:
+
+.. code-block::
+
+   'A quick tour': {
+       'up': 'Introduction',
+       'prev': '',
+       'next': 'Getting started',
+       'line': 251,
+       'path': [0, 1, 0]
+   }
+
+Empty values  mean that is no such value.  The `path` key is special in that it
+is not part of the node header text line,  we have to compute it ourselves.  We
+will come back  to it later.  We also don't  use the `File`  value of the  node
+because we don't need it.
+
+The `b:toc` list is a list of dictionaries where every dictionary is an *entry*
+in the TOC.  An entry is a dictionary  that lists its node  and its sub-tree in
+the TOC. Example:
+
+.. code-block::
+
+   [{'node': 'Introduction', 'tree':
+       [{'node': 'A quick tour', 'tree': []},
+        {'node': 'Getting started', 'tree': []}]}]
+
+Entries with an empty tree are leaf-entries.
+
+
+Generating the TOC
+------------------
+
+To generate the TOC structes we have to loop over every node header that occurs
+in the document in the order they occur. The first node is the root, from there
+on use the following algorithm:
+
+#) If the node has  no parent add its  entry to the outermost  level of the TOC
+   (usually only applies to root node)
+#) Else, find its parent TOC entry, it has the name of the `up` property
+#) Append its entry to the parent entry's tree
+
+To generate the  `b:nodes` dictionary add  the complete nodes  as you encounter
+them to the dictionary.
+
+
+The `path` property
+-------------------
+
+Mapping an entry  from `b:toc` to  a node in `b:nodes`  is easy: use the `node`
+property as  the key  into `b:nodes`.  Mapping a  node to  a TOC  entry is more
+involved.  We would be wasting too much time iterating over every branch of the
+tree to find our node.  Instead we store a  sequence of indices into  the tree:
+the `path`.
+
+Suppose have a TOC that looks something like this:
+
+.. code-block::
+
+   R
+   ├─O
+   │ ├─O
+   │ ├─O
+   │ └─O
+   ├─O
+   └─O
+     ├─O
+     ├─O
+     │ ├─X
+     │ └─O
+     └─O
+
+Starting from  the root  `R` the  `path` to  node `X`  is `[0, 2, 1, 0]`.  When
+rendering the `path` to  text we can omit the first  entry and add one to every
+number to get a nice section numbering like `3.2.1.` for display.

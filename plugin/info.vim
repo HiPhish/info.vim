@@ -36,3 +36,5 @@ augroup info
   autocmd!
   autocmd BufReadCmd info://* call info#read_doc(expand('<amatch>'))
 augroup END
+
+" vim:tw=78:ts=4:noexpandtab:norl:

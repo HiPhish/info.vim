@@ -1,0 +1,99 @@
+*info.txt*   Read and browse info files in Vim
+
+                   _        __            _           ~
+                  (_)_ __  / _| _____   _(_)_ __ ___  ~
+                  | | '_ \| |_ / _ \ \ / / | '_ ` _ \ ~
+                  | | | | |  _| (_) \ V /| | | | | | |~
+                  |_|_| |_|_|  \___(_)_/ |_|_| |_| |_|~
+                                    
+
+Version: 0.1.0
+Author: Alejandro "HiPhish" Sanchez
+License: MIT License
+
+
+==============================================================================
+TABLE OF CONTENTS                                              *info-contents*
+
+    1. Introduction ..................................... |info-introduction|
+    2. Basic configuration .............................. |info-configuration|
+    3. Commands ......................................... |info-commands|
+    4. Functions ........................................ |info-functions|
+    5. Advanced ......................................... |info-advanced|
+
+
+==============================================================================
+INTRODUCTION                                               *info-introduction*
+
+*info.vim* provides basic  filetype support for info files,  as well  as an info
+document browser. You can open any info file and browse its nodes as you could
+in the standalone command-line program or Emacs's info mode.
+
+Note: info.vim is still very early work; it is feature-complete but you should
+      consider it to be "wet paint" at this point.
+
+
+==============================================================================
+CONFIGURATION                                             *info-configuration*
+
+Currently there is nothing to configure.
+
+
+==============================================================================
+COMMANDS                                                       *info-commands*
+
+:Info {topic}                                                          *:Info*
+
+    Open  the  {topic}  document  in  an  info buffer.  |:Info| accepts  command
+    |<mods>| such as |:vertical| or |:topleft|. See also |info-uri|
+
+
+:Node {node}                                                           *:Node*
+
+	Jump to the  {node} in this  info buffer.  The command only works from
+	inside an info buffer.
+
+
+:Toc                                                                    *:Toc*
+
+    Open the table of contents  of this info buffer in the location list.  The
+    command only works from inside an info buffer.
+
+
+==============================================================================
+FUNCTIONS                                                     *info-functions*
+
+info#info({mods}, {...})                                         *info#info()*
+
+    Function equivalent  to |:Info| . The first  argument is  the |<mods>|  of the
+    command, the rest of the arguments must be the topic as a string.
+
+
+info#node({node})                                                *info#node()*
+
+    Function equivalent  to |:Node|.  The {node}  is the  name of  the node as a
+    string.
+
+
+info#toc({node})                                                  *info#toc()*
+
+    Function equivalent to |:Toc|.
+
+
+==============================================================================
+ADVANCED                                                       *info-advanced*
+
+                                                                    *info-uri*
+If an editor  with an info  URI is edited  the document from  the URI  will be
+loaded into the  buffer as if it was  opened with |:Info|.  This would allow you
+to open a new window and execute
+>
+    :edit info://bash
+<
+and have the manual for  the Bourne Again Shell loaded into the buffer.  There
+is absolutely no difference between an info buffer loaded like this and by the
+use of |:Info|.
+
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:

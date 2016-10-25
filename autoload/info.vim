@@ -58,6 +58,34 @@ function! info#read_doc(uri)
 endfunction
 
 
+" Jump to a given node in the document, cannot jump out of the current
+" document.
+function! info#node(node) abort
+	if type(a:node) == type('')
+		if !exists('b:nodes[a:node]')
+			throw 'Node '.a:node.' not registered in this document.'
+		endif
+
+		let l:lnum = b:nodes[a:node]['line']
+		silent execute 'normal '.l:lnum.'G'
+		normal zozt
+	else
+		throw 'Error: node must be a string'
+	endif
+endfunction
+
+
+" Populate the location list with all the nodes reflecting the tree structure
+" of the TOC.
+function! info#toc()
+	for entry in b:toc
+		call s:prettyPrintTOC(entry, 0)
+	endfor
+
+	lopen
+endfunction
+
+
 " Here the heavy heavy lifting happens: we set the options for the buffer and
 " load the info document.
 function! s:read_topic(topic)
@@ -82,6 +110,13 @@ function! s:read_topic(topic)
 
 	" Jump to the first line and delete it because it's blank
     silent keepjumps 1delete _
+
+    " Initialise the TOC tree and node dictionary to empty, they will be
+    " filled up later. See the code about folding for details. The lock
+    " variable will be set after the TOC has been built.
+    let b:toc = []
+    let b:nodes = {}
+    let b:toc_was_built = 0
 
 	" Now lock the file and set all the remaining options
 	setlocal filetype=info
@@ -121,3 +156,35 @@ function! s:find_info() abort
 		endif
 	endwhile
 endfunction
+
+" A helper function used by 'displayTOC' recursively.
+function! s:prettyPrintTOC(entry, level)
+	let l:node = b:nodes[a:entry['node']]
+
+	let l:msg  = repeat(' ', len(b:last_node_line.'') - len(l:node['line'].''))
+	let l:msg .= repeat('  ', a:level)
+	let l:msg .= s:pathToNumbers(l:node).' '. a:entry['node']
+
+	laddexpr expand('%').'\|'.l:node['line'].'\|'. ' . '. l:msg
+
+	for l:sub_node in a:entry['tree']
+		call s:prettyPrintTOC(l:sub_node, a:level + 1)
+	endfor
+endfunction
+
+" Helper function, converts a node path to a number sequence like [0, 1, 2] to
+" '1.2.3.'
+function! s:pathToNumbers(node)
+	let l:path = a:node['path']
+	if len(l:path) == 1
+		return ''
+	endif
+
+	let l:string = ''
+	for index in l:path[1:]
+		let l:string .= (index + 1) . '.'
+	endfor
+	return l:string
+endfunction
+
+" vim:tw=78:ts=4:noexpandtab:norl:

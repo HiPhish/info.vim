@@ -27,7 +27,7 @@ Usage
 This plugin is still very much under construction, so any of this may change in
 the future. To open an info document run
 
-.. code-block::
+.. code-block:: vim
 
    :Info <topic>
 
@@ -35,9 +35,30 @@ The placeholder `topic` is the topic you want to read about,  e.g. `:Info bash`
 to read the manual for the Bourne Again Shell.  Alternatively you can also open
 a buffer with a URI pattern like this:
 
-.. code-block::
+.. code-block:: vim
 
    :edit info://<topic>
 
 You could call `:e info://bash` in a buffer to open the same document as above.
-Specifying nodes is not implemented yet.
+When inside an info buffer you can also use the commands
+
+.. code-block:: vim
+
+   :Node <node>
+
+to jump to a particular node by name and
+
+.. code-block:: vim
+
+   :Toc
+   :TOC
+
+to open the table of content in the location list buffer.
+
+
+Stuff left to do
+################
+
+It should be possible to directly jump to a node by calling `:Info <topic>
+<node>` and the URI should similarly allow specifying a node after the topic
+`info://<topic>/<node>`.
