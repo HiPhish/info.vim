@@ -29,7 +29,7 @@ endif
 let g:loaded_info = 1
 
 
-command! -nargs=+ Info call info#info(<q-mods>, <f-args>)
+command! -nargs=* Info call info#info(<q-mods>, <f-args>)
 
 
 augroup info

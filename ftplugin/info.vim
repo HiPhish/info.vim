@@ -6,9 +6,9 @@ setlocal softtabstop=8
 setlocal shiftwidth=8
 
 
-command! -buffer Toc call info#toc()
+command! -buffer Toc call info#toc(<q-mods>)
 command! -buffer TOC :Toc
 
-command! -buffer -nargs=1 Node call info#node(<q-args>)
+command! -buffer -nargs=? Node call info#node(<q-args>)
 
 " vim:tw=78:ts=4:noexpandtab:norl:

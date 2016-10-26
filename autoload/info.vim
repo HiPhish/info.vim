@@ -34,11 +34,11 @@ endif
 " the topic and options from the arguments
 function! info#info(mods, ...)
 	if a:0 == 0
-		" TODO: use the word under the cursor as the topic
-		error 'Error: Need an argument.'
+		let l:topic = ''
+	else
+		let l:topic = a:1
 	endif
 
-	let l:topic = a:1
 	let l:bufname = 'info://' . l:topic
 
 	" The following will trigger the autocommand of editing an info:// file
@@ -62,6 +62,11 @@ endfunction
 " Jump to a given node in the document, cannot jump out of the current
 " document.
 function! info#node(node) abort
+	if a:node == ''
+		echo s:lineToNode(line('.'), b:toc)
+		return
+	endif
+
 	if type(a:node) == type('')
 		if !exists('b:nodes[a:node]')
 			throw 'Node '.a:node.' not registered in this document.'
@@ -78,7 +83,7 @@ endfunction
 
 " Populate the location list with all the nodes reflecting the tree structure
 " of the TOC.
-function! info#toc()
+function! info#toc(mods)
 	if &modified
 		let b:toc_dirty = 1
 		call s:build_toc
@@ -88,7 +93,7 @@ function! info#toc()
 		call s:prettyPrintTOC(entry, 0)
 	endfor
 
-	lopen
+	execute a:mods . ' lopen'
 endfunction
 
 " predicate function, tests whether a line is a node header or not
@@ -273,6 +278,52 @@ function! s:FindTOCEntry(path)
 	endfor
 
 	return l:entry
+endfunction
+
+" Return the name of the node of the current line.
+function! s:lineToNode(line, tree)
+	" The TOC is a non-binary tree and we will perform a binary search on it.
+	" First search the current level until we have reduced it to one node,
+	" then check that one node, and if it isn't the one we want recurse down
+	" into its sub-tree.
+	"
+	" If the current line number is lower than that of a given node we know
+	" that that node and any of its children, later siblings and their
+	" children are out of the question.
+
+	let l:len = len(a:tree)
+
+	" The one lone node the root of a new sub-tree.
+	if l:len == 1
+		let l:tree = a:tree[0]['tree']
+		" Three cases:
+		"   - Leaf node: found the node
+		"   - Line is above the first child: found the node
+		"   - Else: Descend down the sub-tree.
+		if empty(l:tree)
+			return a:tree[0]['node']
+		elseif a:line < b:nodes[l:tree[0]['node']]['line']
+			return a:tree[0]['node']
+		else
+			return s:lineToNode(a:line, l:tree)
+		endif
+	endif
+
+	" Perform a binary search on the current level
+	let l:pivot = a:tree[l:len / 2]
+
+	" Three cases:
+	"   - The line is the line of the pivot node
+	"   - The line is above the pivot -> recurse upper half
+	"   - The line is below the pivot -> recurse lower half
+	if a:line == b:nodes[l:pivot['node']]['line']
+		return l:pivot['node']
+	elseif a:line > b:nodes[l:pivot['node']]['line']
+		return s:lineToNode(a:line, a:tree[l:len / 2 :])
+	else
+		return s:lineToNode(a:line, a:tree[: l:len / 2 - 1])
+	endif
+
 endfunction
 
 " A helper function used by 'displayTOC' recursively.
