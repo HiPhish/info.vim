@@ -49,10 +49,16 @@ COMMANDS                                                       *info-commands*
 
 
 :Node [{node}]                                                         *:Node*
+:Node -next
+:Node -previous
+:Node -up
 
     Jump to the {node} in this info buffer. The command only works from inside
     an info buffer. If no argument is given the title of the current node will
     be printed.
+
+    When passing  '-next',  '-previous' or  '-up' as  the {node}  argument the
+    buffer will jump to that node relative to the current node.
 
 
 :Toc                                                                    *:Toc*

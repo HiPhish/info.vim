@@ -67,6 +67,29 @@ function! info#node(node) abort
 		return
 	endif
 
+	if a:node == '(dir)'
+		call info#read_doc('info://')
+		return
+	endif
+
+	if a:node == '-next'
+		let l:node = b:nodes[s:lineToNode(line('.'), b:toc)]
+		call info#node(l:node['next'])
+		return
+	endif
+
+	if a:node == '-previous'
+		let l:node = b:nodes[s:lineToNode(line('.'), b:toc)]
+		call info#node(l:node['prev'])
+		return
+	endif
+
+	if a:node == '-up'
+		let l:node = b:nodes[s:lineToNode(line('.'), b:toc)]
+		call info#node(l:node['up'])
+		return
+	endif
+
 	if type(a:node) == type('')
 		if !exists('b:nodes[a:node]')
 			throw 'Node '.a:node.' not registered in this document.'
@@ -74,7 +97,7 @@ function! info#node(node) abort
 
 		let l:lnum = b:nodes[a:node]['line']
 		silent execute 'normal '.l:lnum.'G'
-		normal zozt
+		silent! normal zozt
 	else
 		throw 'Error: node must be a string'
 	endif
