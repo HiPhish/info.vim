@@ -119,6 +119,18 @@ function! info#toc(mods)
 	execute a:mods . ' lopen'
 endfunction
 
+" Echo a quick instruction list
+function! info#help()
+	echomsg 'The following commands are defined in ''info'' buffers:'
+	echomsg '  :Toc              Open table of contents in locatio list'
+	echomsg '  :Node             Echo the current node'
+	echomsg '  :Node <node>      Jump to node <node>'
+	echomsg '  :Node -next       Jump to next node'
+	echomsg '  :Node -previous   Jump to previous node'
+	echomsg '  :Node -up         Jump to parent node'
+	echomsg 'See '':help info'' for more details.'
+endfunction
+
 " predicate function, tests whether a line is a node header or not
 function! info#IsNodeHeader(line)
 	return !empty(matchstr(a:line, '\v^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'))
