@@ -133,7 +133,7 @@ endfunction
 function! s:read_topic(topic)
 	" We will lock it after assembly
 	setlocal modifiable
-	setlocal noreadonly
+	setlocal readonly
 	setlocal noswapfile
 	setlocal buftype=nofile
 	setlocal bufhidden=hide
@@ -165,7 +165,6 @@ function! s:read_topic(topic)
 	setlocal norelativenumber
 	setlocal nomodifiable
 	setlocal nomodified
-	setlocal readonly
 	setlocal foldcolumn=0
 	setlocal colorcolumn=0
 	setlocal nolist

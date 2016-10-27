@@ -15,11 +15,8 @@ of GNU.
 
 .. note::
 
-   At the moment info.vim is still *very* early work in progress. Browsing info
-   files is  implemented,  but not  node navigation.  You can  test the  syntax
-   highlighting of manually  opened info files at the  moment or open documents
-   by topic.
-
+   At the moment info.vim is still *very* early work in progress. You could run
+   into some unexpected edge cases.
 
 Installation
 ############
@@ -76,9 +73,12 @@ I recommend mapping the navigation commands to something more convenient.
 
 .. code-block:: vim
 
-   nnoremap <buffer> gn :Node -next<CR>
-   nnoremap <buffer> gp :Node -previous<CR>
-   nnoremap <buffer> gu :Node -up<CR>
+   " Only apply the mapping to generated buffers
+   if &buftype =~? 'nofile'
+       nnoremap <buffer> gn :Node -next<CR>
+       nnoremap <buffer> gp :Node -previous<CR>
+       nnoremap <buffer> gu :Node -up<CR>
+   endif
 
 .. note::
 
