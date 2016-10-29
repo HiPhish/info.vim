@@ -30,13 +30,17 @@ function! InfoNodeFolds()
 
 	" Lines that aren't header nodes are always on the same level as the node
 	" they belong to
-	if !info#IsNodeHeader(l:thisline)
+	if !s:IsNodeHeader(l:thisline)
 		return '='
 	endif
 
 	let l:node = matchstr(l:thisline, '\v(Node: )@<=[^,]+')
 
 	return '>'.(len(b:nodes[l:node]['path']) - 1)
+endfunction
+
+function! s:IsNodeHeader(line)
+	return !empty(matchstr(a:line, '\v^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'))
 endfunction
 
 " Strip the 'File: foo.info' part from the line

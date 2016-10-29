@@ -119,11 +119,6 @@ function! info#toc(mods)
 	execute a:mods . ' lopen'
 endfunction
 
-" predicate function, tests whether a line is a node header or not
-function! info#IsNodeHeader(line)
-	return !empty(matchstr(a:line, '\v^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'))
-endfunction
-
 
 
 " Private functions for reading info documents {{{1
@@ -226,6 +221,11 @@ endfunction
 " information, such as when you need the line number to jump to that
 " particular node.
 
+" predicate function, tests whether a line is a node header or not
+function! s:IsNodeHeader(line)
+	return !empty(matchstr(a:line, '\v^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'))
+endfunction
+
 " Build the entire TOC tree and node dictionary.
 function! s:build_toc()
 	if !b:toc_dirty
@@ -239,7 +239,7 @@ function! s:build_toc()
 	for l:lnum in range(1, line('$'))
 		let l:thisline = getline(l:lnum)
 
-		if !info#IsNodeHeader(l:thisline)
+		if !s:IsNodeHeader(l:thisline)
 			continue
 		endif
 
