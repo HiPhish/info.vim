@@ -33,13 +33,18 @@ endif
 " The entry function, invoked by the ':Info' command. Its purpose is to find
 " the topic and options from the arguments
 function! info#info(mods, ...)
-	if a:0 == 0
-		let l:topic = ''
-	else
+	let l:topic = ''
+	let l:node = ''
+
+	if a:0 > 0
 		let l:topic = a:1
 	endif
 
-	let l:bufname = 'info://' . l:topic
+	if a:0 > 1
+		let l:node = a:2
+	endif
+
+	let l:bufname = 'info://'.l:topic.(empty(l:node)?'':'\#'.l:node)
 
 	" The following will trigger the autocommand of editing an info:// file
 	if a:mods !~# 'tab' && s:find_info()
@@ -51,11 +56,12 @@ endfunction
 
 
 " This function is called by the autocommand when editing an info:// buffer.
-function! info#read_doc(uri)
-	" TODO: split the path of the URI at the slashes to get the topic and
-	" nodes
-	let l:topic = substitute(matchstr(a:uri, 'info://\zs.*'), '\v\/$', '', '')
-	call s:read_topic(l:topic)
+function! info#read_doc(topic, node)
+	call s:read_topic(a:topic)
+
+	if !empty(a:node)
+		call info#node(a:node)
+	endif
 endfunction
 
 
@@ -97,7 +103,7 @@ function! info#node(node) abort
 
 		let l:lnum = b:nodes[a:node]['line']
 		silent execute 'normal '.l:lnum.'G'
-		silent! normal zozt
+		silent! normal zvzt
 	else
 		throw 'Error: node must be a string'
 	endif

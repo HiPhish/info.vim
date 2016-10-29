@@ -72,11 +72,19 @@ g?                                                                   *info-g?*
 ==============================================================================
 COMMANDS                                                       *info-commands*
 
-:Info {topic}                                                          *:Info*
+:Info {topic} [{node}]                                                 *:Info*
 
     Open  the  {topic}  document  in  an  info buffer.  |:Info| accepts  command
-    |<mods>| such as |:vertical| or |:topleft|. See also |info-uri|
+    |<mods>| such as |:vertical| or |:topleft|. See also |info-uri|.
 
+    If an optional {node} argument is given the document will jump to that
+    node. Keep in mind that spaces have to be escaped:
+>
+        " Wrong
+        :Info bash 'What is Bash?'
+        " Correct
+        :Info bash What\ is\ Bash?
+<
 
 :Node [{node}]                                                         *:Node*
 :Node -next
@@ -100,10 +108,11 @@ COMMANDS                                                       *info-commands*
 ==============================================================================
 FUNCTIONS                                                     *info-functions*
 
-info#info({mods}, {...})                                         *info#info()*
+info#info({mods}, {topic}[, {node}])                             *info#info()*
 
     Function equivalent  to |:Info| . The first  argument is  the |<mods>|  of the
-    command, the rest of the arguments must be the topic as a string.
+    command, the second one the topic  to look up and the third (optional) one
+    is the node to jump to.
 
 
 info#node({node})                                                *info#node()*
@@ -132,6 +141,10 @@ and have the manual for  the Bourne Again Shell loaded into the buffer.  There
 is absolutely no difference between an info buffer loaded like this and by the
 use of |:Info|.
 
+It is possible to specify the node as a fragment following the host of the URI
+>
+    :edit info://bash\#What is Bash?
+<
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:

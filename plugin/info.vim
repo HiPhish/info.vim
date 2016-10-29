@@ -34,7 +34,27 @@ command! -nargs=* Info call info#info(<q-mods>, <f-args>)
 
 augroup info
   autocmd!
-  autocmd BufReadCmd info://* call info#read_doc(expand('<amatch>'))
+  autocmd BufReadCmd info://* call info#parseInfoURI(expand('<amatch>'))
 augroup END
+
+
+" Extract topic and node from URI and pass them on.
+function! info#parseInfoURI(uri)
+	let l:host = ''
+	let l:fragment = ''
+	let l:parts = split(matchstr(a:uri, '\v^info:\/\/\zs.*'), '#')
+
+	if len(l:parts) > 0
+		let l:host = l:parts[0]
+	endif
+
+	if len(l:parts) > 1
+		let l:fragment = l:parts[1]
+	endif
+	echom l:host
+	echom l:fragment
+
+	call info#read_doc(l:host, l:fragment)
+endfunction
 
 " vim:tw=78:ts=4:noexpandtab:norl:
