@@ -1,5 +1,6 @@
 *info.txt*   Read and browse info files in Vim
 
+                                                                    *info.vim*
                    _        __            _           ~
                   (_)_ __  / _| _____   _(_)_ __ ___  ~
                   | | '_ \| |_ / _ \ \ / / | '_ ` _ \ ~
@@ -32,6 +33,26 @@ in the standalone command-line program or Emacs's info mode.
 
 Note: info.vim is still very early work; it is feature-complete but you should
       consider it to be "wet paint" at this point.
+
+You can read the info document for a topic like 'bash' by executing |:Info|:
+>
+    :Info bash
+<
+An alternative way  of loading an info document  is to give an |info-uri| as the
+file name:
+>
+    :edit info://bash
+<
+You can use your  regular Vim motions to  navigate the buffer,  but since info
+documents can get very  large you will want to use node-based navigation.  Use
+the |:Toc| command to display a table of contents in the location list.  Use the
+|:Node| command to navigate over individual nodes.
+
+Note: These commands only work from within info buffers and will shadow global
+      commands. If you were to have for instance a Node.js plugin that defines
+      a global ':Node' command you would not be able to call it from within an
+      info buffer.
+
 
 
 ==============================================================================
