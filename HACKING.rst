@@ -286,3 +286,53 @@ Suppose have a TOC that looks something like this:
 Starting from  the root  `R` the  `path` to  node `X`  is `[0, 2, 1, 0]`.  When
 rendering the `path` to  text we can omit the first  entry and add one to every
 number to get a nice section numbering like `3.2.1.` for display.
+
+
+Finding the current node
+------------------------
+
+Given the current line number, how do we find the node we are currently in?  We
+will use a recursive  search algorithm on the TOC list (`b:toc`).  Given a flat
+list of more than one  node we can pick a pivot node  and then compare the line
+number  with  the `'line'` property  of the pivot node:  if the line  number is
+lower than the node 's the line is in the lower half of the list,  otherwise in
+the upper half (includes the pivot). If these is only one node in the list that
+has to be the node  we are after,  under the condition  that the top-most  node
+starts on the first line.
+
+Here is the  algorithm in more detail.  The `list` is the current list of nodes
+and `line` is the line number.
+
+#) If `list` has only one element (`node`)
+
+   #) If `node` is a leaf-node
+
+      #) Return `node`
+
+   #) Else
+
+      #) If `line` is the line number of `node`
+
+         #) Return `node`
+
+      #) Else
+
+         #) Recurse on the `tree` of `node`
+#) Else
+
+   #) Pick a `pivot` element from `list` (ideally in the middle of the list)
+
+   #) If `line` is the line number of `pivot`
+
+      #) return `pivot`
+
+   #) Else if `line` is less than the line number of `pivot`
+
+      #) Recurse on the first half of `list` (excluding `pivot`)
+
+   #) Else (if `line` is greater than the line number of `pivot`)
+
+      #) Recurse on the other half of `list` (including `pivot`)
+
+This algorithm can fail if it is possible for a line to be before the node, but
+the info compiler never produces such documents.

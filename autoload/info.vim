@@ -316,15 +316,6 @@ endfunction
 
 " Return the name of the node of the current line.
 function! s:lineToNode(line, tree)
-	" The TOC is a non-binary tree and we will perform a binary search on it.
-	" First search the current level until we have reduced it to one node,
-	" then check that one node, and if it isn't the one we want recurse down
-	" into its sub-tree.
-	"
-	" If the current line number is lower than that of a given node we know
-	" that that node and any of its children, later siblings and their
-	" children are out of the question.
-
 	let l:len = len(a:tree)
 
 	" The one lone node the root of a new sub-tree.
