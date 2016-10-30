@@ -59,6 +59,37 @@ Node separator
    lines.  The separator is  always one single  line consisting  of the control
    character `^_` (ASCII `0x1F`) and  a newline control character (ASCII 0x0A).
 
+Node menu
+   A line that contains  only `* Menu:` begins a node menu.  The purpose of the
+   menu is to list nodes which can be  reached from this node in a format thats
+   accessible to human readers.  Readers can specify the node to jump to by its
+   entry name. There are two types of entries:
+
+   .. code-block::
+
+      * Human-readable name: Actual name:    Description.
+      * Actual name::                        Description.
+
+   In the former  case the human-readable  name is what the  user specifies  to
+   jump to, while in the latter case the human-readable name is the actual name
+   of the node.  The description  is irrelevant  and may  span multiple  lines.
+   There may be blank lines between entries.
+
+Cross-reference
+   These are essentially hyperlinks, there are two kinds:
+
+   .. code-block::
+      *Note Human-readable name: Actual Name.
+      *Note Human-readable name: (topic)Actual Name.
+
+   The former is simply a reference to a node in the current document, but the
+   latter is a reference into another documents (as specified by `topic`).
+
+.. note::
+
+   We don't acutally need the following  features if we read our info documents
+   from an info compiler like the standalone `info`.
+
 File header
    Some basic information about  the file itself before the first node, such as
    author or license.  Since the header  comes before  any node  it will  no be
@@ -116,7 +147,7 @@ Local variables
       End:
 
    They might be used by Emacs to set buffer-specific settings,  similar to the
-   `vim:..` last line in files used by Vim.
+   `vim:..` modeline in files used by Vim.
 
 
 One format, two purposes

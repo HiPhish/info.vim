@@ -89,8 +89,6 @@ I recommend mapping the navigation commands to something more convenient.
 Stuff left to do
 ################
 
-It should be  possible to  directly jump  to a node  by calling  `:Info <topic>
-<node>` and the URI  should similarly allow  specifying a node  after the topic
-`info://<topic>/<node>`. We also need to the able to recognise when the user is
-having  their  cursor inside  a reference  and allow  jumping to  that node  by
-pressing `K`.
+- Support for node menus (`:Menu` command)
+- Support both short (`* Foo:: bar`) and long (`* Foo: Boo: Baz`) menu items
+- Support cross-references (maybe a `:Cross` command as well)
