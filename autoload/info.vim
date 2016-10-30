@@ -52,6 +52,8 @@ function! info#info(mods, ...)
 	else
 		execute 'silent' a:mods 'split' l:bufname
 	endif
+
+	echo 'Welcome to Info. Type g? for help, :Toc for the table of contents.'
 endfunction
 
 
@@ -62,6 +64,7 @@ function! info#read_doc(topic, node)
 	if !empty(a:node)
 		call info#node(a:node)
 	endif
+
 endfunction
 
 
