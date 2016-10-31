@@ -40,7 +40,7 @@ function! InfoNodeFolds()
 endfunction
 
 function! s:IsNodeHeader(line)
-	return !empty(matchstr(a:line, '\v^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'))
+	return !empty(matchstr(a:line, '\v^((File|Node|Next|Prev|Up)\:\s+[^,]+\,?\s*)+$'))
 endfunction
 
 " Strip the 'File: foo.info' part from the line

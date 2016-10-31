@@ -232,7 +232,7 @@ endfunction
 
 " predicate function, tests whether a line is a node header or not
 function! s:IsNodeHeader(line)
-	return !empty(matchstr(a:line, '\v^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'))
+	return !empty(matchstr(a:line, '\v^((File|Node|Next|Prev|Up)\:\s+[^,]+\,?\s*)+$'))
 endfunction
 
 " Build the entire TOC tree and node dictionary.
