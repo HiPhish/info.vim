@@ -40,6 +40,11 @@ file is a plain-text  file (ASCII or Unicode?) that  contains some light markup
 so the reader can  identify parts of it.  Here is a  list of some of  the terms
 used, the names are made-up by me because there is no formal specification.
 
+.. warning::
+
+   Contrary to what is written here nodes do not have to form a tree,  although
+   they more often than no do. That part of the document has to be rewritten.
+
 Node
    Nodes are elements  of the table of  contents (toc) tree.  There is always a
    root node  called `Top` by convention.  Each node can directly reference any
@@ -59,28 +64,43 @@ Node separator
    lines.  The separator is  always one single  line consisting  of the control
    character `^_` (ASCII `0x1F`) and  a newline control character (ASCII 0x0A).
 
-Node menu
-   A line that contains  only `* Menu:` begins a node menu.  The purpose of the
-   menu is to list nodes which can be  reached from this node in a format thats
-   accessible to human readers.  Readers can specify the node to jump to by its
-   entry name. There are two types of entries:
+Menu
+   A line that  begins with exactly  `* Menu:` begins a node menu  (the rest of
+   that line is a comment).  The purpose of the menu is to list nodes which can
+   be reached  from this  node in a  format thats accessible  to human readers.
+   Readers can specify the node to jump to by its entry name.
+   
+   Each line  which begins  with `* ` is  an entry.  It is  followed by  a name
+   readable to humans, `:`,  and the name of the node.  Anything following is a
+   comment for humans.
 
    .. code-block::
 
-      * Human-readable name: Actual name:    Description.
-      * Actual name::                        Description.
+      * Human-readable topic: Actual node:    Description.
 
-   In the former  case the human-readable  name is what the  user specifies  to
-   jump to, while in the latter case the human-readable name is the actual name
-   of the node.  The description  is irrelevant  and may  span multiple  lines.
-   There may be blank lines between entries.
+   The topic terminator  `:` can be followed  by any amount of whitespace.  The
+   node name is terminated by `:`, `,`, `.`, tabs or newline.  If the topic and
+   name of the node are the same a shorthand is preferred:
+
+   .. code-block::
+
+      * Actual node::                        Description.
+
+   Finally,  if the  description matches  `\(line\s+\d+\)` that  line number is
+   used as an offset into the node to jump to a particular line of text (offset
+   relative to node header).
+
+Node index
+   An  index  is a  special  kind  of menu.  The  menu  is preceded  by a  line
+   containing only  `^A^H[index^A^H[index]` where  `^A` and  `^H` are the ASCII
+   control characters `0x01` (start of heading) and `0x08` (backspace).
 
 Cross-reference
-   These are essentially hyperlinks, there are two kinds:
+   These are essentially hyperlinks, they specify a node to jump to.
 
    .. code-block::
-      *Note Human-readable name: Actual Name.
-      *Note Human-readable name: (topic)Actual Name.
+
+      *Note Human-readable topc: Actual node.
 
    The former is simply a reference to a node in the current document, but the
    latter is a reference into another documents (as specified by `topic`).
