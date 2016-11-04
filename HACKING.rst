@@ -40,47 +40,68 @@ file is a plain-text  file (ASCII or Unicode?) that  contains some light markup
 so the reader can  identify parts of it.  Here is a  list of some of  the terms
 used, the names are made-up by me because there is no formal specification.
 
+The following representations of ASCII control characters are used:
+
+============  =======  ===========  =======  ==================================
+Digraph       Decimal  Hexadecimal  Acronym  Name
+============  =======  ===========  =======  ==================================
+`^A`                1         0x01      SOH  Start Of Heading
+`^H`                8         0x08       BS  Backspace
+`^L`               12         0x0C       FF  Form Feed or Page Break
+`^M` or `\n`       16         0x0A       LF  Line Feed or Newline
+`^_`               31         0x1F       US  Unit Separator
+`^?`              127         0x7F      DEL  Delete
+============  =======  ===========  =======  ==================================
+
 .. warning::
 
    Contrary to what is written here nodes do not have to form a tree,  although
-   they more often than no do. That part of the document has to be rewritten.
+   they more often than not do. That part of the document has to be rewritten.
+
 
 Node
-   Nodes are elements  of the table of  contents (toc) tree.  There is always a
-   root node  called `Top` by convention.  Each node can directly reference any
-   (including none) of the following nodes:  the parent `Up`,  and the siblings
-   `Next` and `Previous`.  Not all of these related nodes exist for every node.
+   A node begins with `^_`,  followed by a newline or `^L` and node header (see
+   below), and is terminated by either `^_`, `^L` or the end of the file.
 
-   If indirection is  used the `File` value is  not necessarily the actual file
-   the node is stored in, but the file of the topic.
+   Each file has a root node called `Top` by convention. Each node can directly
+   reference any (including none) of the following nodes:  the parent `Up`, and
+   the siblings `Next` and `Previous`. Not all of these related nodes exist for
+   every node.
 
 Node header
    This line marks  the beginning of a node.  It consists of a  number of `Key:
-   Value` pairs separated by comma (`,`) and (opional?) whitespace.
+   Value` pairs where the key is one of `File`,  `Node`, `Next`, `Previous` and
+   `Up`. `File` is the first key, the other keys can appear in any order.  Only
+   `File` and `Node` are mandatory.
 
-Node separator
-   This marks the border between two  nodes and is used by readers to know when
-   to stop displaying text and pad the remaining lines on the screen with empty
-   lines.  The separator is  always one single  line consisting  of the control
-   character `^_` (ASCII `0x1F`) and  a newline control character (ASCII 0x0A).
+   The keyword is  separated from the value by a colon (`:`),  spaces and tabs.
+   The value  is terminated  by a comma,  tabs or  a newline,  but not  spaces,
+   spaces count as part of the value (name of the file/node).
+
+   The name of a node can be given as a plain name (e.g. `Definitions`) or with
+   the name of a file  prepended in parentheses (e.g. `(bash)Definitions`).  If
+   there is no file name, the name of the node is understood to refer to a node
+   in the current file. The value of `Node` must not contain a file name.
 
 Menu
    A line that  begins with exactly  `* Menu:` begins a node menu  (the rest of
    that line is a comment).  The purpose of the menu is to list nodes which can
    be reached  from this  node in a  format thats accessible  to human readers.
    Readers can specify the node to jump to by its entry name.
-   
+
+Menu entry
    Each line  which begins  with `* ` is  an entry.  It is  followed by  a name
    readable to humans, `:`,  and the name of the node.  Anything following is a
-   comment for humans.
+   comment for humans.  Notice how this is the same `Key: Value` format used in
+   the node header line; in addition to a period (`.`) the name of the node can
+   also terminated by a tab, comma or newline.
 
    .. code-block::
 
-      * Human-readable topic: Actual node:    Description.
+      * Human-readable topic: Actual node.    Description.
 
-   The topic terminator  `:` can be followed  by any amount of whitespace.  The
-   node name is terminated by `:`, `,`, `.`, tabs or newline.  If the topic and
-   name of the node are the same a shorthand is preferred:
+   The topic terminator  `:` can be followed  by any amount of tabs and spaces.
+   If the topic and name of the node are the same a shorthand is preferred:
 
    .. code-block::
 
@@ -92,18 +113,18 @@ Menu
 
 Node index
    An  index  is a  special  kind  of menu.  The  menu  is preceded  by a  line
-   containing only  `^A^H[index^A^H[index]` where  `^A` and  `^H` are the ASCII
-   control characters `0x01` (start of heading) and `0x08` (backspace).
+   containing only  `^A^H[index^A^H[index]`.
 
 Cross-reference
-   These are essentially hyperlinks, they specify a node to jump to.
+   These are  essentially hyperlinks,  they specify a  node to jump  to and can
+   occur in-line.
 
    .. code-block::
 
-      *Note Human-readable topc: Actual node.
+      *Note Human-readable topic: Actual node.
 
-   The former is simply a reference to a node in the current document, but the
-   latter is a reference into another documents (as specified by `topic`).
+   This is exactly the  same format as for menu entries,  except that it begins
+   with `*Note` or `*note` rather than just `*`.
 
 .. note::
 
@@ -132,32 +153,37 @@ Indirect
    This list has to come before the tag table.
 
 Tag table
-   A table of tags occurring in the file along with their byte offsets into the
-   file. A tag can be either a note or a reference.  The format of the table is
-   as follows:
+   A table  of tags  occurring at  the end  of the  file along  with their byte
+   offsets into the file. A tag can be either a note or a reference. The format
+   of the table is as follows:
 
    .. code-block::
 
-      ^_
+      ^_^L
       Tag Table:
-      <tag>: <name>^?<offset>
+      <node-header>^?<offset>
       ...
-      <tag>: <name>^?<offset>
+      <node-header>^?<offset>
       ^_
       End Tag Table
 
-   Where `<tag>` is the type of tag,  `<name>` its name,  `<offset>` the offset
-   into  the  info file,  and `^?`  the  ASCII  control  character  `0x7F`.  If
-   indirection is used the first three lines look like this:
+   Each line of the table contains the beginning of the node's header, followed
+   by `^?` and  the offset into  the file in bytes.  If indirection is used the
+   first three lines look like this:
 
    .. code-block::
 
-      ^_
+      ^_^L
       Tag Table:
       (Indirect)
 
-Local variables
-   I don't know what exactly this does, format is as follows:
+   .. note::
+
+      I have seen files which  begin with `^_` only instead of `^_^L`,  but the
+      info manual says the former is correct.
+
+Emacs local variables
+   These are used by Emacs similar to the `vim:...` modeline.
 
    .. code-block::
 
@@ -166,8 +192,47 @@ Local variables
       <variable>: <value>
       End:
 
-   They might be used by Emacs to set buffer-specific settings,  similar to the
-   `vim:..` modeline in files used by Vim.
+
+The node structure
+==================
+
+And info document  (also called an  info file)  is made  of nodes.  These nodes
+usually form a  tree-like hierarchy,  but this does  not necessarily have to be
+the case.  The only truth  is that the  nodes form a  directed graph,  but this
+graph may even contain cycles or unreachable nodes.
+
+Each file has  one root node  that's named  `Top` by convention.  The root node
+usually has  its first child  as its `Next` node,  but all  other nodes usually
+have their next  sibling as their  `Next` and  their previous  sibling as their
+`Previous`.
+
+A node  can  have  a menu,  listing  other  nodes  there.  These  nodes  can be
+considered to be "children" of that node, but don't take that term literally.
+It only means that in the graph there is an edge from this node to the nodes
+listed in the menu.
+
+Putting everything together we can conclude that every node has an outgoing
+edge to the nodes listed in the node header (`Next`, `Previous` and `Up`), as
+well as to the nodes in the menu. If the nodes in the menu are not in a
+different file we consider them to be children.
+
+The standalone info program cannot access arbitrary nodes in a file, instead it
+has to work through the node graph. For example, if we want to jump directly to
+section 1.1 of the Bash manual we have to call info like this:
+
+.. code-block:: sh
+
+   # Will not work because node 'What is Bash' is unreachable from 'Top'
+   info bash What\ is\ Bash
+
+   # Will work because node 'Introduction' is reachable from 'Top'
+   info bash Introduction What\ is\ Bash
+
+We can see that info resolves our node path one node at a time to reach the
+destination. This maps nicely to a URI as we will see later.
+
+One special file is the `(dir)` file which contains a menu that maps to all the
+other info files. It's a sort of root of roots if you will.
 
 
 One format, two purposes
@@ -201,7 +266,7 @@ found in the following files:
    Most of the code that does the actual heavy lifting.
 
 `after/ftplugin/info/folding.vim`
-   Folding and TOC construction
+   Folding.
 
 `ftplugin/info.vim`
    File-type settings for info files.  These settings apply to  all info files,
@@ -216,6 +281,36 @@ From now  on I  will be  making a  distinction between  info *files*  which are
 actual files  in the  file system,  and info  *documents*  which  is what  info
 displays. An info document can be an info file, but it can also be assembled on
 the fly from multiple files.
+
+
+The info URI
+============
+
+We can describe a position inside the node system using a URI scheme:
+
+.. code-block::
+
+   info://document/node-1/node-2/node-3#menu
+
+The name of  the scheme is `info`,  the host is  the name of the document,  the
+path is the sequence of nodes to traverse (excluding the root) and the fragment
+can be a  particular part of the node,  such as `menu` for the node's menu.  To
+access the `(dir)` document omit the host and path,  to access the root node of
+a document omit the path. Here are some examples:
+
+.. code-block::
+
+   # Directory node
+   info://
+
+   # Manual for the Bourne Again Shell
+   info://bash/
+
+   # Section 1.1 of the Bourne Again Shell manual
+   info://bash/introduction/what%20is%20bash%3f/
+
+We have to percent-encode the spaces (`%20`) and the question mark (`%3f`).
+
 
 Reading an info document
 ========================
@@ -249,6 +344,12 @@ write-lock the buffer only after the document has been written.
 
 The table of contents
 =====================
+
+.. warning::
+
+   Standalone info  does not  employ a  table of  contents,  but other  formats
+   generate from Texinfo do so.  I don't whether we  should support a TOC if we
+   don't load the entire file into the buffer.
 
 Info documents  can get  very large,  so it is  important to  have some  way of
 navigating them. We need to be able to do two things: find a node very quickly,
