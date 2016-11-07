@@ -17,24 +17,25 @@ License: MIT License
 TABLE OF CONTENTS                                              *info-contents*
 
     1. Introduction ..................................... |info-introduction|
-    2. Basic configuration .............................. |info-configuration|
-    3. Key mappings ..................................... |info-keymaps|
-    4. Commands ......................................... |info-commands|
-    5. Functions ........................................ |info-functions|
-    6. Advanced ......................................... |info-advanced|
+    2. Setup and Configuration .......................... |info-configuration|
+    3. Variables ........................................ |info-variables|
+    4. Key mappings ..................................... |info-keymaps|
+    5. Commands ......................................... |info-commands|
+    6. Functions ........................................ |info-functions|
+    7. Advanced ......................................... |info-advanced|
 
 
 ==============================================================================
 INTRODUCTION                                               *info-introduction*
 
-*info.vim* provides basic  filetype support for info files,  as well  as an info
+*Info.vim* provides basic file type support for info files,  as well  as an info
 document browser. You can open any info file and browse its nodes as you could
 in the standalone command-line program or Emacs's info mode.
 
-Note: info.vim is still very early work; it is feature-complete but you should
+Note  Info.vim is still very early work; it is feature-complete but you should
       consider it to be "wet paint" at this point.
 
-You can read the info document for a topic like 'bash' by executing |:Info|:
+You can read the info document for a topic like `bash` by executing `:Info`:
 >
     :Info bash
 <
@@ -44,21 +45,26 @@ file name:
     :edit info://bash
 <
 You can use your  regular Vim motions to  navigate the buffer,  but since info
-documents can get very  large you will want to use node-based navigation.  Use
-the |:Toc| command to display a table of contents in the location list.  Use the
-|:Node| command to navigate over individual nodes.
-
-Note: These commands only work from within info buffers and will shadow global
-      commands. If you were to have for instance a Node.js plugin that defines
-      a global ':Node' command you would not be able to call it from within an
-      info buffer.
-
+documents can get very  large you will want to use node-based navigation. See
+the |info-functions| section for an overview.
 
 
 ==============================================================================
 CONFIGURATION                                             *info-configuration*
 
-Currently there is nothing to configure.
+Info is installed like any other Vim plugin.  After installing you can set the
+info binary  for processing  info files via  the |g:infoprg| variable.  You need
+at least GNU info version 1.6
+
+
+==============================================================================
+VARIABLES                                                     *info-variables*
+
+g:infoprg                                                          *g:infoprg*
+Default: 'info'~
+
+    Name or path to the standalone GNU info program. You need at least version
+    6.0, so you can use this variable to override your system's default info.
 
 
 ==============================================================================
@@ -74,8 +80,8 @@ COMMANDS                                                       *info-commands*
 
 :Info {topic} [{node}]                                                 *:Info*
 
-    Open  the  {topic}  document  in  an  info buffer.  |:Info| accepts  command
-    |<mods>| such as |:vertical| or |:topleft|. See also |info-uri|.
+    Open  the  {topic}  document  in  an  info buffer.  `:Info` accepts  command
+    |<mods>| such as `:vertical` or `:topleft`. See also |info-uri|.
 
     If an optional  {node} argument is  given the document  will jump to  that
     node. Keep in mind that spaces have to be escaped:
@@ -85,25 +91,6 @@ COMMANDS                                                       *info-commands*
         " Correct
         :Info bash What\ is\ Bash?
 <
-
-:Node [{node}]                                                         *:Node*
-:Node -next
-:Node -previous
-:Node -up
-
-    Jump to the {node} in this info buffer. The command only works from inside
-    an info buffer. If no argument is given the title of the current node will
-    be printed.
-
-    When passing '-next',  '-previous' or  '-up' in place  of the argument the
-    buffer will jump to that node relative to the current node.
-
-
-:Toc                                                                    *:Toc*
-
-    Open the table of contents  of this info buffer in the location list.  The
-    command only works from inside an info buffer.
-
 
 ==============================================================================
 FUNCTIONS                                                     *info-functions*
@@ -115,16 +102,22 @@ info#info({mods}, {topic} [, {node}])                            *info#info()*
     is the node to jump to.
 
 
-info#node({node})                                                *info#node()*
+info#up()                                                          *info#up()*
 
-    Function equivalent  to |:Node|.  The {node}  is the  name of  the node as a
-    string. If {node} is the empty string the name of the current node will be
-    echoed.
+    Move one node  upwards in the  current window.  Prints an error message if
+    there is no parent node.
 
 
-info#toc({node})                                                  *info#toc()*
+info#next()                                                      *info#next()*
 
-    Function equivalent to |:Toc|.
+    Move to the next sibling node. Prints an error message if there is no next
+    node.
+
+
+info#prev()                                                      *info#prev()*
+
+    Move to the previous sibling node. Prints an error message if there is no
+    previous node.
 
 
 ==============================================================================
@@ -132,19 +125,21 @@ ADVANCED                                                       *info-advanced*
 
                                                                     *info-uri*
 If an editor  with an info  URI is edited  the document from  the URI  will be
-loaded into the  buffer as if it was  opened with |:Info|.  This would allow you
+loaded into the  buffer as if it was  opened with `:Info`.  This would allow you
 to open a new window and execute
 >
     :edit info://bash
 <
 and have the manual for  the Bourne Again Shell loaded into the buffer.  There
 is absolutely no difference between an info buffer loaded like this and by the
-use of |:Info|.
+use of `:Info`.
 
-It is possible to specify the node as a fragment following the host of the URI
+It is possible to specify the node as a path following the host of the URI:
 >
-    :edit info://bash\#What is Bash?
+    :edit info://bash/What%20is%20Bash%3f
 <
+Note  We have to  percent-encode reserved  characters like space  and question
+      mark.
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:

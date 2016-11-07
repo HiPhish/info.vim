@@ -206,32 +206,21 @@ usually has  its first child  as its `Next` node,  but all  other nodes usually
 have their next  sibling as their  `Next` and  their previous  sibling as their
 `Previous`.
 
-A node  can  have  a menu,  listing  other  nodes  there.  These  nodes  can be
-considered to be "children" of that node, but don't take that term literally.
-It only means that in the graph there is an edge from this node to the nodes
-listed in the menu.
+A node can have a menu listing other nodes in it. These nodes can be considered
+children of that node,  but don't take that term literally.  It only means that
+there is some way for the user to access that node, a child node might not have
+the current node as its `Up` node.  In fact,  the child node might even be in a
+different file.
 
-Putting everything together we can conclude that every node has an outgoing
-edge to the nodes listed in the node header (`Next`, `Previous` and `Up`), as
-well as to the nodes in the menu. If the nodes in the menu are not in a
-different file we consider them to be children.
-
-The standalone info program cannot access arbitrary nodes in a file, instead it
-has to work through the node graph. For example, if we want to jump directly to
-section 1.1 of the Bash manual we have to call info like this:
+The standalone info program  can access arbitrary nodes  in a file if you use a
+recent version (we take version 6.0 to be safe for our purposes).
 
 .. code-block:: sh
 
-   # Will not work because node 'What is Bash' is unreachable from 'Top'
-   info bash What\ is\ Bash
+   # Will not work in older versions
+   info --file 'bash' --node 'What is Bash?'
 
-   # Will work because node 'Introduction' is reachable from 'Top'
-   info bash Introduction What\ is\ Bash
-
-We can see that info resolves our node path one node at a time to reach the
-destination. This maps nicely to a URI as we will see later.
-
-One special file is the `(dir)` file which contains a menu that maps to all the
+One special file is the  `dir` file which contains  a menu that maps to all the
 other info files. It's a sort of root of roots if you will.
 
 
@@ -290,13 +279,12 @@ We can describe a position inside the node system using a URI scheme:
 
 .. code-block::
 
-   info://document/node-1/node-2/node-3#menu
+   info://file/node#line
 
 The name of  the scheme is `info`,  the host is  the name of the document,  the
-path is the sequence of nodes to traverse (excluding the root) and the fragment
-can be a  particular part of the node,  such as `menu` for the node's menu.  To
-access the `(dir)` document omit the host and path,  to access the root node of
-a document omit the path. Here are some examples:
+path is  the node  and the  fragment is  the line  number.  To access the `dir`
+document omit the host and path, to access the root node of a document omit the
+path. Here are some examples:
 
 .. code-block::
 
@@ -307,9 +295,14 @@ a document omit the path. Here are some examples:
    info://bash/
 
    # Section 1.1 of the Bourne Again Shell manual
-   info://bash/introduction/what%20is%20bash%3f/
+   info://bash/what%20is%20bash%3f/
 
-We have to percent-encode the spaces (`%20`) and the question mark (`%3f`).
+   # Line 3 of section 1.1 of the Bourne Again Shell manual
+   info://bash/what%20is%20bash%3f#3
+
+We have to  percent-encode the  spaces (`%20`)  and the question  mark (`%3f`).
+Slashes at the end o f the host or path are  optional if there is no successive
+element.
 
 
 Reading an info document
@@ -340,151 +333,3 @@ as opening an info document by URI. Here is a simplified code draft:
 Once we have a new  buffer and a topic it's just  a matter of setting the extra
 options for  documents  and  reading in  the output  of `info`.  Make  sure  to
 write-lock the buffer only after the document has been written.
-
-
-The table of contents
-=====================
-
-.. warning::
-
-   Standalone info  does not  employ a  table of  contents,  but other  formats
-   generate from Texinfo do so.  I don't whether we  should support a TOC if we
-   don't load the entire file into the buffer.
-
-Info documents  can get  very large,  so it is  important to  have some  way of
-navigating them. We need to be able to do two things: find a node very quickly,
-and maintain the  tree structure of the TOC.  The former can be achieved with a
-dictionary `b:nodes` that gives us fast access to any node, while the latter is
-achieved using  a list  (with nested  lists) `b:toc`.  This means  we have  two
-variables at any point.
-
-
-Data structures
----------------
-
-The keys of `b:nodes` are the names of  the nodes and the values are themselves
-dictionaries with the node's data. Here is an example:
-
-.. code-block::
-
-   'A quick tour': {
-       'up': 'Introduction',
-       'prev': '',
-       'next': 'Getting started',
-       'line': 251,
-       'path': [0, 1, 0]
-   }
-
-Empty values  mean that is no such value.  The `path` key is special in that it
-is not part of the node header text line,  we have to compute it ourselves.  We
-will come back  to it later.  We also don't  use the `File`  value of the  node
-because we don't need it.
-
-The `b:toc` list is a list of dictionaries where every dictionary is an *entry*
-in the TOC.  An entry is a dictionary  that lists its node  and its sub-tree in
-the TOC. Example:
-
-.. code-block::
-
-   [{'node': 'Introduction', 'tree':
-       [{'node': 'A quick tour', 'tree': []},
-        {'node': 'Getting started', 'tree': []}]}]
-
-Entries with an empty tree are leaf-entries.
-
-
-Generating the TOC
-------------------
-
-To generate the TOC structes we have to loop over every node header that occurs
-in the document in the order they occur. The first node is the root, from there
-on use the following algorithm:
-
-#) If the node has  no parent add its  entry to the outermost  level of the TOC
-   (usually only applies to root node)
-#) Else, find its parent TOC entry, it has the name of the `up` property
-#) Append its entry to the parent entry's tree
-
-To generate the  `b:nodes` dictionary add  the complete nodes  as you encounter
-them to the dictionary.
-
-
-The `path` property
--------------------
-
-Mapping an entry  from `b:toc` to  a node in `b:nodes`  is easy: use the `node`
-property as  the key  into `b:nodes`.  Mapping a  node to  a TOC  entry is more
-involved.  We would be wasting too much time iterating over every branch of the
-tree to find our node.  Instead we store a  sequence of indices into  the tree:
-the `path`.
-
-Suppose have a TOC that looks something like this:
-
-.. code-block::
-
-   R
-   ├─O
-   │ ├─O
-   │ ├─O
-   │ └─O
-   ├─O
-   └─O
-     ├─O
-     ├─O
-     │ ├─X
-     │ └─O
-     └─O
-
-Starting from  the root  `R` the  `path` to  node `X`  is `[0, 2, 1, 0]`.  When
-rendering the `path` to  text we can omit the first  entry and add one to every
-number to get a nice section numbering like `3.2.1.` for display.
-
-
-Finding the current node
-------------------------
-
-Given the current line number, how do we find the node we are currently in?  We
-will use a recursive  search algorithm on the TOC list (`b:toc`).  Given a flat
-list of more than one  node we can pick a pivot node  and then compare the line
-number  with  the `'line'` property  of the pivot node:  if the line  number is
-lower than the node 's the line is in the lower half of the list,  otherwise in
-the upper half (includes the pivot). If these is only one node in the list that
-has to be the node  we are after,  under the condition  that the top-most  node
-starts on the first line.
-
-Here is the  algorithm in more detail.  The `list` is the current list of nodes
-and `line` is the line number.
-
-#) If `list` has only one element (`node`)
-
-   #) If `node` is a leaf-node
-
-      #) Return `node`
-
-   #) Else
-
-      #) If `line` is the line number of `node`
-
-         #) Return `node`
-
-      #) Else
-
-         #) Recurse on the `tree` of `node`
-#) Else
-
-   #) Pick a `pivot` element from `list` (ideally in the middle of the list)
-
-   #) If `line` is the line number of `pivot`
-
-      #) return `pivot`
-
-   #) Else if `line` is less than the line number of `pivot`
-
-      #) Recurse on the first half of `list` (excluding `pivot`)
-
-   #) Else (if `line` is greater than the line number of `pivot`)
-
-      #) Recurse on the other half of `list` (including `pivot`)
-
-This algorithm can fail if it is possible for a line to be before the node, but
-the info compiler never produces such documents.

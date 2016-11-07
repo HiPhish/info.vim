@@ -15,14 +15,16 @@ of GNU.
 
 .. note::
 
-   At the moment info.vim is still *very* early work in progress. You could run
-   into some unexpected edge cases.
+   At the moment info.vim is still *very* early work in progress. It is not yet
+   feature-complete and the interface might change.
+
 
 Installation
 ############
 
-Install it like  any other Vim plugin.  You must have the GNU info command-line
-tool installed on your system, or a compatible alternative.
+Install it like any other Vim plugin. You must have at least version 6.0 of the
+GNU info command-line tool installed on your system.  You can set the binary by
+setting the `g:infoprg` variable to its path.
 
 
 Quickstart
@@ -33,15 +35,22 @@ the future. To open an info document run
 
 .. code-block:: vim
 
-   :Info <topic>
+   " Open the directory listing
+   :Info
+   " Open a particular document
+   :Info <file>
+   " Same as above, but jump to specific node
+   :Info <file> <node>
 
-The placeholder `topic` is the topic you want to read about,  e.g. `:Info bash`
+The placeholder `<file>` is the topic you want to read about, e.g. `:Info bash`
 to read the manual for the Bourne Again Shell.  Alternatively you can also open
 a buffer with a URI pattern like this:
 
 .. code-block:: vim
 
-   :edit info://<topic>
+   :edit info://
+   :edit info://<file>
+   :edit info://<file>/<node>
 
 You could call `:e info://bash` in a buffer to open the same document as above.
 
@@ -49,46 +58,29 @@ You could call `:e info://bash` in a buffer to open the same document as above.
 Navigation
 ==========
 
-Use the `:Toc` command from inside an info buffer to open its table of contents
-in the location list. Use the `:Node` command to navigate inside the buffer.
-
-.. code-block:: vim
-
-   " Print the current node
-   :Node
-
-   " Jump to node <node> (typed without the angle braces)
-   :Node <node>
-
-   " Jump the next node
-   :Node -next
-
-   " Jump the previous node
-   :Node -previous
-
-   " Jump the parent node
-   :Node -up
-
-I recommend mapping the navigation commands to something more convenient.
+Use the functions `info#next()`,  `info#prev()` and  `info#up()` to navigate to
+respective node. I recommend mapping the navigation functions to something more
+convenient.
 
 .. code-block:: vim
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
-       nnoremap <buffer> gn :Node -next<CR>
-       nnoremap <buffer> gp :Node -previous<CR>
-       nnoremap <buffer> gu :Node -up<CR>
+       nnoremap <silent> <buffer> gu :call info#up()<CR>
+       nnoremap <silent> <buffer> gn :call info#next()<CR>
+       nnoremap <silent> <buffer> gp :call info#prev()<CR>
    endif
 
-.. note::
-
-   The `:Toc` and `:Node` are only  defined for info buffers, other plugins can
-   implement them for other file types without stepping on info.vim's toes.
+I will see to add proper commands later as well.
 
 
 Stuff left to do
 ################
 
-- Support for node menus (`:Menu` command)
+The goal for the first stable release is feature-parity with standalone info.
+
+- Menus (`:Menu` command)
+- Index lookup (`:Index` command)
+- Search within a file (`:Search` command)
+- Cross-references (maybe a `:Cross` command as well)
 - Support both short (`* Foo:: bar`) and long (`* Foo: Boo: Baz`) menu items
-- Support cross-references (maybe a `:Cross` command as well)
