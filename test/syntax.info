@@ -40,7 +40,7 @@ massa placerat pellentesque feugiat. Etiam et aliquam nisi.
 
    Any text can contain a reference to some other node *note Herp Derp::
 inline. The reference can even span multiple lines if necessary *note Lorem
-ipsum dolor sit ament::.
+ipsum dolor sit ament::. More complex references are *Note Herp: (derp)Lol..
 
 * Menu:
 

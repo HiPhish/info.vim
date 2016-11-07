@@ -41,8 +41,6 @@
 "     literal block needs to be able to understand "I am inside a list, so my
 "     indentation should be the indentation of a list (3) plus mine (5)". This
 "     also should be able to nest, i.e. have lists inside of lists.
-"   - Perhaps it can be useful to math entire nodes as well. A node is a
-"     region that starts with a node header and ends with a node separator.
 "
 " False positives:
 "   - Paragraphs in function definitions are mistaken for literal blocks
@@ -58,34 +56,27 @@ endif
 let s:nodeHeaderRegex = '^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'
 
 
-" Inline markup may appear anywhere in text {{{
+" Menu markup {{{
 
-" References look like *Note topic reference :: or *Note topic reference:
-" (foo)Bar.
-syntax region infoReference start='\v\*[Nn]ote\s' end='\v\:(\:)|(\s\(\w+\)\w+\.)'
+" A table of contents menu
+execute 'syntax region infoMenu matchgroup=Label '
+			\ . 'start=/\v^\* Menu\:$/ end=/\v('.s:nodeHeaderRegex.')@=/ '
+			\ . 'contains=infoMenuEntry,infoMenuTitle,infoFootnotes keepend'
 
-" URLs are enclosed in angle brackets: <https://example.com/herp-derp/>
-" syntax region infoURL start=/\v\<\S@=/ end=/\v\S@=\>/
-syntax match infoURL /\v\<\S+\>/
-
-" File path, code literals and so on
-syntax region infoLiteral start='\v‘' end='\v’'
-" This one can abort too early in literal Lisp code: `(cons 'a 12)', but it's
-" better than skipping the inner tick, or else we would match beyond the
-" literal in a sentence like 'These two values are `cons'ed together'.
-syntax region infoLiteral start='\v\`' end='\v\''
+" Menu entries have two forms: '* Name: Node.' and '* Node::'
+syntax match infoMenuEntry '\v^\*\s+[^:]+\:\s*[^.,[:tab:][:return:]]+[.,[:tab:][:return:]]' contained
+syntax match infoMenuEntry '\v^\*\s+[^:]+\:\:' contained
 
 " }}}
 
+
+" Block-level markup may only appear on its own {{{
 
 " Header at the beginning of every node
 execute 'syntax match infoNodeHeader /\v'.s:nodeHeaderRegex.'/'
 
 " Section titles, normal text followed by underline characters on next line
 syntax match infoSection '\v^(\s*).+\n\1[*.=-]+$'
-
-" these are really just regular strings, but inside a toc menu
-syntax match infoMenuTitle '\v^[^*	].+$' contained
 
 " Function definitions start with two leading dashes: -- Function print(s)
 syntax match infoFunctionDef '\v^ -- .+$'
@@ -94,18 +85,10 @@ syntax match infoFunctionDef '\v^ -- .+$'
 " syntax match infoDescriptionList '\v'
 
 
-" A table of contents menu
-execute 'syntax region infoMenu matchgroup=Label '
-			\ . 'start=/\v^\* Menu\:$/ end=/\v('.s:nodeHeaderRegex.')@=/ '
-			\ . 'contains=infoMenuEntry,infoMenuTitle,infoFootnotes keepend'
-
-" Similar to a reference, except inside the menu
-syntax region infoMenuEntry start='\v\*\s+' end='\v\:\:' contained
-
 " Footnotes
 execute 'syntax region infoFootnotes start=/\v^ {3}-+\s+Footnotes?\s+-+$/ '
 	\ . 'end=/\v('.s:nodeHeaderRegex.')@=/ '
-	\ . 'contains=infoReference,infoLiteralBlock,infoLiteral,infoURL keepend'
+	\ . 'contains=infoXRef,infoLiteralBlock,infoLiteral,infoURL keepend'
 
 " This causes problems when the '_' is used as a subscript like i_0
 " syntax region infoEmphasis start=/\v_/ end=/\v_/
@@ -117,7 +100,27 @@ syntax region infoLiteralBlock
 " Three spaces, a bullet and one more space. We need to match lists to not
 " confuse paragraphs inside lists with literal blocks.
 syntax region infoList start='\v^\n\z( {3,})• ' skip='^$'  end='\v^\z1@!'
-	\ contains=infoReference,infoLiteral,infoURL
+	\ contains=infoXRef,infoLiteral,infoURL
+
+
+" }}}
+
+
+" Inline markup may appear anywhere in text {{{
+
+" References look like *Note Reference:: or *Note topic reference:
+" (foo)Bar.
+syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\:'
+syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\_[^.:]+\.'
+
+" File path, code literals and so on
+syntax region infoLiteral start='\v‘' end='\v’'
+" This one can abort too early in literal Lisp code: `(cons 'a 12)', but it's
+" better than skipping the inner tick, or else we would match beyond the
+" literal in a sentence like 'These two values are `cons'ed together'.
+syntax region infoLiteral start='\v\`' end='\v\''
+
+" }}}
 
 
 " This is needed to make the multi-line matches work
@@ -129,7 +132,7 @@ highlight link infoNodeHeader     Special
 highlight link infoFootnotes         None
 highlight link infoFunctionDef       None
 highlight link infoURL         Identifier
-highlight link infoReference   Identifier
+highlight link infoXRef   Identifier
 highlight link infoList              None
 highlight link infoLiteral         String
 " highlight def  infoEmphasis        term=italic cterm=italic gui=italic
