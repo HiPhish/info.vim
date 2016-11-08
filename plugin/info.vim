@@ -34,57 +34,7 @@ command! -nargs=* Info call info#info(<q-mods>, <f-args>)
 
 augroup info
   autocmd!
-  autocmd BufReadCmd info://* call <SID>parseInfoURI(expand('<amatch>'))
 augroup END
 
-
-" Extract topic and node from URI and pass them on.
-function! s:parseInfoURI(uri)
-	let l:host = ''
-	let l:path = ''
-	let l:fragment = ''
-	let l:parts = split(matchstr(a:uri, '\v^info\:\/\/\zs.*'), '/')
-
-	if len(l:parts) > 0
-		let l:host = s:percentDecode(l:parts[0])
-	endif
-
-	if len(l:parts) > 1
-		let l:path = split(l:parts[1], '#')
-		if len(l:path) > 1
-			let l:fragment = s:percentDecode(l:path[1])
-		endif
-		let l:path = s:percentDecode(l:path[0])
-	endif
-
-	call info#read(l:host, l:path, l:fragment)
-endfunction
-
-function s:percentDecode(string)
-	" Important: Decode the percent symbol last
-	let l:string = a:string
-	let l:string = substitute(l:string, '\v\%20', ' ', 'g')
-	let l:string = substitute(l:string, '\v\%21', '!', 'g')
-	let l:string = substitute(l:string, '\v\%23', '#', 'g')
-	let l:string = substitute(l:string, '\v\%24', '$', 'g')
-	let l:string = substitute(l:string, '\v\%26', '&', 'g')
-	let l:string = substitute(l:string, '\v\%27', "'", 'g')
-	let l:string = substitute(l:string, '\v\%28', '(', 'g')
-	let l:string = substitute(l:string, '\v\%29', ')', 'g')
-	let l:string = substitute(l:string, '\v\%2a', '*', 'g')
-	let l:string = substitute(l:string, '\v\%2b', '+', 'g')
-	let l:string = substitute(l:string, '\v\%2c', ',', 'g')
-	let l:string = substitute(l:string, '\v\%2f', '/', 'g')
-	let l:string = substitute(l:string, '\v\%3a', ':', 'g')
-	let l:string = substitute(l:string, '\v\%3b', ';', 'g')
-	let l:string = substitute(l:string, '\v\%3d', '=', 'g')
-	let l:string = substitute(l:string, '\v\%3f', '?', 'g')
-	let l:string = substitute(l:string, '\v\%40', '@', 'g')
-	let l:string = substitute(l:string, '\v\%5b', '[', 'g')
-	let l:string = substitute(l:string, '\v\%5d', ']', 'g')
-	let l:string = substitute(l:string, '\v\%25', '%', 'g')
-
-	return l:string
-endfunction
 
 " vim:tw=78:ts=4:noexpandtab:norl:

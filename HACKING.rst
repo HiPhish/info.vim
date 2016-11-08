@@ -301,8 +301,13 @@ path. Here are some examples:
    info://bash/what%20is%20bash%3f#3
 
 We have to  percent-encode the  spaces (`%20`)  and the question  mark (`%3f`).
-Slashes at the end o f the host or path are  optional if there is no successive
+Slashes at the end of  the host or path are  optional if there is no successive
 element.
+
+URIs can be decoded to  references and references can be encoded as URIs,  they
+are dual to  each other.  A reference  is a dictionary  of `file` ,  `node` and
+`line` keys.  The decoding function  is responsible for  filling missing values
+with the proper defaults (file `dir`, node `Top` and line `1`).
 
 
 Reading an info document

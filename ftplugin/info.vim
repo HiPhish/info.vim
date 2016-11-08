@@ -34,10 +34,6 @@ setlocal shiftwidth=8
 nnoremap <buffer> g? :call <SID>help()<CR>
 
 
-command! -buffer -complete=customlist,info#completeMenu -nargs=?
-	\ Menu call info#menu(<q-args>)
-
-
 " Echo a quick instruction list
 function! s:help()
 	echomsg 'The following commands are defined in ''info'' buffers:'

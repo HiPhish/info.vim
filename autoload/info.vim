@@ -25,8 +25,23 @@
 " This is the program that assembles info files, we might later decide to make
 " it possible to define your own one.
 if !exists('g:infoprg')
+	au!
 	let g:infoprg = 'info'
 endif
+
+" We cannot put these in 'ftplugin/info.vim' because they use private
+" functions. Otherwise they would have to bleed over into public namespace.
+augroup InfoFiletype
+	autocmd!
+
+	autocmd FileType info command! -buffer
+		\ -complete=customlist,<SID>completeMenu -nargs=?
+		\ Menu call info#menu(<q-args>)
+
+	autocmd BufReadCmd info://* call <SID>readRef(<SID>decodeURI(expand('<amatch>')))
+augroup END
+
+" Filetype-specific settings which use private functions
 
 " Public interface functions {{{1
 
@@ -67,8 +82,8 @@ function! info#menu(entry)
 
 	call s:buildMenu()
 	for l:entry in b:info['Menu']
-		if l:entry['Description'] =~? a:entry
-			let l:uri = s:encodeURI(l:entry['File'], l:entry['Node'], '')
+		if l:entry['description'] =~? a:entry
+			let l:uri = s:encodeURI(l:entry['file'], l:entry['node'], '')
 			let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
 
 			execute 'silent edit '.l:uri
@@ -79,27 +94,6 @@ function! info#menu(entry)
 	echohl ErrorMsg
 	echo 'Cannot find menu entry ' . a:entry
 	echohl None
-endfunction
-
-
-" This function is called by the autocommand when editing an info:// buffer.
-function! info#read(file, node, line)
-	let l:file = a:file
-	let l:node = a:node
-
-	if empty(l:file)
-		let l:file = 'dir'
-	endif
-	if empty(l:node)
-		let l:node = 'Top'
-	endif
-
-	call s:readInfo(l:file, l:node)
-
-	" Jump to the given line
-	if !empty(a:line)
-		execute 'normal! '.a:line.'G'
-	endif
 endfunction
 
 " Jump to the next node
@@ -122,15 +116,15 @@ endfunction
 
 " Filter the menu list for entries which match non-magic, case-insensitive and
 " only at the beginning of the string.
-function! info#completeMenu(ArgLead, CmdLine, CursorPos)
+function! s:completeMenu(ArgLead, CmdLine, CursorPos)
 	call s:buildMenu()
 	let l:menu = b:info['Menu']
 	let l:candidates = []
 
 	for l:entry in l:menu
 		" Match only at the beginning of the string
-		if empty(a:ArgLead) || !empty(matchstr(l:entry['Description'], '\c\M^'.a:ArgLead))
-			call add(l:candidates, l:entry['Description'])
+		if empty(a:ArgLead) || !empty(matchstr(l:entry['description'], '\c\M^'.a:ArgLead))
+			call add(l:candidates, l:entry['description'])
 		endif
 	endfor
 
@@ -139,6 +133,14 @@ endfunction
 
 
 " Private functions for reading info documents {{{1
+
+" Jump to a particular reference
+function! s:readRef(reference)
+	call s:readInfo(a:reference['file'], a:reference['node'])
+
+	" Jump to the given line
+	execute 'normal! '.a:reference['line'].'G'
+endfunction
 
 " Here the heavy heavy lifting happens: we set the options for the buffer and
 " load the info document.
@@ -284,8 +286,8 @@ function s:menuLocationList()
 	call setloclist(0, [], ' ', 'Menu')
 
 	for l:item in b:info['Menu']
-		let l:uri = s:encodeURI(l:item['File'], l:item['Node'], '')
-		laddexpr l:uri.'\|1\| '.l:item['Description']
+		let l:uri = s:encodeURI(l:item['file'], l:item['node'], '')
+		laddexpr l:uri.'\|'.l:item['line'].'\| '.l:item['description']
 	endfor
 endfunction
 
@@ -310,7 +312,7 @@ function! s:decodeReference(line)
 		let l:file = b:info['File']
 	endif
 
-	return {'Description': l:title, 'File': l:file, 'Node': l:node}
+	return {'description': l:title, 'file': l:file, 'node': l:node, 'line': 1}
 endfunction
 
 " Private functions for searching {{{1
@@ -339,6 +341,33 @@ function! s:search()
 endfunction
 " URI-handling function {{{1
 
+" Decodes a URI into a node reference
+function! s:decodeURI(uri)
+	" Possible URIs  'info://', 'info://file', 'info://file/',
+	"                'info://file/path', 'info://file/path/',
+	"                'info://file/path/#line', 'info://file/path#line'
+
+	let l:host = matchstr(a:uri, '\v^info\:\/\/\zs[^/]+\ze')
+	let l:path = matchstr(a:uri, '\v^info\:\/\/[^/]+\/\zs[^/#]+\ze')
+	let l:fragment = matchstr(a:uri, '\v^info\:\/\/[^/]+\/[^/#]+\/?\#\zs[^/#]+\ze')
+
+	let l:host = s:percentDecode(l:host)
+	let l:path = s:percentDecode(l:path)
+	let l:fragment = s:percentDecode(l:fragment)
+
+	if empty(l:host)
+		let l:host = 'dir'
+	endif
+	if empty(l:path)
+		let l:path = 'top'
+	endif
+	if empty(l:fragment)
+		let l:fragment = 1
+	endif
+
+	return {'file': l:host, 'node': l:path, 'line': l:fragment}
+endfunction
+
 function! s:encodeURI(file, node, line)
 	let l:file = s:percentEncode(a:file)
 	let l:node = s:percentEncode(a:node)
@@ -356,7 +385,7 @@ function! s:encodeURI(file, node, line)
 endfunction
 
 function! s:percentEncode(string)
-	" Important: Encode the percent symbol first
+	" important: encode the percent symbol first
 	let l:string = a:string
 	let l:string = substitute(l:string, '\v\%', '%25', 'g')
 	let l:string = substitute(l:string, '\v\ ', '%20', 'g')
@@ -378,6 +407,33 @@ function! s:percentEncode(string)
 	let l:string = substitute(l:string, '\v\@', '%40', 'g')
 	let l:string = substitute(l:string, '\v\[', '%5b', 'g')
 	let l:string = substitute(l:string, '\v\]', '%5d', 'g')
+
+	return l:string
+endfunction
+
+function s:percentDecode(string)
+	" Important: Decode the percent symbol last
+	let l:string = a:string
+	let l:string = substitute(l:string, '\v\%20', ' ', 'g')
+	let l:string = substitute(l:string, '\v\%21', '!', 'g')
+	let l:string = substitute(l:string, '\v\%23', '#', 'g')
+	let l:string = substitute(l:string, '\v\%24', '$', 'g')
+	let l:string = substitute(l:string, '\v\%26', '&', 'g')
+	let l:string = substitute(l:string, '\v\%27', "'", 'g')
+	let l:string = substitute(l:string, '\v\%28', '(', 'g')
+	let l:string = substitute(l:string, '\v\%29', ')', 'g')
+	let l:string = substitute(l:string, '\v\%2a', '*', 'g')
+	let l:string = substitute(l:string, '\v\%2b', '+', 'g')
+	let l:string = substitute(l:string, '\v\%2c', ',', 'g')
+	let l:string = substitute(l:string, '\v\%2f', '/', 'g')
+	let l:string = substitute(l:string, '\v\%3a', ':', 'g')
+	let l:string = substitute(l:string, '\v\%3b', ';', 'g')
+	let l:string = substitute(l:string, '\v\%3d', '=', 'g')
+	let l:string = substitute(l:string, '\v\%3f', '?', 'g')
+	let l:string = substitute(l:string, '\v\%40', '@', 'g')
+	let l:string = substitute(l:string, '\v\%5b', '[', 'g')
+	let l:string = substitute(l:string, '\v\%5d', ']', 'g')
+	let l:string = substitute(l:string, '\v\%25', '%', 'g')
 
 	return l:string
 endfunction
