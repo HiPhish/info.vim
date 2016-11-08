@@ -45,7 +45,7 @@ file name:
     :edit info://bash
 <
 You can use your  regular Vim motions to  navigate the buffer,  but since info
-documents can get very  large you will want to use node-based navigation. See
+documents can get very  large you will want to use node-based navigation.  See
 the |info-functions| section for an overview.
 
 
@@ -92,14 +92,26 @@ COMMANDS                                                       *info-commands*
         :Info bash What\ is\ Bash?
 <
 
+:Menu [{entry}]
+
+    With no argument  open the location  list populated with  the menu entries
+    for the  current node.  With an argument  jump to that node.  The argument
+    does not have  to be a perfect match,  it only needs to  match at the head
+    case-insensitively.
+
 ==============================================================================
 FUNCTIONS                                                     *info-functions*
 
 info#info({mods}, {topic} [, {node}])                            *info#info()*
 
-    Function equivalent  to |:Info| . The first  argument is  the |<mods>|  of the
+    Function equivalent  to `:Info`.  The first  argument is  the |<mods>|  of the
     command, the second one the topic  to look up and the third (optional) one
     is the node to jump to.
+    
+
+info#menu({entry})                                               *info#menu()*
+
+    Function equivalent to `:Menu`. The empty string is considered as "none".
 
 
 info#up()                                                          *info#up()*
@@ -142,4 +154,4 @@ Note  We have to  percent-encode reserved  characters like space  and question
       mark.
 
 ==============================================================================
- vim:tw=78:ts=8:ft=help:norl:
+ tim:tw=78:ts=8:ft=help:norl:

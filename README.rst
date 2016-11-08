@@ -54,6 +54,19 @@ a buffer with a URI pattern like this:
 
 You could call `:e info://bash` in a buffer to open the same document as above.
 
+Use the `:Menu` command to follow a node's menu entries.
+
+.. code-block:: vim
+
+   " Display menu in location list
+   :Menu
+   " Jump to entry 'Introduction'
+   :Menu Introduction
+   " Short form works as well
+   :Menu intro
+
+You can also use tab completion with the `:Menu` command.
+
 
 Navigation
 ==========
@@ -79,8 +92,14 @@ Stuff left to do
 
 The goal for the first stable release is feature-parity with standalone info.
 
-- Menus (`:Menu` command)
 - Index lookup (`:Index` command)
 - Search within a file (`:Search` command)
 - Cross-references (maybe a `:Cross` command as well)
-- Support both short (`* Foo:: bar`) and long (`* Foo: Boo: Baz`) menu items
+
+The secondary goal is to make the features fancy:
+
+- Provide prompt-versions of the commands which prompt the user for things
+  like a menu entry or search term. They should behave similar to the prompts
+  of standalone info.
+
+- Make those prompts accessible through `<Plug>`-mappings.

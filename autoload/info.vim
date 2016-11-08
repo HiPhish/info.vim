@@ -57,6 +57,31 @@ function! info#info(mods, ...)
 endfunction
 
 
+" Access the menu in a node.
+function! info#menu(entry)
+	if a:entry == ''
+		call s:menuLocationList()
+		lopen
+		return
+	endif
+
+	call s:buildMenu()
+	for l:entry in b:info['Menu']
+		if l:entry['Description'] =~? a:entry
+			let l:uri = s:encodeURI(l:entry['File'], l:entry['Node'], '')
+			let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+
+			execute 'silent edit '.l:uri
+			return
+		endif
+	endfor
+
+	echohl ErrorMsg
+	echo 'Cannot find menu entry ' . a:entry
+	echohl None
+endfunction
+
+
 " This function is called by the autocommand when editing an info:// buffer.
 function! info#read(file, node, line)
 	let l:file = a:file
@@ -90,6 +115,26 @@ endfunction
 " Jump to the next node
 function! info#up()
 	call s:jumpToProperty('Up')
+endfunction
+
+
+" Completion function {{{1
+
+" Filter the menu list for entries which match non-magic, case-insensitive and
+" only at the beginning of the string.
+function! info#completeMenu(ArgLead, CmdLine, CursorPos)
+	call s:buildMenu()
+	let l:menu = b:info['Menu']
+	let l:candidates = []
+
+	for l:entry in l:menu
+		" Match only at the beginning of the string
+		if empty(a:ArgLead) || !empty(matchstr(l:entry['Description'], '\c\M^'.a:ArgLead))
+			call add(l:candidates, l:entry['Description'])
+		endif
+	endfor
+
+	return l:candidates
 endfunction
 
 
@@ -204,7 +249,94 @@ function! s:find_info_window() abort
 endfunction
 
 
+" Private functions for menus {{{1
 
+" Build up a list of menu entries in a node.
+function! s:buildMenu()
+	" This function will be called lazily when we need a menu. Don't rebuild
+	" it is one already exists.
+	if exists('b:info[''Menu'']')
+		return
+	endif
+
+	let l:save_cursor = getcurpos()
+	let b:info['Menu'] = []
+	let l:menuLine = search('\v^\* [Mm]enu\:')
+
+	if l:menuLine == 0
+		return
+	endif
+
+	" Process entries by searching down from the menu line. Don't wrap to the
+	" beginning of the file or we will be stuck in an infinite loop.
+	let l:entryLine = search('\v^\*[^:]+\:', 'W')
+	while l:entryLine != 0
+		call add(b:info['Menu'], s:decodeReference(getline(l:entryLine)))
+		let l:entryLine = search('\v^\*[^:]+\:', 'W')
+	endwhile
+
+	call setpos('.', l:save_cursor)
+endfunction
+
+" Populate location list with menu items.
+function s:menuLocationList()
+	call s:buildMenu()
+	call setloclist(0, [], ' ', 'Menu')
+
+	for l:item in b:info['Menu']
+		let l:uri = s:encodeURI(l:item['File'], l:item['Node'], '')
+		laddexpr l:uri.'\|1\| '.l:item['Description']
+	endfor
+endfunction
+
+" Parse a reference string into a reference object.
+function! s:decodeReference(line)
+	" Strip away the leading cruft first: '* ' and '*Note '
+	let l:reference = matchstr(a:line, '\v^\*([Nn]ote\s+)?\s*\zs.+')
+	" Try the '* Node::' type of reference first
+	let l:title = matchstr(l:reference, '\v^\s*\zs[^:]+\ze\:\:')
+
+	if empty(l:title)
+		" The format is '* Title: (file)Node.*
+		let l:title = matchstr(l:reference, '\v^\s*\zs[^:]+\ze\:')
+		let l:file = matchstr(l:reference, '\v^[^)]+\(\zs[^)]+\ze\)')
+		" If there is no file the current one is implied
+		if empty(file)
+			let l:file = b:info['File']
+		endif
+		let l:node = matchstr(l:reference, '\v^[^:]+\:\s*(\(.+\))?\zs[^.]+\ze\.')
+	else
+		let l:node = l:title
+		let l:file = b:info['File']
+	endif
+
+	return {'Description': l:title, 'File': l:file, 'Node': l:node}
+endfunction
+
+" Private functions for searching {{{1
+
+function! s:search()
+	let s:string = ''
+	if exists('b:info[''Search'']')
+		let s:string = b:info['Search']
+	endif
+	let l:string = input('Search for string: ', l:string)
+
+	if empty(s:string)
+		return
+	endif
+	let b:info['Search'] = l:string
+	unlet l:string
+
+	let l:file = b:info['file']
+	let l:node = b:info['node']
+	let l:line = line('.')
+
+	while search(b:info['Search'], 'W') == 0
+		if !exists('b:info[''Next'']')
+		endif
+	endwhile
+endfunction
 " URI-handling function {{{1
 
 function! s:encodeURI(file, node, line)

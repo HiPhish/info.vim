@@ -333,3 +333,24 @@ as opening an info document by URI. Here is a simplified code draft:
 Once we have a new  buffer and a topic it's just  a matter of setting the extra
 options for  documents  and  reading in  the output  of `info`.  Make  sure  to
 write-lock the buffer only after the document has been written.
+
+
+Processing menus
+================
+
+Menus are straight-forward,  but ugly to work with.  Since a menu is not always
+needed we  are going  to make  it lazy  by generating  the menu  list only when
+necessary. Internally a menu is a list of entries in the same order they appear
+in the document.
+
+Each entry  is a  dictionary with  keys `Description`  (human-readable  title),
+`File` and `Node`. This structure can be used for all references, not just menu
+entries.  References  can  be encoded  in two  forms as  discussed above,  so a
+decoding function has to recognise and handle both.
+
+Refer to the source code for details,  parsing a menu is very straight-forward.
+The only difficulty is that  we don't have any way  of knowing when the menu is
+terminated, so we have to read the entire rest of the node.
+
+The menu is used  for jumping to entries,  finding entries and for building the
+location list.
