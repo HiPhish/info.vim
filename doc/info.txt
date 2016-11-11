@@ -19,10 +19,9 @@ TABLE OF CONTENTS                                              *info-contents*
     1. Introduction ..................................... |info-introduction|
     2. Setup and Configuration .......................... |info-configuration|
     3. Variables ........................................ |info-variables|
-    4. Key mappings ..................................... |info-keymaps|
+    4. Key mappings ..................................... |info-mappings|
     5. Commands ......................................... |info-commands|
-    6. Functions ........................................ |info-functions|
-    7. Advanced ......................................... |info-advanced|
+    6. Advanced ......................................... |info-advanced|
 
 
 ==============================================================================
@@ -54,7 +53,10 @@ CONFIGURATION                                             *info-configuration*
 
 Info is installed like any other Vim plugin.  After installing you can set the
 info binary  for processing  info files via  the |g:infoprg| variable.  You need
-at least GNU info version 1.6
+at least GNU info version 1.6.
+
+You can  use |info-commands| for navigation,  but if you  want more  comfortable
+controls similar to standalone info you should look into the |info-mappings|.
 
 
 ==============================================================================
@@ -68,11 +70,31 @@ Default: 'info'~
 
 
 ==============================================================================
-KEY MAPPINGS                                                    *info-keymaps*
+KEY MAPPINGS                                                   *info-mappings*
 
 g?                                                                   *info-g?*
 
     Print a quick overview of the commands.
+
+
+<Plug>InfoUp                                                    *<Plug>InfoUp*
+
+    Go to the parent node. See also `:NodeUp`.
+
+
+<Plug>InfoNext                                                *<Plug>InfoNext*
+
+    Go to the next node. See also `:NodeNext`.
+
+
+<Plug>InfoPrev                                                *<Plug>InfoPrev*
+
+    Go to the previous node. See also `:NodePrev`.
+
+
+<Plug>InfoMenu                                                *<Plug>InfoMenu*
+
+    Display a menu prompt, similar to standalone info's `m`. See also `:Menu`.
 
 
 ==============================================================================
@@ -92,44 +114,34 @@ COMMANDS                                                       *info-commands*
         :Info bash What\ is\ Bash?
 <
 
-:Menu [{entry}]
+:NodeUp                                                         *info-:NodeUp*
+
+    Go to the parent node of the current node.
+
+
+:NodeNext                                                     *info-:NodeNext*
+
+    Go to the next node of the current node.
+
+
+:NodePrev                                                     *info-:NodePrev*
+
+    Go to the previous node of the current node.
+
+
+
+:Menu [{entry}]                                                   *info-:Menu*
 
     With no argument  open the location  list populated with  the menu entries
     for the  current node.  With an argument  jump to that node.  The argument
     does not have  to be a perfect match,  it only needs to  match at the head
     case-insensitively.
 
-==============================================================================
-FUNCTIONS                                                     *info-functions*
 
-info#info({mods}, {topic} [, {node}])                            *info#info()*
+:Follow                                                         *info-:Follow*
 
-    Function equivalent  to `:Info`.  The first  argument is  the |<mods>|  of the
-    command, the second one the topic  to look up and the third (optional) one
-    is the node to jump to.
-    
-
-info#menu({entry})                                               *info#menu()*
-
-    Function equivalent to `:Menu`. The empty string is considered as "none".
-
-
-info#up()                                                          *info#up()*
-
-    Move one node  upwards in the  current window.  Prints an error message if
-    there is no parent node.
-
-
-info#next()                                                      *info#next()*
-
-    Move to the next sibling node. Prints an error message if there is no next
-    node.
-
-
-info#prev()                                                      *info#prev()*
-
-    Move to the previous sibling node. Prints an error message if there is no
-    previous node.
+    Follow the  cross-reference  under the  cursor.  If there  is none  only a
+    message will be printed.
 
 
 ==============================================================================
@@ -153,5 +165,6 @@ It is possible to specify the node as a path following the host of the URI:
 Note  We have to  percent-encode reserved  characters like space  and question
       mark.
 
+
 ==============================================================================
- tim:tw=78:ts=8:ft=help:norl:
+ vim:tw=78:ts=8:ft=help:norl:

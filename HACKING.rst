@@ -249,27 +249,21 @@ skip syntax highlighting,  the syntax code  says it all.  The important code is
 found in the following files:
 
 `plugin/info.vim`
-   Commands and auto-commands are defined here, nothing else.
-
-`autoload/info.vim`
-   Most of the code that does the actual heavy lifting.
-
-`after/ftplugin/info/folding.vim`
-   Folding.
+   All of the important  code is in here.  The file is *very*  large due to the
+   fact that there is  no way in VimScript of  splitting it up without  leaking
+   details into the public namespace.
 
 `ftplugin/info.vim`
    File-type settings for info files.  These settings apply to  all info files,
-   whether they are opened manually or through the info interface. Files opened
-   through the  info  interface  have  additional  options which  as  set  upon
-   opening.
-
-   This file also contains  definitions for any commands  and mappings that are
-   exclusive to info files.
+   whether they are  opened manually or through  the info interface.  This file
+   also contains  definitions for any commands  and mappings that are exclusive
+   to info files.
 
 From now  on I  will be  making a  distinction between  info *files*  which are
 actual files  in the  file system,  and info  *documents*  which  is what  info
 displays. An info document can be an info file, but it can also be assembled on
-the fly from multiple files.
+the fly from multiple files. Standalone info makes no distinction between these
+two.
 
 
 The info URI

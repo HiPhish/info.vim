@@ -71,20 +71,38 @@ You can also use tab completion with the `:Menu` command.
 Navigation
 ==========
 
-Use the functions `info#next()`,  `info#prev()` and  `info#up()` to navigate to
-respective node. I recommend mapping the navigation functions to something more
-convenient.
+Use  the  commands  `:NodeUp`,  `:NodeNext`  and  `:NodePrev`  to  navigate  to
+respective node. Alternatively, you add mappings like these to your settings.
 
 .. code-block:: vim
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
-       nnoremap <silent> <buffer> gu :call info#up()<CR>
-       nnoremap <silent> <buffer> gn :call info#next()<CR>
-       nnoremap <silent> <buffer> gp :call info#prev()<CR>
+       nmap <buffer> gu <Plug>InfoUp
+       nmap <buffer> gn <Plug>InfoNext
+       nmap <buffer> gp <Plug>InfoPrev
    endif
 
-I will see to add proper commands later as well.
+You can access  the menu via the  `:Menu` command.  It supports tab-completion,
+and if no argument is given all menu items are listed in the location list.  If
+you want a prompt similar to standalone info use a mapping like this:
+
+.. code-block:: vim
+
+   " Only apply the mapping to generated buffers
+   if &buftype =~? 'nofile'
+       nmap <buffer> gm <Plug>InfoMenu
+   endif
+
+You can follow a cross-reference  under the cursor using the `:Follow` command.
+you can remap it to something more convenient:
+
+.. code-block:: vim
+
+   " Only apply the mapping to generated buffers
+   if &buftype =~? 'nofile'
+       nmap <silent> <buffer> K :Follow<CR>
+   endif
 
 
 Stuff left to do
@@ -92,9 +110,10 @@ Stuff left to do
 
 The goal for the first stable release is feature-parity with standalone info.
 
+- Following cross-references by name rather than just those under the cursor
+  (using `:Follow` command)
 - Index lookup (`:Index` command)
 - Search within a file (`:Search` command)
-- Cross-references (maybe a `:Cross` command as well)
 
 The secondary goal is to make the features fancy:
 
