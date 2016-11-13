@@ -69,6 +69,41 @@ Default: 'info'~
     6.0, so you can use this variable to override your system's default info.
 
 
+b:info                                                                *b:info*
+                                                 *b:info['File']* *b:info['Node']*
+                                        *b:info['Up']* *b:info[Next]* *b:info[Prev]*
+
+    Dictionary describing a number of properties of the current node. Use this
+    for scripting. Most of it is reflecting the node header:
+
+    b:info['File']~
+	Name of the info file (document).
+    b:info['Up']~
+	Name of the current node.
+    b:info['Up']~
+	Name of the parent node.
+    b:info['Next']~
+	Name of the next node.
+    b:info['Prev']~
+	Name of the previous node.
+
+    Not all of these keys have to be present in a node. There is also a number
+    of extra keys which warrant a more detailed explanation.
+
+
+b:info['Menu']                                                *b:info['Menu']*
+
+    A list of menu item entries. Each entry is a dictionary of the form
+>
+	{'description', 'file', 'node', 'line'}
+<
+    where 'description' is the human-readable title,  'file' the target of the
+    file, 'node' the target node, and 'line' the target line number.
+
+    Note  The menu is built lazily, it will not exists until executing a menu-
+          related command.
+
+
 ==============================================================================
 KEY MAPPINGS                                                   *info-mappings*
 

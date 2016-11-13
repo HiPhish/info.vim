@@ -23,6 +23,43 @@
 " }}}
 
 
+" How it works
+" ============
+"
+" This file does a lot of thins as the same time, so here is my attempt at
+" making sense of it. The groups are as follows:
+"
+"   Public interface: Auto-commands, mappings and commands. Anything that is
+"                     meant to be exposed to the user
+"
+"   Completion functions: Tab-complete commands
+"
+"   Reading functions: Getting content into the buffer and opening info files
+"
+"   Navigation functions: Node navigation
+"
+"   Menu function: Anything related to menus
+"
+"   Reference function: Anything related to (cross-)references
+"
+"   URI-handing functions: Anything URI-related
+"
+" The fundamental idea of this plugin is to use standalone info as much as
+" possible and make use of the URI-reference duality. What this means is that
+" internally we pass reference objects around, but when it comes to actually
+" reading a buffer we send a URI to Vim. Vim tries to open the URI, which
+" triggers an auto-command, converting the URI back to a reference and
+" allowing the plugin to send the required information to info.
+"
+" The scheme is:
+" 	1) Call ':Info', this generates a URI and find a window
+" 	2) Edit the URI
+" 	3) This fires and auto-command, converting the URI back to a reference
+" 	4) The reference is used for everything else from now
+" The first step is optional, it does not matter how we get Vim to ':edit' the
+" URI. For instance, when following a reference or going to the next node we
+" convert the reference to a URI and ':edit' it in the current window.
+
 if exists('g:loaded_info')
   finish
 endif
@@ -34,6 +71,8 @@ if !exists('g:infoprg')
 	let g:infoprg = 'info'
 endif
 
+
+" Public interface {{{1
 command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
 
 nnoremap <Plug>InfoUp   :call <SID>up()<CR>
@@ -50,7 +89,7 @@ augroup InfoFiletype
 
 	autocmd FileType info command! -buffer
 		\ -nargs=?
-		\ Follow call info#followReference(<q-args>)
+		\ Follow call <SID>followXRef(<q-args>)
 
 	autocmd FileType info command! -buffer   UpNode  call <SID>up()
 	autocmd FileType info command! -buffer NextNode  call <SID>next()
@@ -60,11 +99,6 @@ augroup InfoFiletype
 	autocmd BufReadCmd info://* call <SID>followReference(<SID>decodeURI(expand('<amatch>')))
 augroup END
 
-let s:referencePattern = '\v\*([Nn]ote\s+)?[^:]+\:(\:|[^.]+\.)'
-" Test-cases for the reference pattern
-" *Note Directory: (dir)Top.
-" *Directory::
-" *Directory: (dir)Top.
 
 
 " Completion function {{{1
@@ -92,7 +126,7 @@ endfunction
 
 
 " Reading functions {{{1
-"
+
 " The entry function, invoked by the ':Info' command. Its purpose is to find
 " the file and options from the arguments
 function! s:info(mods, ...)
@@ -107,7 +141,7 @@ function! s:info(mods, ...)
 		let l:node = a:2
 	endif
 
-	let l:bufname = s:encodeURI(l:file, l:node, '')
+	let l:bufname = s:encodeURI({'file': l:file, 'node': l:node})
 
 	" The following will trigger the autocommand of editing an info:// file
 	if a:mods !~# 'tab' && s:find_info_window()
@@ -139,14 +173,14 @@ function! s:readInfo(file, node, ...)
 	let l:cmd = g:infoprg.' -f '''.a:file.''' -n '''.a:node.''' -o - 2>/dev/null'
 	" And adjust the redirection syntax for special snowflake shells
 	if &shell =~# 'fish$'
-		let l:cmd = substitute(l:cmd, '\v2\>\/dev\/null$', '^/dev/null')
+		let l:cmd = substitute(l:cmd, '\v\zs2\>\ze\/dev\/null$', '^', '')
 	endif
 
 	put =system(l:cmd)
 	" Putting has produced an empty line at the top, remove that
     silent keepjumps 1delete _
 
-    normal! gg
+    silent keepjumps normal! gg
 
 	" Now lock the file and set all the remaining options
 	setlocal filetype=info
@@ -229,22 +263,32 @@ endfunction
 
 " Common code for next, previous, and so on nodes
 function! s:jumpToProperty(property)
-	if exists('b:info['''.a:property.''']')
-		" The node name might contain a file name: (file)Node
-		let l:file = matchstr(b:info[a:property], '\v^\(\zs[^)]+\ze\)')
-		if empty(file)
-			let l:file = b:info['File']
-		endif
-
-		let l:uri = s:encodeURI(l:file, b:info[a:property], '')
-		" We have to escape the percent signs or it will be replaced with the
-		" file name in the ':edit'
-		let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
-
-		execute 'silent edit '.l:uri
-	else
-		echohl ErrorMsg | echo 'No '''.a:property.''' pointer for this node.' | echohl None
+	if !exists('b:info['''.a:property.''']')
+		echohl ErrorMsg
+		echo 'No '''.a:property.''' pointer for this node.'
+		echohl None
+		return
 	endif
+
+	" The node name might contain a file name: (file)Node
+	let l:property = b:info[a:property]
+
+	let l:file = matchstr(l:property, '\v^\(\zs[^)]+\ze\)')
+	if empty(l:file)
+		let l:file = b:info['File']
+	endif
+
+	let l:node = matchstr(l:property, '\v^(\([^)]*\))?\zs.+')
+	if empty(l:node)
+		let l:node = 'Top'
+	endif
+
+	let l:uri = s:encodeURI({'file': l:file , 'node': l:node})
+	" We have to escape the percent signs or it will be replaced with the
+	" file name in the ':edit'
+	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+
+	execute 'silent edit '.l:uri
 endfunction
 
 
@@ -265,7 +309,7 @@ function! s:menu(entry)
 	call s:buildMenu()
 	for l:entry in b:info['Menu']
 		if l:entry['description'] =~? a:entry
-			let l:uri = s:encodeURI(l:entry['file'], l:entry['node'], '')
+			let l:uri = s:encodeURI(l:entry)
 			let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
 
 			execute 'silent edit '.l:uri
@@ -299,7 +343,7 @@ function! s:buildMenu()
 	" beginning of the file or we will be stuck in an infinite loop.
 	let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	while l:entryLine != 0
-		call add(b:info['Menu'], s:decodeReference(getline(l:entryLine)))
+		call add(b:info['Menu'], s:decodeRefString(getline(l:entryLine)))
 		let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	endwhile
 
@@ -312,47 +356,22 @@ function! s:menuLocationList()
 	call setloclist(0, [], ' ', 'Menu')
 
 	for l:item in b:info['Menu']
-		let l:uri = s:encodeURI(l:item['file'], l:item['node'], '')
+		let l:uri = s:encodeURI(l:item)
 		laddexpr l:uri.'\|'.l:item['line'].'\| '.l:item['description']
 	endfor
 endfunction
 
-" Searching functions {{{1
-
-function! s:search()
-	let s:string = ''
-	if exists('b:info[''Search'']')
-		let s:string = b:info['Search']
-	endif
-	let l:string = input('Search for string: ', l:string)
-
-	if empty(s:string)
-		return
-	endif
-	let b:info['Search'] = l:string
-	unlet l:string
-
-	let l:file = b:info['file']
-	let l:node = b:info['node']
-	let l:line = line('.')
-
-	while search(b:info['Search'], 'W') == 0
-		if !exists('b:info[''Next'']')
-		endif
-	endwhile
-endfunction
 
 " Reference functions {{{1
 
 " Follow the cross-reference under the cursor.
-function! info#followReference(reference)
+function! s:followXRef(reference)
 	if a:reference == ''
 		let l:xRef = s:parseReferenceUnderCursor()
 	else
 		" TODO
 		let xRef = ''
 	endif
-	echom 'xRef is ' . l:xRef
 
 	if empty(l:xRef)
 		echohl ErrorMsg
@@ -361,12 +380,20 @@ function! info#followReference(reference)
 		return
 	endif
 
-	let l:reference = s:decodeReference(l:xRef)
-	call s:followReference(l:reference)
+	let l:reference = s:decodeRefString(l:xRef)
+	let l:uri = s:encodeURI(l:reference)
+	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+	execute 'silent edit' l:uri
 endfunction
 
 " Parse the current line for the existence of a reference element.
 function! s:parseReferenceUnderCursor()
+	let l:referencePattern = '\v\*([Nn]ote\s+)?[^:]+\:(\:|[^.]+\.)'
+	" Test-cases for the reference pattern
+	" *Note Directory: (dir)Top.
+	" *Directory::
+	" *Directory: (dir)Top.
+
 	" There can be more than one reference in a line, so we need to find the
 	" one which contains the cursor between its ends. Since cross-references
 	" can span more than one line we will look at the current, preceding and
@@ -383,15 +410,15 @@ function! s:parseReferenceUnderCursor()
 	let l:start = 0
 
 	while l:col >= l:start
-		let l:start = match(l:line, s:referencePattern)
-		let l:end = matchend(l:line, s:referencePattern)
+		let l:start = match(l:line, l:referencePattern)
+		let l:end = matchend(l:line, l:referencePattern)
 
 		if l:start < 0
 			break
 		endif
 
 		if l:col < l:end
-			let l:xRef = matchstr(l:line, s:referencePattern)
+			let l:xRef = matchstr(l:line, l:referencePattern)
 			return l:xRef
 		endif
 
@@ -404,9 +431,9 @@ endfunction
 
 
 " Parse a reference string into a reference object.
-function! s:decodeReference(line)
+function! s:decodeRefString(string)
 	" Strip away the leading cruft first: '* ' and '*Note '
-	let l:reference = matchstr(a:line, '\v^\*([Nn]ote\s+)?\s*\zs.+')
+	let l:reference = matchstr(a:string, '\v^\*([Nn]ote\s+)?\s*\zs.+')
 	" Try the '* Node::' type of reference first
 	let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
 
@@ -457,7 +484,7 @@ function! s:decodeURI(uri)
 		let l:host = 'dir'
 	endif
 	if empty(l:path)
-		let l:path = 'top'
+		let l:path = 'Top'
 	endif
 	if empty(l:fragment)
 		let l:fragment = 1
@@ -466,10 +493,22 @@ function! s:decodeURI(uri)
 	return {'file': l:host, 'node': l:path, 'line': l:fragment}
 endfunction
 
-function! s:encodeURI(file, node, line)
-	let l:file = s:percentEncode(a:file)
-	let l:node = s:percentEncode(a:node)
-	let l:line = s:percentEncode(a:line)
+function! s:encodeURI(reference)
+	let l:file = ''
+	let l:node = ''
+	let l:line = ''
+
+	if (exists('a:reference[''file'']'))
+		let l:file = s:percentEncode(a:reference['file'])
+	endif
+
+	if (exists('a:reference[''node'']'))
+		let l:node = s:percentEncode(a:reference['node'])
+	endif
+
+	if (exists('a:reference[''line'']'))
+		let l:line = s:percentEncode(a:reference['line'])
+	endif
 
 	let l:uri = 'info://'
 	if !empty(l:file)

@@ -266,6 +266,37 @@ the fly from multiple files. Standalone info makes no distinction between these
 two.
 
 
+Data structures
+===============
+
+The following data structures are used throughout the plugin:
+
+`b:info`
+   A dictionary  that contains  all the  information  about  the info-node.  In
+   particular the file,  name of the node,  and parent, next and previous node.
+   In this regard it mirrors the node header.
+
+   The dictionary can contain other information as well. The `Menu` entry lists
+   all menu items that occur in the node. A menu item is stored as a reference.
+
+   This variable should be used for  any information about the node itself,  it
+   offers a single uniform location for information used by the plugin.
+   
+References
+   A reference  is a dictionary  holding all  the information  needed to find a
+   particular node.  It may carry even more information if necessary, such as a
+   line number to jump to.
+
+   A reference should contain a file and node, but if those are not given `dir`
+   and `Top` are assumed implicitly. References can be encoded as URIs and URIs
+   can be decoded into references.
+
+URI
+   A URI is  a string with  the syntax  `info://file/node#line`.  See below for
+   more information.  A URI can be encoded from  a reference and decoded into a
+   reference.
+
+
 The info URI
 ============
 

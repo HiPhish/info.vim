@@ -38,7 +38,11 @@ nnoremap <buffer> g? :call <SID>help()<CR>
 function! s:help()
 	echomsg 'The following commands are defined in ''info'' buffers:'
 	echomsg '  :Menu [entry]  Jump to a menu entry or open menu in location list'
-	echomsg 'See '':help info.vim'' for more details.'
+	echomsg '  :Follow        Follow reference under cursor'
+	echomsg '  :UpNode        Go to parent node'
+	echomsg '  :NextNode      Go to next node'
+	echomsg '  :PrevNode      Go to previous node'
+	echomsg 'See '':help info.vim'' for more details and mappings.'
 endfunction
 
 " vim:tw=78:ts=4:noexpandtab:norl:
