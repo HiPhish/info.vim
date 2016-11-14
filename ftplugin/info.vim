@@ -35,7 +35,8 @@ nnoremap <buffer> g? :call <SID>help()<CR>
 
 
 if &buftype =~? 'nofile'
-	nnoremap <silent> <buffer> K  :Follow<CR>
+	nnoremap <silent> <buffer> K      :Follow<CR>
+	nnoremap <silent> <buffer> <C-]>  :Follow<CR>
 endif
 
 
