@@ -22,8 +22,7 @@
 "    USE OR OTHER DEALINGS IN THE SOFTWARE.
 " }}}
 
-
-" How it works
+" How it works {{{
 " ============
 "
 " This file does a lot of thins as the same time, so here is my attempt at
@@ -59,6 +58,8 @@
 " The first step is optional, it does not matter how we get Vim to ':edit' the
 " URI. For instance, when following a reference or going to the next node we
 " convert the reference to a URI and ':edit' it in the current window.
+" }}}
+
 
 if exists('g:loaded_info')
   finish
@@ -75,10 +76,11 @@ endif
 " Public interface {{{1
 command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
 
-nnoremap <Plug>InfoUp   :call <SID>up()<CR>
-nnoremap <Plug>InfoNext :call <SID>next()<CR>
-nnoremap <Plug>InfoPrev :call <SID>prev()<CR>
-nnoremap <Plug>InfoMenu :call <SID>menuPrompt()<CR>
+nnoremap <silent> <Plug>InfoUp     :call <SID>up()<CR>
+nnoremap <silent> <Plug>InfoNext   :call <SID>next()<CR>
+nnoremap <silent> <Plug>InfoPrev   :call <SID>prev()<CR>
+nnoremap <silent> <Plug>InfoMenu   :call <SID>menuPrompt()<CR>
+nnoremap <silent> <Plug>InfoFollow :call <SID>followPrompt()<CR>
 
 augroup InfoFiletype
 	autocmd!
@@ -88,40 +90,31 @@ augroup InfoFiletype
 		\ Menu call <SID>menu(<q-args>)
 
 	autocmd FileType info command! -buffer
-		\ -nargs=?
-		\ Follow call <SID>followXRef(<q-args>)
+		\ -complete=customlist,<SID>completeFollow -nargs=?
+		\ Follow call <SID>follow(<q-args>)
 
 	autocmd FileType info command! -buffer   UpNode  call <SID>up()
 	autocmd FileType info command! -buffer NextNode  call <SID>next()
 	autocmd FileType info command! -buffer PrevNode  call <SID>prev()
 
 
-	autocmd BufReadCmd info://* call <SID>followReference(<SID>decodeURI(expand('<amatch>')))
+	autocmd BufReadCmd info://* call <SID>readReference(<SID>decodeURI(expand('<amatch>')))
 augroup END
 
 
 
 " Completion function {{{1
 
-function! s:SID()
-	return '<SNR>'.matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$').'_'
-endfunction
-
 " Filter the menu list for entries which match non-magic, case-insensitive and
 " only at the beginning of the string.
 function! s:completeMenu(ArgLead, CmdLine, CursorPos)
 	call s:buildMenu()
-	let l:menu = b:info['Menu']
-	let l:candidates = []
+	return s:completePrompt(a:ArgLead, a:CmdLine, a:CursorPos, b:info['Menu'])
+endfunction
 
-	for l:entry in l:menu
-		" Match only at the beginning of the string
-		if empty(a:ArgLead) || !empty(matchstr(l:entry['description'], '\c\M^'.a:ArgLead))
-			call add(l:candidates, l:entry['description'])
-		endif
-	endfor
-
-	return l:candidates
+function! s:completeFollow(ArgLead, CmdLine, CursorPos)
+	call s:collectXRefs()
+	return s:completePrompt(a:ArgLead, a:CmdLine, a:CursorPos, b:info['XRefs'])
 endfunction
 
 
@@ -153,6 +146,14 @@ function! s:info(mods, ...)
 	echo 'Welcome to Info. Type g? for help.'
 endfunction
 
+
+" Jump to a particular reference
+function! s:readReference(reference)
+	call s:readInfo(a:reference['file'], a:reference['node'])
+
+	" Jump to the given line
+	execute 'normal! '.a:reference['line'].'G'
+endfunction
 
 
 " Here the heavy heavy lifting happens: we set the options for the buffer and
@@ -193,30 +194,21 @@ function! s:readInfo(file, node, ...)
 	setlocal nolist
 	setlocal nospell
 
-	let b:info = s:parseNodeHeader()
-endfunction
-
-
-" Parses the information from the node header and returns a dictionary
-" representing it.
-function! s:parseNodeHeader()
-	let l:info = {}
+	" Parse the node header
+	let b:info = {}
 
 	" We assume that the header is the first line. Split the header into
 	" key-value pairs.
-	let l:pairs = split(getline(1), ',')
+	let l:headerPairs = split(getline(1), ',')
 
-	for l:pair in l:pairs
+	for l:pair in l:HeaderPairs
 		" A key is terminated by a colon and might have leading whitespace.
 		let l:key = matchstr(l:pair, '\v^\s*\zs[^:]+')
 		" The value might have leading whitespace as well
 		let l:value = matchstr(l:pair, '\v^\s*[^:]+\:\s*\zs[^,]+')
-		let l:info[l:key] = l:value
+		let b:info[l:key] = l:value
 	endfor
-
-	return l:info
 endfunction
-
 
 
 " Try finding an exising 'info' window in the current tab. Returns 0 if no
@@ -299,27 +291,39 @@ function s:menuPrompt()
 	call s:menu(l:entry)
 endfunction
 
-function! s:menu(entry)
-	if a:entry == ''
-		call s:menuLocationList()
+function! s:menu(pattern)
+	call s:buildMenu()
+
+	if a:pattern == ''
+		call setloclist(0, [], ' ', 'Menu')
+
+		for l:item in b:info['Menu']
+			if exists('l:item[''line'']')
+				let l:line = l:item['line']
+			else
+				let l:line = 1
+			endif
+
+			let l:uri = s:encodeURI(l:item)
+			laddexpr l:uri.'\|'.l:line.'\| '.l:item['description']
+		endfor
+
 		lopen
 		return
 	endif
 
-	call s:buildMenu()
-	for l:entry in b:info['Menu']
-		if l:entry['description'] =~? a:entry
-			let l:uri = s:encodeURI(l:entry)
-			let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+	let l:entry = s:findRefrerenceInList(a:pattern, b:info['Menu'])
 
-			execute 'silent edit '.l:uri
-			return
-		endif
-	endfor
+	if empty(l:entry)
+		echohl ErrorMsg
+		echo 'Cannot find menu entry ' . a:pattern
+		echohl None
+	endif
 
-	echohl ErrorMsg
-	echo 'Cannot find menu entry ' . a:entry
-	echohl None
+	let l:uri = s:encodeURI(l:entry)
+	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+
+	execute 'silent edit '.l:uri
 endfunction
 
 
@@ -350,27 +354,33 @@ function! s:buildMenu()
 	call setpos('.', l:save_cursor)
 endfunction
 
-" Populate location list with menu items.
-function! s:menuLocationList()
-	call s:buildMenu()
-	call setloclist(0, [], ' ', 'Menu')
 
-	for l:item in b:info['Menu']
-		let l:uri = s:encodeURI(l:item)
-		laddexpr l:uri.'\|'.l:item['line'].'\| '.l:item['description']
-	endfor
+" Follow functions {{{1
+
+function s:followPrompt()
+	call s:collectXRefs()
+	if empty(b:info['XRefs'])
+		echohl ErrorMsg
+		echo 'No cross references in this node.'
+		echohl NONE
+		return
+	endif
+
+	let l:firstItem = b:info['XRefs'][0]['description']
+	let l:pattern = input('Follow xref ('.l:firstItem.'): ', '', 'customlist,'.s:SID().'completeFollow')
+	if empty(l:pattern)
+		let l:pattern = l:firstItem
+	endif
+	call s:follow(l:pattern)
 endfunction
 
-
-" Reference functions {{{1
-
 " Follow the cross-reference under the cursor.
-function! s:followXRef(reference)
-	if a:reference == ''
-		let l:xRef = s:parseReferenceUnderCursor()
+function! s:follow(pattern)
+	if a:pattern == ''
+		let l:xRef = s:xRefUnderCursor()
 	else
-		" TODO
-		let xRef = ''
+		call s:collectXRefs()
+		let xRef = s:findRefrerenceInList(a:pattern, b:info['XRefs'])
 	endif
 
 	if empty(l:xRef)
@@ -380,17 +390,50 @@ function! s:followXRef(reference)
 		return
 	endif
 
-	let l:reference = s:decodeRefString(l:xRef)
-	let l:uri = s:encodeURI(l:reference)
+	let l:uri = s:encodeURI(l:xRef)
 	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
 	execute 'silent edit' l:uri
 endfunction
 
+
+function! s:collectXRefs()
+	if exists('b:info[''XRefs'']')
+		return
+	endif
+
+	" Pattern to search for (will match over line breaks)
+	let l:pattern = '\v\*[Nn]ote\_s*\_[^:]+\:(\_s*\_[^:.]+\.|\:)'
+
+	let l:save_cursor = getcurpos()
+	let l:xRefStrings = []
+	let l:xRefs = []
+
+	" This is an ugly hack that modifies the buffer and then undoes the changes.
+	set modifiable
+	set noreadonly
+	silent execute '%s/'.l:pattern.'/\=len(add(l:xRefStrings, submatch(0))) ? submatch(0) : ''''/ge'
+	set readonly
+	set nomodifiable
+
+	for l:xRefString in l:xRefStrings
+		" Due to line breaks the strings might contain newline and multiple
+		" spaces, replace them with one space only.
+		let l:string = substitute(l:xRefString, '\v\_s+', ' ', 'g')
+		let l:xRef = s:decodeRefString(l:string)
+		call add(l:xRefs, l:xRef)
+	endfor
+
+
+	let b:info['XRefs'] = l:xRefs
+	call setpos('.', l:save_cursor)
+endfunction
+
 " Parse the current line for the existence of a reference element.
-function! s:parseReferenceUnderCursor()
+function! s:xRefUnderCursor()
 	let l:referencePattern = '\v\*([Nn]ote\s+)?[^:]+\:(\:|[^.]+\.)'
 	" Test-cases for the reference pattern
 	" *Note Directory: (dir)Top.
+	" *Note Directory::
 	" *Directory::
 	" *Directory: (dir)Top.
 
@@ -418,7 +461,8 @@ function! s:parseReferenceUnderCursor()
 		endif
 
 		if l:col < l:end
-			let l:xRef = matchstr(l:line, l:referencePattern)
+			let l:xRefString = matchstr(l:line, l:referencePattern)
+			let l:xRef = s:decodeRefString(l:xRefString)
 			return l:xRef
 		endif
 
@@ -426,42 +470,7 @@ function! s:parseReferenceUnderCursor()
 		let l:col -= l:end
 	endwhile
 
-	return ''
-endfunction
-
-
-" Parse a reference string into a reference object.
-function! s:decodeRefString(string)
-	" Strip away the leading cruft first: '* ' and '*Note '
-	let l:reference = matchstr(a:string, '\v^\*([Nn]ote\s+)?\s*\zs.+')
-	" Try the '* Node::' type of reference first
-	let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
-
-	if empty(l:title)
-		" The format is '* Title: (file)Node.*
-		let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:')
-
-		let l:file = matchstr(l:reference, '\v^[^:]+\:\s*\(\zs[^)]+\ze\)')
-		" If there is no file the current one is implied
-		if empty(file)
-			let l:file = b:info['File']
-		endif
-
-		let l:node = matchstr(l:reference, '\v^[^:]+\:\s*(\([^)]+\))?\zs[^.]+\ze\.')
-	else
-		let l:node = l:title
-		let l:file = b:info['File']
-	endif
-
-	return {'description': l:title, 'file': l:file, 'node': l:node, 'line': 1}
-endfunction
-
-" Jump to a particular reference
-function! s:followReference(reference)
-	call s:readInfo(a:reference['file'], a:reference['node'])
-
-	" Jump to the given line
-	execute 'normal! '.a:reference['line'].'G'
+	return {}
 endfunction
 
 " URI-handling function {{{1
@@ -573,6 +582,61 @@ function! s:percentDecode(string)
 	let l:string = substitute(l:string, '\v\%25', '%', 'g')
 
 	return l:string
+endfunction
+
+
+" Generally useful functions {{{1
+
+function! s:SID()
+	return '<SNR>'.matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$').'_'
+endfunction
+
+function! s:findRefrerenceInList(pattern, list)
+	for l:item in a:list
+		if l:item['description'] =~? a:pattern
+			return l:item
+		endif
+	endfor
+	return {}
+endfunction
+
+function! s:completePrompt(ArgLead, CmdLine, CursorPos, list)
+	let l:candidates = []
+
+	for l:item in a:list
+		" Match only at the beginning of the string
+		if empty(a:ArgLead) || !empty(matchstr(l:item['description'], '\c\M^'.a:ArgLead))
+			call add(l:candidates, l:item['description'])
+		endif
+	endfor
+
+	return l:candidates
+endfunction
+
+" Parse a reference string into a reference object.
+function! s:decodeRefString(string)
+	" Strip away the leading cruft first: '* ' and '*Note '
+	let l:reference = matchstr(a:string, '\v^\*([Nn]ote\s+)?\s*\zs.+')
+	" Try the '* Node::' type of reference first
+	let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
+
+	if empty(l:title)
+		" The format is '* Title: (file)Node.*
+		let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:')
+
+		let l:file = matchstr(l:reference, '\v^[^:]+\:\s*\(\zs[^)]+\ze\)')
+		" If there is no file the current one is implied
+		if empty(file)
+			let l:file = b:info['File']
+		endif
+
+		let l:node = matchstr(l:reference, '\v^[^:]+\:\s*(\([^)]+\))?\zs[^.]+\ze\.')
+	else
+		let l:node = l:title
+		let l:file = b:info['File']
+	endif
+
+	return {'description': l:title, 'file': l:file, 'node': l:node}
 endfunction
 
 " vim:tw=78:ts=4:noexpandtab:norl:

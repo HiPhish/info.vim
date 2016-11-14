@@ -37,11 +37,11 @@ nnoremap <buffer> g? :call <SID>help()<CR>
 " Echo a quick instruction list
 function! s:help()
 	echomsg 'The following commands are defined in ''info'' buffers:'
-	echomsg '  :Menu [entry]  Jump to a menu entry or open menu in location list'
-	echomsg '  :Follow        Follow reference under cursor'
-	echomsg '  :UpNode        Go to parent node'
-	echomsg '  :NextNode      Go to next node'
-	echomsg '  :PrevNode      Go to previous node'
+	echomsg '  :Menu [entry]   Jump to a menu entry or open menu in location list'
+	echomsg '  :Follow [xRef]  Follow reference and cross-references'
+	echomsg '  :UpNode         Go to parent node'
+	echomsg '  :NextNode       Go to next node'
+	echomsg '  :PrevNode       Go to previous node'
 	echomsg 'See '':help info.vim'' for more details and mappings.'
 endfunction
 

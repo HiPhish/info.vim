@@ -67,12 +67,21 @@ Use the `:Menu` command to follow a node's menu entries.
 
 You can also use tab completion with the `:Menu` command.
 
+You can follow cross-references using the `:Follow` command:
+
+.. code-block:: vim
+
+   " Follow a named cross-reference
+   :Follow Name of the reference
+   " Follow reference under cursor (works for any kind of reference)
+   :Follow
+
 
 Navigation
 ==========
 
 Use  the  commands  `:NodeUp`,  `:NodeNext`  and  `:NodePrev`  to  navigate  to
-respective node. Alternatively, you add mappings like these to your settings.
+respective node. Alternatively, add mappings like these to your settings.
 
 .. code-block:: vim
 
@@ -94,13 +103,15 @@ you want a prompt similar to standalone info use a mapping like this:
        nmap <buffer> gm <Plug>InfoMenu
    endif
 
-You can follow a cross-reference  under the cursor using the `:Follow` command.
-you can remap it to something more convenient:
+You can follow a cross-reference using the `:Follow` command.  You can remap it
+to something more convenient:
 
 .. code-block:: vim
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
+       nmap <buffer> gm <Plug>InfoMenu
+       " Works for any reference under the cursor, such as menu items
        nmap <silent> <buffer> K :Follow<CR>
    endif
 
@@ -108,17 +119,11 @@ you can remap it to something more convenient:
 Stuff left to do
 ################
 
-The goal for the first stable release is feature-parity with standalone info.
+The goal for the first  stable release is feature-parity  with standalone info.
+These features depend on support from standalone info, so my hands are tied for
+the time being.
 
-- Following cross-references by name rather than just those under the cursor
-  (using `:Follow` command)
 - Index lookup (`:Index` command)
 - Search within a file (`:Search` command)
-
-The secondary goal is to make the features fancy:
-
-- Provide prompt-versions of the commands which prompt the user for things
-  like a menu entry or search term. They should behave similar to the prompts
-  of standalone info.
-
-- Make those prompts accessible through `<Plug>`-mappings.
+- Going to a specific node in the file (`:Goto` command) (not sure if we really
+  need this)

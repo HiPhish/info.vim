@@ -132,6 +132,13 @@ g?                                                                   *info-g?*
     Display a menu prompt, similar to standalone info's `m`. See also `:Menu`.
 
 
+<Plug>InfoFollow                                            *<Plug>InfoFollow*
+
+    Display a cross-reference  following prompt,  similar to standalone info's
+    `f`.  See also `:Follow`.  If no argument  is given the first cross-reference
+    is followed.
+
+
 ==============================================================================
 COMMANDS                                                       *info-commands*
 
@@ -173,10 +180,10 @@ COMMANDS                                                       *info-commands*
     case-insensitively.
 
 
-:Follow                                                         *info-:Follow*
+:Follow [{xRef}]                                                *info-:Follow*
 
-    Follow the  cross-reference  under the  cursor.  If there  is none  only a
-    message will be printed.
+    Follow the  given cross-reference.  Without argument follow  the reference
+    under the cursor. If there is none only a message will be printed.
 
 
 ==============================================================================
