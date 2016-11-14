@@ -201,7 +201,7 @@ function! s:readInfo(file, node, ...)
 	" key-value pairs.
 	let l:headerPairs = split(getline(1), ',')
 
-	for l:pair in l:HeaderPairs
+	for l:pair in l:headerPairs
 		" A key is terminated by a colon and might have leading whitespace.
 		let l:key = matchstr(l:pair, '\v^\s*\zs[^:]+')
 		" The value might have leading whitespace as well
