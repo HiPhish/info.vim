@@ -34,6 +34,11 @@ setlocal shiftwidth=8
 nnoremap <buffer> g? :call <SID>help()<CR>
 
 
+if &buftype =~? 'nofile'
+	nnoremap <silent> <buffer> K  :Follow<CR>
+endif
+
+
 " Echo a quick instruction list
 function! s:help()
 	echomsg 'The following commands are defined in ''info'' buffers:'

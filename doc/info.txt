@@ -112,19 +112,26 @@ g?                                                                   *info-g?*
     Print a quick overview of the commands.
 
 
+K                                                                     *info-K*
+
+    Follow the reference under the cursor. Works for cross-references and menu
+    items.
+
+
+------------------------------------------------------------------------------
 <Plug>InfoUp                                                    *<Plug>InfoUp*
 
-    Go to the parent node. See also `:NodeUp`.
+    Go to the parent node. See also `:UpNode`.
 
 
 <Plug>InfoNext                                                *<Plug>InfoNext*
 
-    Go to the next node. See also `:NodeNext`.
+    Go to the next node. See also `:NextNode`.
 
 
 <Plug>InfoPrev                                                *<Plug>InfoPrev*
 
-    Go to the previous node. See also `:NodePrev`.
+    Go to the previous node. See also `:PrevNode`.
 
 
 <Plug>InfoMenu                                                *<Plug>InfoMenu*
@@ -156,17 +163,17 @@ COMMANDS                                                       *info-commands*
         :Info bash What\ is\ Bash?
 <
 
-:NodeUp                                                         *info-:NodeUp*
+:UpNode                                                         *info-:UpNode*
 
     Go to the parent node of the current node.
 
 
-:NodeNext                                                     *info-:NodeNext*
+:NextNode                                                     *info-:NextNode*
 
     Go to the next node of the current node.
 
 
-:NodePrev                                                     *info-:NodePrev*
+:PrevNode                                                     *info-:PrevNode*
 
     Go to the previous node of the current node.
 

@@ -111,8 +111,6 @@ to something more convenient:
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
        nmap <buffer> gm <Plug>InfoMenu
-       " Works for any reference under the cursor, such as menu items
-       nmap <silent> <buffer> K :Follow<CR>
    endif
 
 
