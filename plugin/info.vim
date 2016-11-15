@@ -123,6 +123,8 @@ endfunction
 " The entry function, invoked by the ':Info' command. Its purpose is to find
 " the file and options from the arguments
 function! s:info(mods, ...)
+	call s:verifyInfoVersion()
+
 	let l:file = ''
 	let l:node = ''
 
@@ -159,6 +161,8 @@ endfunction
 " Here the heavy heavy lifting happens: we set the options for the buffer and
 " load the info document.
 function! s:readInfo(file, node, ...)
+	call s:verifyInfoVersion()
+
 	" We will lock it after assembly
 	setlocal modifiable
 	setlocal readonly
@@ -639,4 +643,25 @@ function! s:decodeRefString(string)
 	return {'description': l:title, 'file': l:file, 'node': l:node}
 endfunction
 
+" Check the version of info installed, display a warning if it is too low.
+function! s:verifyInfoVersion()
+	if exists('s:infoVersion')
+		echom 'derp'
+		return
+	endif
+
+	let l:version = matchstr(system(g:infoprg.' --version'), '\v\d+\.\d+')
+	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
+	" let l:minor = matchstr(l:version, '\v\d+\.\zs\d+\ze')
+
+	if l:major < 6
+		echohl WarningMsg
+		echom 'Warning: Version 6.0+ of standalone info needed, you have '.l:version.'; please set'
+		echom 'the ''g:infoprg'' variable to a compatible binary. Info might still work with'
+		echom 'your binary, but it is not guaranteed.'
+		echohl NONE
+	endif
+
+	let s:infoVersion = l:version
+endfunction
 " vim:tw=78:ts=4:noexpandtab:norl:
