@@ -15,6 +15,7 @@ of GNU. Check out this asciicast for a live demonstation:
 
 .. image:: https://asciinema.org/a/92884.png
    :width: 75%
+   :align: center
    :target: https://asciinema.org/a/92884
 
 .. warning::
