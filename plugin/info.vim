@@ -136,32 +136,40 @@ function! s:info(mods, ...)
 		let l:node = a:2
 	endif
 
-	let l:bufname = s:encodeURI({'file': l:file, 'node': l:node})
+	let l:reference = {'file': l:file, 'node': l:node}
+	if !s:verifyReference(l:reference)
+		return
+	endif
+
+
+	let l:uri = s:encodeURI(l:reference)
 
 	" The following will trigger the autocommand of editing an info:// file
 	if a:mods !~# 'tab' && s:find_info_window()
-		execute 'silent edit' l:bufname
+		execute 'silent edit' l:uri
 	else
-		execute 'silent' a:mods 'split' l:bufname
+		execute 'silent' a:mods 'split' l:uri
 	endif
 
 	echo 'Welcome to Info. Type g? for help.'
 endfunction
 
 
-" Jump to a particular reference
-function! s:readReference(reference)
-	call s:readInfo(a:reference['file'], a:reference['node'])
-
-	" Jump to the given line
-	execute 'normal! '.a:reference['line'].'G'
-endfunction
-
-
-" Here the heavy heavy lifting happens: we set the options for the buffer and
-" load the info document.
-function! s:readInfo(file, node, ...)
+" Jump to a particular reference. Here the heavy heavy lifting happens: we set
+" the options for the buffer and load the info document.
+function! s:readReference(ref)
 	call s:verifyInfoVersion()
+
+	if !s:verifyReference(a:ref)
+		" The first buffer is special: If there is no content Vim will reuse
+		" it for our edit, that's why we can't just wipe it out
+		if bufnr('%') == 1
+			silent file [No Name]
+		else
+			silent bwipeout
+		endif
+		return
+	endif
 
 	" We will lock it after assembly
 	setlocal modifiable
@@ -170,16 +178,8 @@ function! s:readInfo(file, node, ...)
 	setlocal buftype=nofile
 	setlocal bufhidden=hide
 
-	" TODO: We first have to check if file and node even exist
-	silent keepjumps %delete _
-
-	" Make sure to redirect the standard error into the void and quote the
-	" name of the file and node (they may contain spaces and parentheses).
-	let l:cmd = g:infoprg.' -f '''.a:file.''' -n '''.a:node.''' -o - 2>/dev/null'
-	" And adjust the redirection syntax for special snowflake shells
-	if &shell =~# 'fish$'
-		let l:cmd = substitute(l:cmd, '\v\zs2\>\ze\/dev\/null$', '^', '')
-	endif
+	" Make sure to redirect the standard error into the void
+	let l:cmd = s:encodeCommand(a:ref, {'stderr': '/dev/null'})
 
 	put =system(l:cmd)
 	" Putting has produced an empty line at the top, remove that
@@ -212,6 +212,11 @@ function! s:readInfo(file, node, ...)
 		let l:value = matchstr(l:pair, '\v^\s*[^:]+\:\s*\zs[^,]+')
 		let b:info[l:key] = l:value
 	endfor
+
+	" Jump to the given line
+	if exists('a:ref[''line'']')
+		execute 'normal! '.a:ref['line'].'G'
+	endif
 endfunction
 
 
@@ -643,10 +648,34 @@ function! s:decodeRefString(string)
 	return {'description': l:title, 'file': l:file, 'node': l:node}
 endfunction
 
+
+" Encode a reference into an info command call. The 'kwargs' is for
+" redirection of stdin and stderr
+function s:encodeCommand(ref, kwargs)
+	let l:file = shellescape(exists('a:ref[''file'']') ? a:ref['file'] : 'dir')
+	let l:node = shellescape(exists('a:ref[''node'']') ? a:ref['node'] : 'Top')
+
+	let l:cmd = g:infoprg.' -f '.l:file.' -n '.l:node.' -o -'
+
+	if exists('a:kwargs[''stderr'']')
+		let l:cmd .= ' 2>'.a:kwargs['stderr']
+		" Adjust the redirection syntax for special snowflake shells
+		if &shell =~# 'fish$'
+			let l:cmd = substitute(l:cmd, '\v\zs2\>\ze\/dev\/null$', '^', '')
+		endif
+	endif
+
+	if exists('a:kwargs[''stdout'']')
+		let l:cmd .= ' >'.a:kwargs['stdout']
+	endif
+
+	return l:cmd
+endfunction
+
+
 " Check the version of info installed, display a warning if it is too low.
 function! s:verifyInfoVersion()
 	if exists('s:infoVersion')
-		echom 'derp'
 		return
 	endif
 
@@ -663,5 +692,25 @@ function! s:verifyInfoVersion()
 	endif
 
 	let s:infoVersion = l:version
+endfunction
+
+
+" Verify that a reference leads to an actual file or node.
+function! s:verifyReference(ref)
+	" Send the output to the void, we only want the error
+	let l:cmd = s:encodeCommand(a:ref, {'stdout': '/dev/null'})
+	let l:stderr = system(l:cmd)
+
+	" Info always returns exit code 0, so we have to rely on the error message
+	if !empty(l:stderr)
+		" The message might contain line breaks.
+		let l:stderr = substitute(l:stderr, '\v\_s+', ' ', 'g')
+		echohl ErrorMsg
+		echom l:stderr
+		echohl NONE
+		return 0
+	endif
+
+	return 1
 endfunction
 " vim:tw=78:ts=4:noexpandtab:norl:
