@@ -156,6 +156,11 @@ CTRL-]                                                           *info-CTRL-]*
     is followed.
 
 
+<Plug>InfoGoto                                                *<Plug>InfoGoto*
+
+    Display a node prompt, similar to standalone info's `g`. See also `:GotoNode`.
+
+
 
 ==============================================================================
 COMMANDS                                                       *info-commands*
@@ -206,6 +211,12 @@ COMMANDS                                                       *info-commands*
     under the cursor. If there is none only a message will be printed.
 
 
+------------------------------------------------------------------------------
+:GotoNode {node}                                              *info-:GotoNode*
+
+    Go to {node} in the current file.
+
+
 
 ==============================================================================
 ADVANCED                                                       *info-advanced*
@@ -221,7 +232,7 @@ dictionaries with some or all of the following fields:
     {file}  Info file, not necessarily a physical file
     {node}  Node inside a given file
     {line}  Line number inside a node, counting the node header
-    {name}  A human-readable name of the node, this is what must be given to
+    {name}  A human-readable  name of the node,  this is what must be given to
             menu- and cross reference commands
 
 If an entry is  missing there will either  be a default value used  (e.g. line

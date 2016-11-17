@@ -76,11 +76,12 @@ endif
 " Public interface {{{1
 command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
 
-nnoremap <silent> <Plug>InfoUp     :call <SID>up()<CR>
-nnoremap <silent> <Plug>InfoNext   :call <SID>next()<CR>
-nnoremap <silent> <Plug>InfoPrev   :call <SID>prev()<CR>
-nnoremap <silent> <Plug>InfoMenu   :call <SID>menuPrompt()<CR>
-nnoremap <silent> <Plug>InfoFollow :call <SID>followPrompt()<CR>
+nnoremap <silent> <Plug>InfoUp      :call <SID>up()<CR>
+nnoremap <silent> <Plug>InfoNext    :call <SID>next()<CR>
+nnoremap <silent> <Plug>InfoPrev    :call <SID>prev()<CR>
+nnoremap <silent> <Plug>InfoMenu    :call <SID>menuPrompt()<CR>
+nnoremap <silent> <Plug>InfoFollow  :call <SID>followPrompt()<CR>
+nnoremap <silent> <Plug>InfoGoto    :call <SID>gotoPrompt()<CR>
 
 augroup InfoFiletype
 	autocmd!
@@ -92,6 +93,9 @@ augroup InfoFiletype
 	autocmd FileType info command! -buffer
 		\ -complete=customlist,<SID>completeFollow -nargs=?
 		\ Follow call <SID>follow(<q-args>)
+
+	autocmd FileType info command! -buffer -nargs=?
+		\ GotoNode call <SID>gotoNode(<q-args>)
 
 	autocmd FileType info command! -buffer   UpNode  call <SID>up()
 	autocmd FileType info command! -buffer NextNode  call <SID>next()
@@ -118,7 +122,7 @@ function! s:completeFollow(ArgLead, CmdLine, CursorPos)
 endfunction
 
 
-" Reading functions {{{1
+" 'Info' functions {{{1
 
 " The entry function, invoked by the ':Info' command. Its purpose is to find
 " the file and options from the arguments
@@ -245,7 +249,7 @@ function! s:find_info_window() abort
 endfunction
 
 
-" Navigation functions {{{1
+" Navigation functions (up, next, prev) {{{1
 
 " Jump to the next node
 function! s:next()
@@ -293,11 +297,11 @@ function! s:jumpToProperty(property)
 endfunction
 
 
-" Menu functions {{{1
+" 'Menu' functions {{{1
 
 function s:menuPrompt()
-	let l:entry = input('Menu item: ', '', 'customlist,'.s:SID().'completeMenu')
-	call s:menu(l:entry)
+	let l:pattern = input('Menu item: ', '', 'customlist,'.s:SID().'completeMenu')
+	call s:menu(l:pattern)
 endfunction
 
 function! s:menu(pattern)
@@ -314,14 +318,14 @@ function! s:menu(pattern)
 			endif
 
 			let l:uri = s:encodeURI(l:item)
-			laddexpr l:uri.'\|'.l:line.'\| '.l:item['description']
+			laddexpr l:uri.'\|'.l:line.'\| '.l:item['name']
 		endfor
 
 		lopen
 		return
 	endif
 
-	let l:entry = s:findRefrerenceInList(a:pattern, b:info['Menu'])
+	let l:entry = s:findReferenceInList(a:pattern, b:info['Menu'])
 
 	if empty(l:entry)
 		echohl ErrorMsg
@@ -365,7 +369,7 @@ function! s:buildMenu()
 endfunction
 
 
-" Follow functions {{{1
+" 'Follow' functions {{{1
 
 function s:followPrompt()
 	call s:collectXRefs()
@@ -376,7 +380,7 @@ function s:followPrompt()
 		return
 	endif
 
-	let l:firstItem = b:info['XRefs'][0]['description']
+	let l:firstItem = b:info['XRefs'][0]['name']
 	let l:pattern = input('Follow xref ('.l:firstItem.'): ', '', 'customlist,'.s:SID().'completeFollow')
 	if empty(l:pattern)
 		let l:pattern = l:firstItem
@@ -390,7 +394,7 @@ function! s:follow(pattern)
 		let l:xRef = s:xRefUnderCursor()
 	else
 		call s:collectXRefs()
-		let xRef = s:findRefrerenceInList(a:pattern, b:info['XRefs'])
+		let xRef = s:findReferenceInList(a:pattern, b:info['XRefs'])
 	endif
 
 	if empty(l:xRef)
@@ -483,6 +487,34 @@ function! s:xRefUnderCursor()
 	return {}
 endfunction
 
+
+
+" 'Goto' functions {{{1
+
+" Go to a given node.
+function! s:gotoPrompt()
+	let l:node = input('Goto node: ')
+	if empty(l:node)
+		return
+	endif
+
+	call s:gotoNode(l:node)
+endfunction
+
+
+" Jump to a given node inside the current file.
+function! s:gotoNode(node)
+	let l:ref = {'file': b:info['File'], 'node': a:node}
+	if !s:verifyReference(l:ref)
+		return
+	endif
+
+	let l:uri = s:encodeURI(l:ref)
+	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+	echom l:uri
+
+	execute 'silent edit '.l:uri
+endfunction
 " URI-handling function {{{1
 
 " Decodes a URI into a node reference
@@ -601,9 +633,9 @@ function! s:SID()
 	return '<SNR>'.matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$').'_'
 endfunction
 
-function! s:findRefrerenceInList(pattern, list)
+function! s:findReferenceInList(pattern, list)
 	for l:item in a:list
-		if l:item['description'] =~? a:pattern
+		if l:item['name'] =~? a:pattern
 			return l:item
 		endif
 	endfor
@@ -615,8 +647,8 @@ function! s:completePrompt(ArgLead, CmdLine, CursorPos, list)
 
 	for l:item in a:list
 		" Match only at the beginning of the string
-		if empty(a:ArgLead) || !empty(matchstr(l:item['description'], '\c\M^'.a:ArgLead))
-			call add(l:candidates, l:item['description'])
+		if empty(a:ArgLead) || !empty(matchstr(l:item['name'], '\c\M^'.a:ArgLead))
+			call add(l:candidates, l:item['name'])
 		endif
 	endfor
 
@@ -628,11 +660,11 @@ function! s:decodeRefString(string)
 	" Strip away the leading cruft first: '* ' and '*Note '
 	let l:reference = matchstr(a:string, '\v^\*([Nn]ote\s+)?\s*\zs.+')
 	" Try the '* Node::' type of reference first
-	let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
+	let l:name = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
 
-	if empty(l:title)
-		" The format is '* Title: (file)Node.*
-		let l:title = matchstr(l:reference, '\v^\zs[^:]+\ze\:')
+	if empty(l:name)
+		" The format is '* Name: (file)Node.*
+		let l:name = matchstr(l:reference, '\v^\zs[^:]+\ze\:')
 
 		let l:file = matchstr(l:reference, '\v^[^:]+\:\s*\(\zs[^)]+\ze\)')
 		" If there is no file the current one is implied
@@ -642,11 +674,11 @@ function! s:decodeRefString(string)
 
 		let l:node = matchstr(l:reference, '\v^[^:]+\:\s*(\([^)]+\))?\zs[^.]+\ze\.')
 	else
-		let l:node = l:title
+		let l:node = l:name
 		let l:file = b:info['File']
 	endif
 
-	return {'description': l:title, 'file': l:file, 'node': l:node}
+	return {'name': l:name, 'file': l:file, 'node': l:node}
 endfunction
 
 

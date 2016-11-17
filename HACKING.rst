@@ -373,9 +373,8 @@ needed we  are going  to make  it lazy  by generating  the menu  list only when
 necessary. Internally a menu is a list of entries in the same order they appear
 in the document.
 
-Each entry  is a  dictionary with  keys `Description`  (human-readable  title),
-`File` and `Node`. This structure can be used for all references, not just menu
-entries.  References  can  be encoded  in two  forms as  discussed above,  so a
+Each entry is a reference with  keys `name` (human-readable title),  `file` and
+`node`.  Menu entries  can be  written in  two forms  as discussed above,  so a
 decoding function has to recognise and handle both.
 
 Refer to the source code for details,  parsing a menu is very straight-forward.

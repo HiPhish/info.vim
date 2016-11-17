@@ -128,5 +128,5 @@ the time being.
 
 - Index lookup (`:Index` command)
 - Search within a file (`:Search` command)
-- Going to a specific node in the file (`:Goto` command) (not sure if we really
-  need this)
+- Going to a specific node in the file (`:Goto` command) (implemented, but
+  without tab-completion)
