@@ -327,6 +327,7 @@ function! s:menu(pattern)
 		echohl ErrorMsg
 		echo 'Cannot find menu entry ' . a:pattern
 		echohl None
+		return
 	endif
 
 	let l:uri = s:encodeURI(l:entry)
