@@ -304,12 +304,12 @@ We can describe a position inside the node system using a URI scheme:
 
 .. code-block::
 
-   info://file/node#line
+   info://file/node?line=n&column=m
 
-The name of  the scheme is `info`,  the host is  the name of the document,  the
-path is  the node  and the  fragment is  the line  number.  To access the `dir`
-document omit the host and path, to access the root node of a document omit the
-path. Here are some examples:
+The name  of the scheme is  `info`, the host is  the name of the  document, the
+path is the node and the query can  contain a line- or column number. To access
+the  `dir` document  omit the  host and  path,  to access  the root  node of  a
+document omit the path. Here are some examples:
 
 .. code-block::
 
@@ -323,7 +323,7 @@ path. Here are some examples:
    info://bash/what%20is%20bash%3f/
 
    # Line 3 of section 1.1 of the Bourne Again Shell manual
-   info://bash/what%20is%20bash%3f#3
+   info://bash/what%20is%20bash%3f/?line=3&column=7
 
 We have to  percent-encode the  spaces (`%20`)  and the question  mark (`%3f`).
 Slashes at the end of  the host or path are  optional if there is no successive

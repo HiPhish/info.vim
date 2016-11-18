@@ -218,9 +218,11 @@ function! s:readReference(ref)
 	endif
 
 	" Jump to the given line
-	if exists('a:ref[''line'']')
-		execute 'normal! '.a:ref['line'].'G'
-	endif
+	let l:cursor = [
+		\ exists('a:ref[''line'']'  ) ? a:ref['line'  ] : 1,
+		\ exists('a:ref[''column'']') ? a:ref['column'] : 1
+	\ ]
+	call cursor(l:cursor)
 
 	" Now lock the file and set all the remaining options
 	setlocal filetype=info
@@ -303,6 +305,7 @@ function! s:jumpToProperty(property)
 	" We have to escape the percent signs or it will be replaced with the
 	" file name in the ':edit'
 	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
+	echom l:uri
 
 	execute 'silent edit '.l:uri
 endfunction
@@ -530,35 +533,45 @@ endfunction
 
 " Decodes a URI into a node reference
 function! s:decodeURI(uri)
-	" Possible URIs  'info://', 'info://file', 'info://file/',
-	"                'info://file/path', 'info://file/path/',
-	"                'info://file/path/#line', 'info://file/path#line'
+	" URI-parsing regex from [RFC 3986]:
+	"    https://tools.ietf.org/html/rfc3986#appendix-B
+	let l:uriMatches = matchlist(a:uri, '\v^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
 
-	let l:host = matchstr(a:uri, '\v^info\:\/\/\zs[^/]+\ze')
-	let l:path = matchstr(a:uri, '\v^info\:\/\/[^/]+\/\zs[^/#]+\ze')
-	let l:fragment = matchstr(a:uri, '\v^info\:\/\/[^/]+\/[^/#]+\/?\#\zs[^/#]+\ze')
+	let l:authority = s:percentDecode(l:uriMatches[4])
+	let l:path      = s:percentDecode(l:uriMatches[5])
+	let l:query     = s:percentDecode(l:uriMatches[7])
 
-	let l:host = s:percentDecode(l:host)
-	let l:path = s:percentDecode(l:path)
-	let l:fragment = s:percentDecode(l:fragment)
+	let l:file = empty(l:authority) ? 'dir' : l:authority
 
-	if empty(l:host)
-		let l:host = 'dir'
-	endif
-	if empty(l:path)
-		let l:path = 'Top'
-	endif
-	if empty(l:fragment)
-		let l:fragment = 1
+	" Strip leading and trailing slashes from the path
+	let l:node = substitute(l:path, '\v(^\/)|(\/$)', '', 'g')
+	if empty(l:node)
+		let l:node = 'Top'
 	endif
 
-	return {'file': l:host, 'node': l:path, 'line': l:fragment}
+	let l:line   = matchstr(l:query, '\vline\=\zs\d+')
+	let l:column = matchstr(l:query, '\vcolumn\=\zs\d+')
+
+	let l:ref = {'file': l:file, 'node': l:node}
+
+	if !empty(l:line)
+		let l:ref['line'] = l:line
+	endif
+
+	if !empty(l:column)
+		let l:ref['column'] = l:column
+	endif
+
+	return l:ref
 endfunction
 
+
+" Encodes a node reference into a URI
 function! s:encodeURI(reference)
-	let l:file = ''
-	let l:node = ''
-	let l:line = ''
+	let l:file   = ''
+	let l:node   = ''
+	let l:line   = ''
+	let l:column = ''
 
 	if (exists('a:reference[''file'']'))
 		let l:file = s:percentEncode(a:reference['file'])
@@ -569,14 +582,32 @@ function! s:encodeURI(reference)
 	endif
 
 	if (exists('a:reference[''line'']'))
-		let l:line = s:percentEncode(a:reference['line'])
+		let l:line = a:reference['line']
+	endif
+
+	if (exists('a:reference[''column'']'))
+		let l:line = a:reference['column']
 	endif
 
 	let l:uri = 'info://'
+
 	if !empty(l:file)
 		let l:uri .= l:file.'/'
 		if !empty(l:node)
 			let l:uri .= l:node.'/'
+		endif
+	endif
+
+	if !empty(l:line) || !empty(l:column)
+		let l:uri .= '?'
+		if !empty(l:line)
+			let l:uri .= 'line='.l:line
+			if !empty(l:column)
+				let l:uri .= '&'
+			endif
+		endif
+		if !empty(l:column)
+			let l:uri .= 'column='.l:column
 		endif
 	endif
 

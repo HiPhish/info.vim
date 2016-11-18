@@ -256,11 +256,16 @@ use of `:Info`.
 
 It is possible to specify the node as a path following the host of the URI:
 >
-    :edit info://bash/What%20is%20Bash%3f
+    :edit info://bash.info/What%20is%20Bash%3f/
 <
 Note  We have to  percent-encode reserved  characters like space  and question
       mark.
 
+Additional information  can be included  in the query;  currently only a line-
+and column number are supported:
+>
+    :edit info:/bash.info/What%20is%20Bash%3f/?line=3&column=7
+<
 
 
 ==============================================================================
