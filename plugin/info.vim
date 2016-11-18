@@ -191,17 +191,6 @@ function! s:readReference(ref)
 
     silent keepjumps normal! gg
 
-	" Now lock the file and set all the remaining options
-	setlocal filetype=info
-	setlocal nonumber
-	setlocal norelativenumber
-	setlocal nomodifiable
-	setlocal nomodified
-	setlocal foldcolumn=0
-	setlocal colorcolumn=0
-	setlocal nolist
-	setlocal nospell
-
 	" Parse the node header
 	let b:info = {}
 
@@ -217,10 +206,32 @@ function! s:readReference(ref)
 		let b:info[l:key] = l:value
 	endfor
 
+	" Normalise the URI (it might contain abbreviations, but we want full
+	" names)
+	let l:normalisedURI = s:encodeURI({'file': b:info['File'], 'node': b:info['Node']})
+	if bufexists(l:normalisedURI) && bufnr(l:normalisedURI) != bufnr('%')
+		let l:winbufnr = winbufnr(0)
+		execute 'silent edit '.l:normalisedURI
+		execute 'silent '.l:winbufnr.'bwipeout'
+	elseif bufname('%') != l:normalisedURI
+		execute 'silent file '.l:normalisedURI
+	endif
+
 	" Jump to the given line
 	if exists('a:ref[''line'']')
 		execute 'normal! '.a:ref['line'].'G'
 	endif
+
+	" Now lock the file and set all the remaining options
+	setlocal filetype=info
+	setlocal nonumber
+	setlocal norelativenumber
+	setlocal nomodifiable
+	setlocal nomodified
+	setlocal foldcolumn=0
+	setlocal colorcolumn=0
+	setlocal nolist
+	setlocal nospell
 endfunction
 
 
