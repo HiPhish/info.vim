@@ -672,7 +672,7 @@ endfunction
 " Generally useful functions {{{1
 
 function! s:SID()
-	return '<SNR>'.matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$').'_'
+	return matchstr(expand('<sfile>'), '\v\<SNR\>\d+_')
 endfunction
 
 function! s:findReferenceInList(pattern, list)
