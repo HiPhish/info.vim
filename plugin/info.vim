@@ -60,6 +60,25 @@
 " convert the reference to a URI and ':edit' it in the current window.
 " }}}
 
+" Read first before writing code {{{
+" ==============================
+"
+" VimScript is full of ugly pitfalls, and this code is full of ugly
+" workarounds, so here is a list of things to look out for.
+"
+" Executing commands containing a URI
+" 	 A URI may contain percent characters (percent encoding), which in an
+" 	 ex-command are interpreted as "the current file". For this reason they
+" 	 must be escaped. To cut down the redundancy use the 's:executeURI'
+" 	 function.
+"
+" Calling an external tool (e.g. info)
+"    External tools are called from the shell, so the command strings needs to
+"    be properly escaped. This does not just mean escaping spaces, but also
+"    adjusting redirection for different shells. Use the 's:encodeCommand'
+"    function.
+" }}}
+
 
 if exists('g:loaded_info')
   finish
@@ -150,9 +169,9 @@ function! s:info(mods, ...)
 
 	" The following will trigger the autocommand of editing an info:// file
 	if a:mods !~# 'tab' && s:find_info_window()
-		execute 'silent edit' l:uri
+		call s:executeURI('silent edit ', l:uri)
 	else
-		execute 'silent' a:mods 'split' l:uri
+		call s:executeURI('silent '.a:mods.' split ', l:uri)
 	endif
 
 	echo 'Welcome to Info. Type g? for help.'
@@ -208,13 +227,14 @@ function! s:readReference(ref)
 
 	" Normalise the URI (it might contain abbreviations, but we want full
 	" names)
-	let l:normalisedURI = s:encodeURI({'file': b:info['File'], 'node': b:info['Node']})
-	if bufexists(l:normalisedURI) && bufnr(l:normalisedURI) != bufnr('%')
+	let l:uri = s:encodeURI({'file': b:info['File'], 'node': b:info['Node']})
+
+	if bufexists(l:uri) && bufnr(l:uri) != bufnr('%')
 		let l:winbufnr = winbufnr(0)
-		execute 'silent edit '.l:normalisedURI
+		call s:executeURI('silent edit ', l:uri)
 		execute 'silent '.l:winbufnr.'bwipeout'
-	elseif bufname('%') != l:normalisedURI
-		execute 'silent file '.l:normalisedURI
+	elseif bufname('%') != l:uri
+		call s:executeURI('silent file ', l:uri)
 	endif
 
 	" Jump to the given line
@@ -302,12 +322,7 @@ function! s:jumpToProperty(property)
 	endif
 
 	let l:uri = s:encodeURI({'file': l:file , 'node': l:node})
-	" We have to escape the percent signs or it will be replaced with the
-	" file name in the ':edit'
-	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
-	echom l:uri
-
-	execute 'silent edit '.l:uri
+	call s:executeURI('silent edit ', l:uri)
 endfunction
 
 
@@ -349,9 +364,7 @@ function! s:menu(pattern)
 	endif
 
 	let l:uri = s:encodeURI(l:entry)
-	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
-
-	execute 'silent edit '.l:uri
+	call s:executeURI('silent edit ', l:uri)
 endfunction
 
 
@@ -419,8 +432,7 @@ function! s:follow(pattern)
 	endif
 
 	let l:uri = s:encodeURI(l:xRef)
-	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
-	execute 'silent edit' l:uri
+	call s:executeURI('silent edit', l:uri)
 endfunction
 
 
@@ -524,10 +536,7 @@ function! s:gotoNode(node)
 	endif
 
 	let l:uri = s:encodeURI(l:ref)
-	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
-	echom l:uri
-
-	execute 'silent edit '.l:uri
+	call s:executeURI('silent edit ', l:uri)
 endfunction
 " URI-handling function {{{1
 
@@ -615,7 +624,7 @@ function! s:encodeURI(reference)
 endfunction
 
 function! s:percentEncode(string)
-	" important: encode the percent symbol first
+	" Important: encode the percent symbol first
 	let l:string = a:string
 	let l:string = substitute(l:string, '\v\%', '%25', 'g')
 	let l:string = substitute(l:string, '\v\ ', '%20', 'g')
@@ -745,6 +754,16 @@ function s:encodeCommand(ref, kwargs)
 	endif
 
 	return l:cmd
+endfunction
+
+
+" Call an ex-command with the URI. This will make sure the URI is properly
+" escaped.
+function! s:executeURI(ex_cmd, uri)
+	" We have to escape the percent signs or it will be replaced with the
+	" file name in the ':edit'
+	let l:uri = substitute(a:uri, '\v\%', '\\%', 'g')
+	execute a:ex_cmd . l:uri
 endfunction
 
 
