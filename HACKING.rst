@@ -383,3 +383,12 @@ terminated, so we have to read the entire rest of the node.
 
 The menu is used  for jumping to entries,  finding entries and for building the
 location list.
+
+
+Testing
+#######
+
+Testing uses  Vader_ for testing.  Testing is very poor  at the moment,  so any
+more test cases are welcome.
+
+.. _Vader: https://github.com/junegunn/vader.vim

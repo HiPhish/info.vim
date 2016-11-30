@@ -1,0 +1,37 @@
+############################################
+# Health check using Neovim's :CheckHealth #
+############################################
+
+# We use 'echo' to print a controlled fake version number instead of having to
+# rely on some particular version of 'info' to be installed on the tester's
+# system.
+
+
+Execute (Non-existing info):
+  let g:infoprg = ''
+  CheckHealth info
+
+Then:
+  let message = search('No standalone info binary found.')
+  tabclose
+  AssertNotEqual 0, message
+
+
+Execute (Info version < 6.0):
+  let g:infoprg = 'echo 1.0'
+  CheckHealth info
+
+Then:
+  let message = search('You need at least version 6.0 of standalone info')
+  tabclose
+  AssertNotEqual 0, message
+
+
+Execute (Correct info version number):
+  let g:infoprg = 'echo 6.0'
+  CheckHealth info
+
+Then:
+  let message = search('Version 6.0 of standalone info installed')
+  tabclose
+  AssertNotEqual 0, message

@@ -22,4 +22,23 @@
 "    USE OR OTHER DEALINGS IN THE SOFTWARE.
 " }}}
 
-" vim:tw=78:ts=4:noexpandtab:norl:
+function! health#info#check() abort
+	call health#report_start('info.vim')
+
+	let l:version = matchstr(system(g:infoprg.' --version'), '\v\d+\.\d+')
+	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
+
+	if empty(l:version)
+		let l:msg  = 'No standalone info binary found.'
+		let l:sug1 = 'Install at least version 6.0 of GNU Texinfo.'
+		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
+		call health#report_error(l:msg,[l:sug1, l:sug2])
+	elseif l:major < 6
+		let l:msg = 'You need at least version 6.0 of standalone info.'
+		let l:sug1 = 'Install at least version 6.0 of GNU Texinfo.'
+		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
+		call health#report_error(l:msg, [l:sug1, l:sug2])
+	else
+		call health#report_ok('Version '.l:version.' of standalone info installed.')
+	endif
+endfunction
