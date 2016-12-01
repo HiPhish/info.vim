@@ -85,7 +85,7 @@ You can follow cross-references using the `:Follow` command:
 Navigation
 ==========
 
-Use  the  commands  `:NodeUp`,  `:NodeNext`  and  `:NodePrev`  to  navigate  to
+Use  the  commands  `:InfoUp`,  `:InfoNext`  and  `:InfoPrev`  to  navigate  to
 respective node. Alternatively, add mappings like these to your settings.
 
 .. code-block:: vim

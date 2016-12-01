@@ -131,17 +131,17 @@ CTRL-]                                                           *info-CTRL-]*
 ------------------------------------------------------------------------------
 <Plug>(InfoUp)                                                *<Plug>(InfoUp)*
 
-    Go to the parent node. See also `:UpNode`.
+    Go to the parent node. See also `:InfoUp`.
 
 
 <Plug>(InfoNext)                                            *<Plug>(InfoNext)*
 
-    Go to the next node. See also `:NextNode`.
+    Go to the next node. See also `:InfoNext`.
 
 
 <Plug>(InfoPrev)                                            *<Plug>(InfoPrev)*
 
-    Go to the previous node. See also `:PrevNode`.
+    Go to the previous node. See also `:InfoPrev`.
 
 
 <Plug>(InfoMenu)                                            *<Plug>(InfoMenu)*
@@ -180,17 +180,17 @@ COMMANDS                                                       *info-commands*
 <
 
 ------------------------------------------------------------------------------
-:UpNode                                                         *info-:UpNode*
+:InfoUp                                                         *info-:InfoUp*
 
     Go to the parent node of the current node.
 
 
-:NextNode                                                     *info-:NextNode*
+:InfoNext                                                     *info-:InfoNext*
 
     Go to the next node of the current node.
 
 
-:PrevNode                                                     *info-:PrevNode*
+:InfoPrev                                                     *info-:InfoPrev*
 
     Go to the previous node of the current node.
 

@@ -116,9 +116,9 @@ augroup InfoFiletype
 	autocmd FileType info command! -buffer -nargs=?
 		\ GotoNode call <SID>gotoNode(<q-args>)
 
-	autocmd FileType info command! -buffer   UpNode  call <SID>up()
-	autocmd FileType info command! -buffer NextNode  call <SID>next()
-	autocmd FileType info command! -buffer PrevNode  call <SID>prev()
+	autocmd FileType info command! -buffer InfoUp    call <SID>up()
+	autocmd FileType info command! -buffer InfoNext  call <SID>next()
+	autocmd FileType info command! -buffer InfoPrev  call <SID>prev()
 
 
 	autocmd BufReadCmd info://* call <SID>readReference(<SID>decodeURI(expand('<amatch>')))
