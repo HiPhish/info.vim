@@ -92,9 +92,9 @@ respective node. Alternatively, add mappings like these to your settings.
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
-       nmap <buffer> gu <Plug>InfoUp
-       nmap <buffer> gn <Plug>InfoNext
-       nmap <buffer> gp <Plug>InfoPrev
+       nmap <buffer> gu <Plug>(InfoUp)
+       nmap <buffer> gn <Plug>(InfoNext)
+       nmap <buffer> gp <Plug>(InfoPrev)
    endif
 
 You can access  the menu via the  `:Menu` command.  It supports tab-completion,
@@ -105,7 +105,7 @@ you want a prompt similar to standalone info use a mapping like this:
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
-       nmap <buffer> gm <Plug>InfoMenu
+       nmap <buffer> gm <Plug>(InfoMenu)
    endif
 
 You can follow a cross-reference using the `:Follow` command.  You can remap it
@@ -115,7 +115,7 @@ to something more convenient:
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
-       nmap <buffer> gm <Plug>InfoMenu
+       nmap <buffer> gm <Plug>(InfoMenu)
    endif
 
 

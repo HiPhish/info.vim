@@ -95,12 +95,12 @@ endif
 " Public interface {{{1
 command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
 
-nnoremap <silent> <Plug>InfoUp      :call <SID>up()<CR>
-nnoremap <silent> <Plug>InfoNext    :call <SID>next()<CR>
-nnoremap <silent> <Plug>InfoPrev    :call <SID>prev()<CR>
-nnoremap <silent> <Plug>InfoMenu    :call <SID>menuPrompt()<CR>
-nnoremap <silent> <Plug>InfoFollow  :call <SID>followPrompt()<CR>
-nnoremap <silent> <Plug>InfoGoto    :call <SID>gotoPrompt()<CR>
+nnoremap <silent> <Plug>(InfoUp)      :call <SID>up()<CR>
+nnoremap <silent> <Plug>(InfoNext)    :call <SID>next()<CR>
+nnoremap <silent> <Plug>(InfoPrev)    :call <SID>prev()<CR>
+nnoremap <silent> <Plug>(InfoMenu)    :call <SID>menuPrompt()<CR>
+nnoremap <silent> <Plug>(InfoFollow)  :call <SID>followPrompt()<CR>
+nnoremap <silent> <Plug>(InfoGoto)    :call <SID>gotoPrompt()<CR>
 
 augroup InfoFiletype
 	autocmd!
@@ -270,12 +270,12 @@ function! s:find_info_window() abort
 	elseif winnr('$') ==# 1
 		return 0
 	endif
-	let thiswin = winnr()
+	let l:thiswin = winnr()
 	while 1
 		wincmd w
 		if &filetype ==# 'info'
 			return 1
-		elseif thiswin ==# winnr()
+		elseif l:thiswin ==# winnr()
 			return 0
 		endif
 	endwhile
@@ -336,7 +336,7 @@ endfunction
 function! s:menu(pattern)
 	call s:buildMenu()
 
-	if a:pattern == ''
+	if a:pattern ==# ''
 		call setloclist(0, [], ' ', 'Menu')
 
 		for l:item in b:info['Menu']
@@ -417,11 +417,11 @@ endfunction
 
 " Follow the cross-reference under the cursor.
 function! s:follow(pattern)
-	if a:pattern == ''
+	if a:pattern ==# ''
 		let l:xRef = s:xRefUnderCursor()
 	else
 		call s:collectXRefs()
-		let xRef = s:findReferenceInList(a:pattern, b:info['XRefs'])
+		let l:xRef = s:findReferenceInList(a:pattern, b:info['XRefs'])
 	endif
 
 	if empty(l:xRef)
@@ -506,7 +506,7 @@ function! s:xRefUnderCursor()
 			return l:xRef
 		endif
 
-		let l:line = l:line[l:end:]
+		let l:line = l:line[l:end :]
 		let l:col -= l:end
 	endwhile
 
@@ -719,7 +719,7 @@ function! s:decodeRefString(string)
 
 		let l:file = matchstr(l:reference, '\v^[^:]+\:\s*\(\zs[^)]+\ze\)')
 		" If there is no file the current one is implied
-		if empty(file)
+		if empty(l:file)
 			let l:file = b:info['File']
 		endif
 

@@ -129,34 +129,34 @@ CTRL-]                                                           *info-CTRL-]*
 
 
 ------------------------------------------------------------------------------
-<Plug>InfoUp                                                    *<Plug>InfoUp*
+<Plug>(InfoUp)                                                *<Plug>(InfoUp)*
 
     Go to the parent node. See also `:UpNode`.
 
 
-<Plug>InfoNext                                                *<Plug>InfoNext*
+<Plug>(InfoNext)                                            *<Plug>(InfoNext)*
 
     Go to the next node. See also `:NextNode`.
 
 
-<Plug>InfoPrev                                                *<Plug>InfoPrev*
+<Plug>(InfoPrev)                                            *<Plug>(InfoPrev)*
 
     Go to the previous node. See also `:PrevNode`.
 
 
-<Plug>InfoMenu                                                *<Plug>InfoMenu*
+<Plug>(InfoMenu)                                            *<Plug>(InfoMenu)*
 
     Display a menu prompt, similar to standalone info's `m`. See also `:Menu`.
 
 
-<Plug>InfoFollow                                            *<Plug>InfoFollow*
+<Plug>(InfoFollow)                                        *<Plug>(InfoFollow)*
 
     Display a cross-reference  following prompt,  similar to standalone info's
     `f`.  See also `:Follow`.  If no argument  is given the first cross-reference
     is followed.
 
 
-<Plug>InfoGoto                                                *<Plug>InfoGoto*
+<Plug>(InfoGoto)                                            *<Plug>(InfoGoto)*
 
     Display a node prompt, similar to standalone info's `g`. See also `:GotoNode`.
 
