@@ -1,0 +1,373 @@
+
+File: info.vim.info,  Node: Top,  Next: Getting Started,  Up: (dir)
+
+Info.vim: The Info reader for Vim
+*********************************
+
+In this  tutorial you will  learn the basics  of browsing Info  documents using
+Info.vim.  The document  serves  as a  complement to  the  *note official  info
+tutorial: (info)Top., which is specific to standalone Info and Emacs Info. This
+tutorial  is not  a substitute  to  the original,  it only  replaces the  parts
+specific to the reader implementation.
+
+    You can move  around the document using all of  Vim's movement commands, an
+Info document is  a regular buffer in  that regard. This applies  all other Vim
+modes as well.
+
+    Let's move on to the first lesson. You can either move the cursor down onto
+the left-hand  item of the first  menu entry and  press ‘K’ or use  the ‘:Menu’
+command. If you use the command you must  give the name of the menu entry as an
+argument. You can use the ‘Tab’ key  to complete the argument if you don't feel
+like typing everything. Finally, you can also execute the ‘:InfoNext’ command.
+
+* Menu:
+
+* Getting Started::  Getting started using the Info.vim reader.
+* Advanced::         Advanced Info.vim commands.
+
+
+File: info.vim.info,  Node: Getting Started,  Next: Advanced,  Prev: Top,  Up: Top
+
+1 Getting Started
+*****************
+
+The first  part of this Info  tutorial will briefly explain  how Info documents
+are structured and how to navigate them.  Repeat what you did previously to get
+here to move on (except for ‘:InfoNext’, you cannot use that one right now).
+
+* Menu:
+
+* Info-Structure::   Structure of Info files.
+* Node-Navigation::  Navigating the nodes of an Info file.
+* Menu-Navigation::  Navigating Info files using menus.
+* XRef-Navigation::  Navigating Info files using cross-references.
+* Goto-Navigation::  Navigating Info files by jumping to nodes manually.
+
+
+File: info.vim.info,  Node: Info-Structure,  Next: Node-Navigation,  Up: Getting Started
+
+1.1 Structure of Info files
+===========================
+
+A ‘file’  in Info  terms is a  document, even  if the "file"  is not  an actual
+on-disc file, but a collection of files or even a document that is generated on
+the  fly,  such  as  the  *note  (dir)::  file.  The  current  file  is  called
+‘info.vim.info’.
+
+    Files are further split  into ‘nodes’. A node is like a  section in a book,
+it can be  a chapter, a section, a  sub-section and so on. Usually  they form a
+tree-structure, but  they don't have  to. Each node  can have a  ‘Next’, ‘Prev’
+(previous),  and ‘Up’  node. The  current node  is named  ‘Info-Structure’, the
+previous node is ‘Getting Started’ and the next node is ‘Node-Navigation’.
+
+    At the top  of the buffer is  a line called the ‘header’,  it describes all
+the information about  the current node of  the file. You can  also access this
+information through scripting (*note Advanced::).
+
+    Now it is time to learn  how to navigate between nodes. Execute ‘:InfoNext’
+one more time.
+
+
+File: info.vim.info,  Node: Node-Navigation,  Next: Menu-Navigation,  Prev: Info-Structure,  Up: Getting Started
+
+1.2 Navigating the nodes of an Info file
+========================================
+
+There are two ways of navigating  nodes: via commands or mappings. Commands are
+one  option that  works out  of  the box,  so that  is  what we  will be  using
+throughout this tutorial. See the manual of Info.vim for the mappings.
+
+    The naming  convention for  the commands is  ‘:InfoWhich’ where  ‘Which’ is
+either ‘Next’, ‘Prev’ or ‘Up’. None of the commands take any argument.
+
+    Let's try  it out: execute ‘:InfoPrev’  to move to the  previous node. Once
+there you can move back to this  node by executing ‘:InfoNext’. Go ahead, do it
+now.
+
+    Back again? Let's try  ‘:InfoUp’ next to go to the  parent node. Once there
+you will have to execute ‘:InfoNext’ twice since this node is the second child.
+Go ahead and try it out.
+
+    Keep in mind  that nodes do not  have any notion of "children",  it just so
+happens that the next node of *note Getting Started:: is its child and the next
+node of  that is the second  child. All this  will generally hold true  for any
+sane Info files, but the file format does no mandate it.
+
+    From now on we  won't be mentioning how to move between nodes,  it is up to
+you whether you wish to use commands of mappings. Move on to the next node.
+
+
+File: info.vim.info,  Node: Menu-Navigation,  Next: XRef-Navigation,  Prev: Node-Navigation,  Up: Getting Started
+
+1.3 Navigating Info files using menus
+=====================================
+
+Nodes alone are too restrictive for navigation,  you can only move forward in a
+linear manner.  Menus allow for  branching navigation  by presenting a  list of
+nodes to  jump to  directly. Menu entries  are just ordinary  text in  a buffer
+marked  up in  a  special way  so  the reader  can recognise  them.  A menu  is
+identified by a line that starts with ‘*  Menu:’, if such a line does not exist
+it is not a menu.
+
+    You can navigate  a menu using the ‘:Menu <entry>’  command where ‘<entry>’
+is the name of the menu entry. You can use the ‘<Tab>’ key to complete the name
+of an entry. The argument does not have to match the name exactly as long as it
+matches one  entry uniquely. There is  also a menu  prompt you can map  to, but
+that is an advanced topic.
+
+    Below you can see  a menu with two entries, they both  point to nodes which
+are not accessible using regular node navigation. This is intentional, you have
+to use the menu to reach them.
+
+    note how to two  have different markup. In the case of  the first entry the
+name of the entry is the same as the name of the target node, but in the second
+example they differ. The  name of the entry is the first part,  that is the one
+you have to pass  as an argument. Try them both out now,  the node explains how
+to get back.
+
+* Menu:
+
+* Menu-Example::                The first menu entry
+* Another Entry: Menu-Example.  The second menu entry
+
+Once you are done move on to the next node.
+
+
+File: info.vim.info,  Node: Menu-Example,  Up: Menu-Navigation
+
+1.3.1 Menu navigation continued
+-------------------------------
+
+Congratulations, you have found a hidden  node! Remember how we said that nodes
+usually form a  tree but don't have do?  This is one such example.  If you knew
+the name of this node you could have jumped here directly, but as it stands now
+your only way of getting here was the menu.
+
+    You can move back by navigating to  the ‘Up’ node. Notice how this node has
+neither a ‘Next’ nor a ‘Prev’ node, it's a complete dead-end in that regard. We
+can still use other means of navigation, even a menu:
+
+* Menu:
+
+* Menu-Navigation::  Return back to where you came from
+
+    As you can see,  menus allow the author to let the reader  go anywhere in a
+controlled manner. In fact, you could even  navigate to a different file if the
+name of the file is prepended in parentheses:
+
+* Outside file: (info)Top.  This leads to the ‘Top’ node of the ‘info’ file.
+
+    There is no straight-forward way back  anymore from there. You will have to
+use  Vim's ability  to go  back  to the  previous buffer  (e.g. using  ‘<C-O>’)
+instead.
+
+
+File: info.vim.info,  Node: XRef-Navigation,  Next: Goto-Navigation,  Prev:  Menu-Navigation,  Up: Getting Started
+
+1.4 Navigating Info files using cross-references
+================================================
+
+As you have  been reading this tutorial you have  occasionally come across some
+weird  looking  markup  like  *note  this:  XRef-Navigation.  These  are  cross
+references, they  are similar  to hyperlinks  in HTML. They  allow you  to jump
+anywhere in the file similar to a menu, except they can occur in-line.
+
+    You can follow a cross reference by executing the ‘:Follow <name>’ command,
+where  ‘<name>’ is  the name  of  the reference.  They work  exactly like  menu
+entries in this regard. Cross reference  names can be tab-completed as well and
+the completions are separate from menu completions.
+
+    It is  not uncommon for  cross references to lead  to a different  file, so
+make sure you read *note Menu-Example:: as well. Since cross references let you
+jump anywhere your best way of getting back where you can from is going back to
+the previous Vim buffer (e.g. by pressing ‘<C-O>’).
+
+
+File: info.vim.info,  Node: Goto-Navigation,  Prev:  XRef-Navigation,  Up: Getting Started
+
+1.5 Navigating Info files by jumping to nodes manually
+======================================================
+
+The last form of navigation allows you to  jump to any node as long as you know
+its name. You cannot jump to nodes of other files, you will have to invoke Info
+for that file separately.
+
+    To jump to a node execute the ‘:InfoGoto <name>’ command, where ‘<name>’ is
+the name of the node. The name does  not have to match exactly as long as there
+is no ambiguity. Try it out now by jumping to the previous node manually:
+
+     :InfoGoto XRef-Navigation
+
+You can navigate back to here using ‘:InfoNext’. There is no tab-completion for
+technical  reasons, so  this form  of  navigation is  only useful  if you  know
+exactly which node you are looking for.
+
+
+File: info.vim.info,  Node: Advanced,  Prev: Getting Started,  Up: Top
+
+2 Advanced Info.vim commands
+****************************
+
+After you  have familiarised  yourself with the  basic navigation  through Info
+files you  can learn about  its more advanced  features. Info.vim is  more than
+just a  replacement for standalone  Info, it has  a URI scheme  for identifying
+files and nodes and fits nicely inside the Vim ecosystem.
+
+* Menu:
+
+* Mappings and Prompts::  Set up more comfortable navigation.
+* URI-Scheme::            Every file and node have a unique URI correspondence.
+* Location List::         Collect all menu items or cross references here.
+* Invoking Info::         There is more than just the ‘:Info’ command.
+* Scripting Info::        Use the ‘b:info’ variable for your scripting.
+
+
+File: info.vim.info,  Node: Mappings and Prompts,  Next: URI-Scheme,  Up: Advanced
+
+2.1 Mappings and Prompts
+========================
+
+Navigation using ex-commands works out of  the box, but can get really tedious,
+that's why Info.vim  offers convenient mappings and prompts for  you to set up.
+The maps  used here are just  examples and will shadow  existing commands, keep
+that in mind if you decide to copy them.
+
+
+Node navigation
+---------------
+
+Here is  an example in  which we set  up the node  navigation to be  similar to
+standalone Info, except we prepend ‘g’ to each key to avoid conflict with Vim's
+motions:
+
+     if &buftype =~? 'nofile'
+         nmap <buffer> gu <Plug>(InfoUp)
+         nmap <buffer> gn <Plug>(InfoNext)
+         nmap <buffer> gp <Plug>(InfoPrev)
+     endif
+
+Now we  can move between  nodes as comfortable  as standalone Info  users. Note
+that we wrapped the  mappins inside an ‘if’ block. It is  possible to open Info
+files normally for editing and it would not make sense to set up those mappings
+in that case.
+
+
+Prompts
+-------
+
+In standalone Info you can type ‘m’, ‘f’ or ‘g’ to get a nice prompt asking you
+for the name. We can have that as well by setting up the following mappings:
+
+     if &buftype =~? 'nofile'
+         nmap <buffer> gm <Plug>(InfoMenu)
+         nmap <buffer> gf <Plug>(InfoFollow)
+         nmap <buffer> go <Plug>(InfoGoto)
+     endif
+
+The prompts support tab-completion just like the commands, so the functionality
+is exactly the same.
+
+
+File: info.vim.info,  Node: URI-Scheme,  Next: Location List,  Prev: Mappings and Prompts,  Up: Advanced
+
+2.2 The URI-Scheme
+==================
+
+Info.vim  uses  a URI  scheme  to  identify  files  and nodes.  Currently  This
+mechanism is unique to Info.vim, but other  Info reader could adopt it as well.
+An Info URI looks like this:
+
+     info://file/node/?key1=value1&key2=value2
+
+The ‘file’ is the name of the file and  ‘node’ is the name of the node. The URI
+query can contain further information for the  reader, such as a line or column
+number to jump to. See the manual for details.
+
+    After a URI has been processed by  Info.vim the query part is stripped away
+and the URI is set as the file  name of the buffer. This allows you to identify
+any node uniquely by its URI.
+
+    All URIs are "normalised" by filling in omitted information. If the node is
+not specified it is set to ‘Top’, and if the file it not specified it is set to
+‘dir’. This is consistent with how standalone Info treats omitted arguments.
+
+    Similar URI schemes are use by Neovim's terminal and other Vim plugins like
+Fugitive or  Man.vim. The normalisation  removes any ambiguity, making  it well
+suited for any custom scripting.
+
+
+File: info.vim.info,  Node: Location List,  Next: Invoking Info,  Prev: URI-Scheme,  Up: Advanced
+
+2.3 Location List and Info commands
+===================================
+
+If the  commands ‘:Menu’  and ‘Follow’  or their  prompt variants  are executed
+without  any  arguments   the  location  list  will  be   populated  with  URIs
+representing the menu  items or cross references.  You can go up  one level and
+try it with the menu there to see for yourself.
+
+    The location list entries are URIs and you can open them like normal files.
+Move on to the next node to find out why this works.
+
+
+File: info.vim.info,  Node: Invoking Info,  Next: Scripting Info,  Prev: Location List,  Up: Advanced
+
+2.4 Invoking Info
+=================
+
+You already know that the ‘:Info’ command  invokes the reader. This command can
+be used with all the usual Vim position modifiers like ‘:vertical’ or ‘:above’.
+This gives you more control over where the Info window will be opened.
+
+    You can also use the  previously discussed *note URI-Scheme::. When editing
+a file  that has a matching  URI the reader  will be invoked. This  is actually
+what is being  used internally and what  makes it possible to  use the location
+list for navigation. Try it out:
+
+     :edit info://info
+
+This URI is  incomplete, but due to  URI normalisation it will  be completed to
+its full path:
+
+     :file
+     > "info://info.info/Top" [readonly] line 1 of 29 --3%-- col 1
+
+This is very powerful because it allows  you to open a new Info buffer anywhere
+you want  and open  any location directly.  In fact, this  is what  the ‘:Info’
+command internally translates to.
+
+
+File: info.vim.info,  Node: Scripting Info,  Prev: Invoking Info,  Up: Advanced
+
+2.5 Scripting Info
+==================
+
+Every Info buffer has a variable ‘b:info’ associated with it to hold data about
+the current node. This variable is a dictionary where the key is something like
+‘File’ or ‘Node’. See the manual for the possible keys.
+
+    If a key  does not exist then it  means there is no such data  in the node.
+For example, if  there is no ‘b:info['Next']’  entry then the node  has no next
+node.
+
+
+Example: '(file)node' string from data
+--------------------------------------
+
+Since the file name of an info buffer is a URI it would look ugly to display it
+in the status line of a window. We could use scripting to generate a string
+resembling what standalone Info displays:
+
+     if exists('b:info')
+         let l:fName = substitute(b:info['File'], '\v\.info$', '', '')
+         return '(' . l:fName . ')' . b:info['Node']
+     endif
+
+If this code was applied to  this node the result would be ‘(info.vim)Scripting
+Info’.
+
+    First we strip the  ‘.info’ file extension from the file  name if it exists
+and  then wrap  everything up  in parentheses.  The ‘if’  block checks  for the
+presence of  the ‘b:info’ variable  to detect  Info buffers. Checking  the file
+type alone is not  enough because the user might have opened  an Info file from
+the disc for editing.

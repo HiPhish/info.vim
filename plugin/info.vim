@@ -739,7 +739,9 @@ function s:encodeCommand(ref, kwargs)
 	let l:file = shellescape(exists('a:ref[''file'']') ? a:ref['file'] : 'dir')
 	let l:node = shellescape(exists('a:ref[''node'']') ? a:ref['node'] : 'Top')
 
-	let l:cmd = g:infoprg.' -f '.l:file.' -n '.l:node.' -o -'
+	" The path to the 'doc' directory has been added so we can find the
+	" documents included with the plugin.
+	let l:cmd = g:infoprg.' -f '.l:file.' -n '.l:node.' -d '.expand('<sfile>:p:h').'/doc/ -o -'
 
 	if exists('a:kwargs[''stderr'']')
 		let l:cmd .= ' 2>'.a:kwargs['stderr']

@@ -1,4 +1,4 @@
-*info.txt*   Read and browse info files in Vim
+*info.txt*   Read and browse Info files in Vim
 
                                                                     *info.vim*
                    _        __            _           ~
@@ -17,6 +17,7 @@ License: MIT License
 ==============================================================================
 TABLE OF CONTENTS                                              *info-contents*
 
+    0. Tutorial ......................................... |info-tutorial|
     1. Introduction ..................................... |info-introduction|
     2. Setup and Configuration .......................... |info-configuration|
     3. Variables ........................................ |info-variables|
@@ -27,25 +28,37 @@ TABLE OF CONTENTS                                              *info-contents*
 
 
 ==============================================================================
+TUTORIAL                                                       *info-tutorial*
+
+Try out  the interactive  tutorial,  straight up  in Info itself!  Execute the
+following command:
+>
+    :Info info.vim
+<
+You can use a modifier like `:vertical` or `:tab` with the command.
+
+
+
+==============================================================================
 INTRODUCTION                                               *info-introduction*
 
-*Info.vim* provides basic file type support for info files,  as well  as an info
-document browser. You can open any info file and browse its nodes as you could
-in the standalone command-line program or Emacs's info mode.
+*Info.vim* provides basic file type support for Info files,  as well  as an Info
+document browser. You can open any Info file and browse its nodes as you could
+in the standalone command-line program or Emacs's Info mode.
 
 Note  Info.vim is still very early work; it is feature-complete but you should
       consider it to be "wet paint" at this point.
 
-You can read the info document for a topic like `bash` by executing `:Info`:
+You can read the Info document for a topic like `bash` by executing `:Info`:
 >
     :Info bash
 <
-An alternative way  of loading an info document  is to give an |info-uri| as the
+An alternative way  of loading an Info document  is to give an |info-uri| as the
 file name:
 >
     :edit info://bash
 <
-You can use your  regular Vim motions to  navigate the buffer,  but since info
+You can use your  regular Vim motions to  navigate the buffer,  but since Info
 documents can get very  large you will want to use node-based navigation.  See
 the |info-functions| section for an overview.
 
@@ -55,11 +68,11 @@ the |info-functions| section for an overview.
 CONFIGURATION                                             *info-configuration*
 
 Info is installed like any other Vim plugin.  After installing you can set the
-info binary  for processing  info files via  the |g:infoprg| variable.  You need
-at least GNU info version 1.6.
+Info binary  for processing  Info files via  the |g:infoprg| variable.  You need
+at least GNU Info version 1.6.
 
 You can  use |info-commands| for navigation,  but if you  want more  comfortable
-controls similar to standalone info you should look into the |info-mappings|.
+controls similar to standalone Info you should look into the |info-mappings|.
 
 
 
@@ -69,8 +82,8 @@ VARIABLES                                                     *info-variables*
 g:infoprg                                                          *g:infoprg*
 Default: 'info'~
 
-    Name or path to the standalone GNU info program. You need at least version
-    6.0, so you can use this variable to override your system's default info.
+    Name or path to the standalone GNU Info program. You need at least version
+    6.0, so you can use this variable to override your system's default Info.
 
 
 ------------------------------------------------------------------------------
@@ -82,7 +95,7 @@ b:info                                                                *b:info*
     for scripting. Most of it is reflecting the node header:
 
     b:info['File']~
-	Name of the info file (document).
+	Name of the Info file (document).
     b:info['Up']~
 	Name of the current node.
     b:info['Up']~
@@ -146,19 +159,19 @@ CTRL-]                                                           *info-CTRL-]*
 
 <Plug>(InfoMenu)                                            *<Plug>(InfoMenu)*
 
-    Display a menu prompt, similar to standalone info's `m`. See also `:Menu`.
+    Display a menu prompt, similar to standalone Info's `m`. See also `:Menu`.
 
 
 <Plug>(InfoFollow)                                        *<Plug>(InfoFollow)*
 
-    Display a cross-reference  following prompt,  similar to standalone info's
+    Display a cross-reference  following prompt,  similar to standalone Info's
     `f`.  See also `:Follow`.  If no argument  is given the first cross-reference
     is followed.
 
 
 <Plug>(InfoGoto)                                            *<Plug>(InfoGoto)*
 
-    Display a node prompt, similar to standalone info's `g`. See also `:GotoNode`.
+    Display a node prompt, similar to standalone Info's `g`. See also `:GotoNode`.
 
 
 
@@ -167,7 +180,7 @@ COMMANDS                                                       *info-commands*
 
 :Info {file} [{node}]                                                  *:Info*
 
-    Open the {file} document  in an info buffer.  `:Info` accepts command |<mods>| 
+    Open the {file} document  in an Info buffer.  `:Info` accepts command |<mods>| 
     such as `:vertical` or `:topleft`. See also |info-uri|.
 
     If an optional  {node} argument is  given the document  will jump to  that
@@ -225,8 +238,8 @@ ADVANCED                                                       *info-advanced*
 ------------------------------------------------------------------------------
 Info references                                               *info-reference*
 
-Reference objects are the fundamental file type in info,  they describe in Vim
-terms a link  to another info item,  such as a file or a node.  References are
+Reference objects are the fundamental file type in Info,  they describe in Vim
+terms a link  to another Info item,  such as a file or a node.  References are
 dictionaries with some or all of the following fields:
 
     {file}  Info file, not necessarily a physical file
@@ -244,14 +257,14 @@ without {name}).
 ------------------------------------------------------------------------------
 Info URI                                                            *info-uri*
 
-If an editor  with an info  URI is edited  the document from  the URI  will be
+If an editor  with an Info  URI is edited  the document from  the URI  will be
 loaded into the  buffer as if it was  opened with `:Info`.  This would allow you
 to open a new window and execute
 >
     :edit info://bash
 <
 and have the manual for  the Bourne Again Shell loaded into the buffer.  There
-is absolutely no difference between an info buffer loaded like this and by the
+is absolutely no difference between an Info buffer loaded like this and by the
 use of `:Info`.
 
 It is possible to specify the node as a path following the host of the URI:
@@ -261,10 +274,10 @@ It is possible to specify the node as a path following the host of the URI:
 Note  We have to  percent-encode reserved  characters like space  and question
       mark.
 
-Additional information  can be included  in the query;  currently only a line-
+Additional Information  can be included  in the query;  currently only a line-
 and column number are supported:
 >
-    :edit info:/bash.info/What%20is%20Bash%3f/?line=3&column=7
+    :edit info://bash.info/What%20is%20Bash%3f/?line=3&column=7
 <
 
 
