@@ -432,7 +432,7 @@ function! s:follow(pattern)
 	endif
 
 	let l:uri = s:encodeURI(l:xRef)
-	call s:executeURI('silent edit', l:uri)
+	call s:executeURI('silent edit ', l:uri)
 endfunction
 
 
@@ -763,7 +763,7 @@ function! s:executeURI(ex_cmd, uri)
 	" We have to escape the percent signs or it will be replaced with the
 	" file name in the ':edit'
 	let l:uri = substitute(a:uri, '\v\%', '\\%', 'g')
-	execute a:ex_cmd . l:uri
+	execute a:ex_cmd l:uri
 endfunction
 
 
