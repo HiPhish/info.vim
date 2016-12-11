@@ -97,9 +97,10 @@ respective node. Alternatively, add mappings like these to your settings.
        nmap <buffer> gp <Plug>(InfoPrev)
    endif
 
-You can access  the menu via the  `:Menu` command.  It supports tab-completion,
-and if no argument is given all menu items are listed in the location list.  If
-you want a prompt similar to standalone info use a mapping like this:
+You   can  access   the  menu   via  the   `:InfoMenu`  command.   It  supports
+tab-completion, and if  no argument is given  all menu items are  listed in the
+location list. If  you want a prompt  similar to standalone info  use a mapping
+like this:
 
 .. code-block:: vim
 
@@ -108,14 +109,14 @@ you want a prompt similar to standalone info use a mapping like this:
        nmap <buffer> gm <Plug>(InfoMenu)
    endif
 
-You can follow a cross-reference using the `:Follow` command.  You can remap it
-to something more convenient:
+You can follow a cross-reference using the `:InfoFollow` command. You can remap
+the prompt to something more convenient:
 
 .. code-block:: vim
 
    " Only apply the mapping to generated buffers
    if &buftype =~? 'nofile'
-       nmap <buffer> gm <Plug>(InfoMenu)
+       nmap <buffer> gf <Plug>(InfoFollow)
    endif
 
 
