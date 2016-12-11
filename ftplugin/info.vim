@@ -42,12 +42,13 @@ endif
 
 " Echo a quick instruction list
 function! s:help()
-	echomsg 'The following commands are defined in ''info'' buffers:'
+	echomsg 'Execute '':Info info.vim'' for an interactive tutorial. The following'
+	echomsg 'commands are defined in ''info'' buffers:'
 	echomsg '  :Menu [entry]   Jump to a menu entry or open menu in location list'
 	echomsg '  :Follow [xRef]  Follow reference and cross-references'
-	echomsg '  :UpNode         Go to parent node'
-	echomsg '  :NextNode       Go to next node'
-	echomsg '  :PrevNode       Go to previous node'
+	echomsg '  :InfoUp         Go to parent node'
+	echomsg '  :InfoNext       Go to next node'
+	echomsg '  :InfoPrev       Go to previous node'
 	echomsg 'See '':help info.vim'' for more details and mappings.'
 endfunction
 

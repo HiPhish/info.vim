@@ -91,6 +91,9 @@ if !exists('g:infoprg')
 	let g:infoprg = 'info'
 endif
 
+" Path to the documentation in Info format
+let s:doc_path = expand('<sfile>:p:h:h').'/doc/'
+
 
 " Public interface {{{1
 command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
@@ -741,7 +744,7 @@ function s:encodeCommand(ref, kwargs)
 
 	" The path to the 'doc' directory has been added so we can find the
 	" documents included with the plugin.
-	let l:cmd = g:infoprg.' -f '.l:file.' -n '.l:node.' -d '.expand('<sfile>:p:h').'/doc/ -o -'
+	let l:cmd = g:infoprg.' -f '.l:file.' -n '.l:node.' -d '.s:doc_path.' -o -'
 
 	if exists('a:kwargs[''stderr'']')
 		let l:cmd .= ' 2>'.a:kwargs['stderr']
