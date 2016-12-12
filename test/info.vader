@@ -1,0 +1,27 @@
+#######################
+# The ':Info' command #
+#######################
+
+# We'll use the tutorial as a general sample file because we don't want to rely
+# on what is installed on the user's machine.
+  
+
+Execute (No arguments):
+  Info
+
+Then (Load up the 'dir' node):
+  AssertEqual 'info://dir/Top/', expand('%')
+
+
+Execute (Load up the tutorial):
+  Info info.vim
+
+Then:
+  AssertEqual 'info://info.vim.info/Top/', expand('%')
+
+
+Execute (File and node):
+  Info info.vim Advanced
+
+Then:
+  AssertEqual 'info://info.vim.info/Advanced/', expand('%') 
