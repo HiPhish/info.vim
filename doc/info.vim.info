@@ -106,7 +106,7 @@ Nodes alone are too restrictive for navigation,  you can only move forward in a
 linear manner.  Menus allow for  branching navigation  by presenting a  list of
 nodes to  jump to  directly. Menu entries  are just ordinary  text in  a buffer
 marked  up in  a  special way  so  the reader  can recognise  them.  A menu  is
-identified by a line that starts with ‘*  Menu:’, if such a line does not exist
+identified by a line that starts with ‘* Menu:’,  if such a line does not exist
 it is not a menu.
 
     You can navigate  a menu using the ‘:Menu <entry>’  command where ‘<entry>’

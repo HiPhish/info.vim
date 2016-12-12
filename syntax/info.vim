@@ -32,40 +32,22 @@
 "
 " There are two types of info buffers: ones read from from an actual info file
 " and ones generated from one or more files by the Info command.
-"
-" Still to be done:
-"   - Description lists
-"   - Is it possible to allow anything inside a list? How do we prevent
-"     paragraphs inside list items to be confused with literal blocks?
-"   - Can we make the indentation of lists and literal blocks smarter? I.e. a
-"     literal block needs to be able to understand "I am inside a list, so my
-"     indentation should be the indentation of a list (3) plus mine (5)". This
-"     also should be able to nest, i.e. have lists inside of lists.
-"
-" False positives:
-"   - Paragraphs in function definitions are mistaken for literal blocks
-"
-" False negatives:
-"   - Literal blocks inside list paragraphs are not recognised
 
-if exists("b:current_syntax")
+scriptencoding utf-8
+
+if exists('b:current_syntax')
 	finish
 endif
-
-" Commonly used regex are stored here for later use
-let s:nodeHeaderRegex = '^\s*((File|Node|Next|Prev|Up)\:\s*[^,]+\,?\s*)+$'
 
 
 " Menu markup {{{
 
-" A table of contents menu
-execute 'syntax region infoMenu matchgroup=Label '
-			\ . 'start=/\v^\* Menu\:$/ end=/\v('.s:nodeHeaderRegex.')@=/ '
-			\ . 'contains=infoMenuEntry,infoMenuTitle,infoFootnotes keepend'
+" A menu begins with such a line; other text can follow the colon
+syntax match infoMenu '\v^\* Menu\:'
 
 " Menu entries have two forms: '* Name: Node.' and '* Node::'
-syntax match infoMenuEntry '\v^\*\s+[^:]+\:\s*[^.,[:tab:][:return:]]+[.,[:tab:][:return:]]' contained
-syntax match infoMenuEntry '\v^\*\s+[^:]+\:\:' contained
+syntax match infoMenuEntry '\v^\*\s+[^:]+\:\s*[^.,[:tab:]]+[.,]?'
+syntax match infoMenuEntry '\v^\*\s+[^:]+\:\:'
 
 " }}}
 
@@ -73,35 +55,13 @@ syntax match infoMenuEntry '\v^\*\s+[^:]+\:\:' contained
 " Block-level markup may only appear on its own {{{
 
 " Header at the beginning of every node
-execute 'syntax match infoNodeHeader /\v'.s:nodeHeaderRegex.'/'
+syntax match infoHeader '\v^((File|Node|Next|Prev|Up)\:\s*[^,]+,?\s*)+'
 
 " Section titles, normal text followed by underline characters on next line
-syntax match infoSection '\v^(\s*).+\n\1[*.=-]+$'
-
-" Function definitions start with two leading dashes: -- Function print(s)
-syntax match infoFunctionDef '\v^ -- .+$'
-
-" Description list: *Some ordinary text*\n
-" syntax match infoDescriptionList '\v'
-
+syntax match infoHeading '\v^(\s*).+\n\1[*.=-]+$'
 
 " Footnotes
-execute 'syntax region infoFootnotes start=/\v^ {3}-+\s+Footnotes?\s+-+$/ '
-	\ . 'end=/\v('.s:nodeHeaderRegex.')@=/ '
-	\ . 'contains=infoXRef,infoLiteralBlock,infoLiteral,infoURL keepend'
-
-" This causes problems when the '_' is used as a subscript like i_0
-" syntax region infoEmphasis start=/\v_/ end=/\v_/
-
-" Indented piece of text, but not a list, terminated by an empty line
-syntax region infoLiteralBlock
-      \ start='\v^\n\z(\s{5,})' skip='^$' end='\v(^\s{,3}\S)@='
-
-" Three spaces, a bullet and one more space. We need to match lists to not
-" confuse paragraphs inside lists with literal blocks.
-syntax region infoList start='\v^\n\z( {3,})• ' skip='^$'  end='\v^\z1@!'
-	\ contains=infoXRef,infoLiteral,infoURL
-
+syntax match infoFootnotes '\v^\s*\-+ Footnotes \-+$'
 
 " }}}
 
@@ -111,35 +71,29 @@ syntax region infoList start='\v^\n\z( {3,})• ' skip='^$'  end='\v^\z1@!'
 " References look like *Note Reference:: or *Note topic reference:
 " (foo)Bar.
 syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\:'
-syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\_[^.:]+\.'
+syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\_[^.,:]+[.,:]'
 
 " File path, code literals and so on
 syntax region infoLiteral start='\v‘' end='\v’'
 " This one can abort too early in literal Lisp code: `(cons 'a 12)', but it's
 " better than skipping the inner tick, or else we would match beyond the
 " literal in a sentence like 'These two values are `cons'ed together'.
-syntax region infoLiteral start='\v\`' end='\v\''
+syntax region infoLiteral start='\v`' end=/\v'/
 
 " }}}
 
 
 " This is needed to make the multi-line matches work
-syn sync minlines=5 linebreaks=2
+syntax sync minlines=5 linebreaks=2
 
-highlight link infoKeyword        Keyword
-highlight link infoSection          Label
-highlight link infoNodeHeader     Special
-highlight link infoFootnotes         None
-highlight link infoFunctionDef       None
-highlight link infoURL         Identifier
-highlight link infoXRef   Identifier
-highlight link infoList              None
-highlight link infoLiteral         String
-" highlight def  infoEmphasis        term=italic cterm=italic gui=italic
-highlight link infoLiteralBlock    String
-highlight link infoMenuTitle        Label
-highlight link infoMenuEntry   Identifier
+highlight link infoHeading           Label
+highlight link infoHeader          Special
+highlight link infoFootnotes         Label
+highlight link infoXRef         Identifier
+highlight link infoLiteral          String
+highlight link infoMenu              Label
+highlight link infoMenuEntry    Identifier
 
-let b:current_syntax = "info"
+let b:current_syntax = 'info'
 
 " vim:tw=78:ts=4:noexpandtab:norl:

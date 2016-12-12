@@ -1,0 +1,104 @@
+#####################
+# Syntax test cases #
+#####################
+
+
+Given info (Info node header):
+  File: asdf, Node: qwer, Next: hjkl, Up: (dir)
+  File: adsf,	Node: qwer,	This is a comment
+
+Execute:
+  AssertEqual 'infoHeader', SyntaxAt(1, 1)
+  AssertEqual 'infoHeader', SyntaxAt(2, 1)
+
+
+Given info (Headings in a file):
+  This is a level 1 heading
+  *************************
+
+  This is a level 2 heading
+  =========================
+
+  This is a level 3 heading
+  -------------------------
+
+Execute:
+  AssertEqual 'infoHeading', SyntaxAt(1, 1)
+  AssertEqual 'infoHeading', SyntaxAt(2, 1)
+
+  AssertEqual 'infoHeading', SyntaxAt(4, 1)
+  AssertEqual 'infoHeading', SyntaxAt(5, 1)
+
+  AssertEqual 'infoHeading', SyntaxAt(7, 1)
+  AssertEqual 'infoHeading', SyntaxAt(8, 1)
+
+
+Given info (Menus):
+  * Menu:
+
+  * First entry::
+  * Second entry::	Comment
+  * Third entry::		Items can have descriptions which can span multiple
+  			lines. They are aligned using tabs.
+  * Comic swearing #-°@_!? works as well::
+
+  * Pretty name: Actual node.  Terminated by dot
+  * Pretty name: Actual node,  Terminated by comma
+  * Pretty name: Actual node	Terminated by tab
+  * Pretty name: Actual node
+        Terminated by new line
+
+  * Node:: Comment ends in dot but should not be matched.
+
+Execute:
+  AssertEqual      'infoMenu', SyntaxAt( 1,  1)
+
+  AssertEqual 'infoMenuEntry', SyntaxAt( 3,  1)
+  AssertEqual              '', SyntaxAt( 4, 19)
+  AssertEqual              '', SyntaxAt( 6,  7)
+  AssertEqual 'infoMenuEntry', SyntaxAt( 7,  1)
+
+  AssertEqual 'infoMenuEntry', SyntaxAt( 9,  1)
+  AssertEqual              '', SyntaxAt( 9, 30)
+  AssertEqual 'infoMenuEntry', SyntaxAt(10,  1)
+  AssertEqual              '', SyntaxAt(10, 30)
+  AssertEqual 'infoMenuEntry', SyntaxAt(11,  1)
+  AssertEqual              '', SyntaxAt(11, 30)
+  AssertEqual 'infoMenuEntry', SyntaxAt(12,  1)
+  AssertEqual              '', SyntaxAt(12, 30)
+
+  AssertEqual 'infoMenuEntry', SyntaxAt(15,  1)
+  AssertEqual              '', SyntaxAt(15, 10)
+
+
+Given info (In-line code literal):
+  Lorem ipsum dolor ‘sit’ amet, `consectetur' adipiscing elit.
+
+Execute:
+  AssertEqual 'infoLiteral', SyntaxOf('\v‘.*’')
+  AssertEqual 'infoLiteral', SyntaxOf('\v`.*''')
+
+
+Given info (Cross-references):
+  *Note Lorem:: ipsum dolor *note sit:: amet, *note consectetur: adipiscing,
+  elit. Let's try a line break: Sed eu purus at ipsum mollis varius in *note id
+  orci::. Donec rutrum odio at felis facilisis aliquam ac sit amet nisl.
+
+Execute:
+  AssertEqual 'infoXRef', SyntaxOf('\v\*Note Lorem\:\:')
+  AssertEqual 'infoXRef', SyntaxOf('\v\*note sit\:\: amet\,')
+  AssertEqual 'infoXRef', SyntaxOf('\v\*note consectetur\: adipiscing\,')
+  AssertEqual 'infoXRef', SyntaxOf('\v\*note id\_\s*orci\:\:')
+
+
+Given info (Footnotes):
+
+     ---------- Footnotes ----------
+  
+     (1) Lorem ipsum dolor sit amet, consectetur adipiscing, elit. Sed eu purus
+  at ipsum mollis varius in id orci. Donec rutrum odio at felis facilisis
+  aliquam ac sit amet nisl.
+
+Execute:
+  AssertEqual 'infoFootnotes', SyntaxOf('\v\-+ Footnotes \-+')
+  AssertEqual              '', SyntaxAt(3, 4)
