@@ -211,8 +211,6 @@ function! s:readReference(ref)
 	" Putting has produced an empty line at the top, remove that
     silent keepjumps 1delete _
 
-    silent keepjumps normal! gg
-
 	" Parse the node header
 	let b:info = {}
 
