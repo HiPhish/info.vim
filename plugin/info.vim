@@ -222,7 +222,7 @@ function! s:readReference(ref)
 		" A key is terminated by a colon and might have leading whitespace.
 		let l:key = matchstr(l:pair, '\v^\s*\zs[^:]+')
 		" The value might have leading whitespace as well
-		let l:value = matchstr(l:pair, '\v^\s*[^:]+\:\s*\zs[^,]+')
+		let l:value = matchstr(l:pair, '\v\:\s*\zs[^,]+')
 		let b:info[l:key] = l:value
 	endfor
 
