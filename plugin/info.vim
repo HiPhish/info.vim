@@ -162,7 +162,14 @@ function! s:info(mods, ...)
 		let l:node = a:2
 	endif
 
-	let l:reference = {'file': l:file, 'node': l:node}
+	let l:reference = {}
+	if !empty(l:file)
+		let l:reference['file'] = l:file
+	endif
+	if !empty(l:node)
+		let l:reference['node'] = l:node
+	endif
+
 	if !s:verifyReference(l:reference)
 		return
 	endif
@@ -554,18 +561,24 @@ function! s:decodeURI(uri)
 	let l:path      = s:percentDecode(l:uriMatches[5])
 	let l:query     = s:percentDecode(l:uriMatches[7])
 
-	let l:file = empty(l:authority) ? 'dir' : l:authority
+	let l:file = empty(l:authority) ? '' : l:authority
 
 	" Strip leading and trailing slashes from the path
 	let l:node = substitute(l:path, '\v(^\/)|(\/$)', '', 'g')
 	if empty(l:node)
-		let l:node = 'Top'
+		let l:node = ''
 	endif
 
 	let l:line   = matchstr(l:query, '\vline\=\zs\d+')
 	let l:column = matchstr(l:query, '\vcolumn\=\zs\d+')
 
-	let l:ref = {'file': l:file, 'node': l:node}
+	let l:ref = {}
+	if !empty(l:file)
+		let l:ref['file'] = l:file
+	endif
+	if !empty(l:node)
+		let l:ref['node'] = l:node
+	endif
 
 	if !empty(l:line)
 		let l:ref['line'] = l:line
@@ -740,12 +753,16 @@ endfunction
 " Encode a reference into an info command call. The 'kwargs' is for
 " redirection of stdin and stderr
 function s:encodeCommand(ref, kwargs)
-	let l:file = shellescape(exists('a:ref[''file'']') ? a:ref['file'] : 'dir')
-	let l:node = shellescape(exists('a:ref[''node'']') ? a:ref['node'] : 'Top')
-
+	let l:cmd = g:infoprg
+	if exists('a:ref[''file'']')
+		let l:cmd .= ' --file '.shellescape(a:ref['file'])
+	endif
+	if exists('a:ref[''node'']')
+		let l:cmd .= ' --node '.shellescape(a:ref['node'])
+	endif
 	" The path to the 'doc' directory has been added so we can find the
-	" documents included with the plugin.
-	let l:cmd = g:infoprg.' -f '.l:file.' -n '.l:node.' -d '.s:doc_path.' -o -'
+	" documents included with the plugin. Output is directed stdout
+	let l:cmd .= ' -d '.s:doc_path.' --output -'
 
 	if exists('a:kwargs[''stderr'']')
 		let l:cmd .= ' 2>'.a:kwargs['stderr']
