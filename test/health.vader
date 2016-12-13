@@ -6,6 +6,12 @@
 # rely on some particular version of 'info' to be installed on the tester's
 # system.
 
+Before (Store old info binary so it can be restored):
+  let g:old_infoprg = g:infoprg
+
+After (Restore the original info binary):
+  let g:infoprg = g:old_infoprg
+
 
 Execute (Non-existing info):
   let g:infoprg = ''
@@ -13,7 +19,7 @@ Execute (Non-existing info):
 
 Then:
   let message = search('No standalone info binary found.')
-  tabclose
+  quit
   AssertNotEqual 0, message
 
 
@@ -23,7 +29,7 @@ Execute (Info version < 6.0):
 
 Then:
   let message = search('You need at least version 6.0 of standalone info')
-  tabclose
+  quit
   AssertNotEqual 0, message
 
 
@@ -33,5 +39,5 @@ Execute (Correct info version number):
 
 Then:
   let message = search('Version 6.0 of standalone info installed')
-  tabclose
+  quit
   AssertNotEqual 0, message

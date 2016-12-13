@@ -7,21 +7,24 @@
   
 
 Execute (No arguments):
-  Info
+  silent Info
 
 Then (Load up the 'dir' node):
   AssertEqual 'info://dir/Top/', expand('%')
+  quit
 
 
 Execute (Load up the tutorial):
-  Info info.vim
+  silent Info info.vim
 
 Then:
   AssertEqual 'info://info.vim.info/Top/', expand('%')
+  quit
 
 
 Execute (File and node):
-  Info info.vim Advanced
+  silent Info info.vim Advanced
 
 Then:
   AssertEqual 'info://info.vim.info/Advanced/', expand('%') 
+  quit
