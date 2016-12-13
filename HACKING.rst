@@ -1,10 +1,10 @@
 .. default-role:: code
 
 ####################################
- Working on the info plugin for Vim
+ Working on the Info plugin for Vim
 ####################################
 
-This document is intended for programmers who want to work on info.vim, add new
+This document is intended for programmers who want to work on Info.vim, add new
 features,  fix bugs or just  learn how it works and why  certain decisions have
 been made. I will assume the reader to be familiar with how Vim plugins work in
 general.  All files  follow the  usual directory  hierarchy,  so you  will find
@@ -14,28 +14,28 @@ everything where you expect it.
 Overview of the plugin design
 #############################
 
-The basic idea of info.vim is to make  Vim a first-class reader for text in the
-Info format, just like the standalone info and Emacs's info mode. This includes
-and is not limited  to finding info  files in the same  directories as info and
+The basic idea of Info.vim is to make  Vim a first-class reader for text in the
+Info format, just like the standalone Info and Emacs's Info mode. This includes
+and is not limited  to finding Info  files in the same  directories as Info and
 Emacs do,  skipping to the  beginning o f the first node,  hiding or  replacing
 markup information, and offering easy navigation.
 
-Non-goals are the generation or organisation of info files.  Editing info files
+Non-goals are the generation or organisation of Info files.  Editing Info files
 is no priority,  but should not be inhibited.  Users are themselves responsible
-for compiling info files and deciding where to install them.
+for compiling Info files and deciding where to install them.
 
-The most important aspect is that we are not trying to write another info.  Vim
+The most important aspect is that we are not trying to write another Info.  Vim
 is a text editor,  not an  operating system,  our goal is to make  browsing and
-reading info files more pleasant, not to embed an entire program into Vim.  Use
+reading Info files more pleasant, not to embed an entire program into Vim.  Use
 Vim's own features and add as little as possible of your own.  If something can
 be achieved with less than five  lines of VimScript then chances are that it is
 best left to the user to set.
 
 
-The info file format
+The Info file format
 ====================
 
-The following is an informal format description suitable for our needs. An info
+The following is an informal format description suitable for our needs. An Info
 file is a plain-text  file (ASCII or Unicode?) that  contains some light markup
 so the reader can  identify parts of it.  Here is a  list of some of  the terms
 used, the names are made-up by me because there is no formal specification.
@@ -128,8 +128,8 @@ Cross-reference
 
 .. note::
 
-   We don't acutally need the following  features if we read our info documents
-   from an info compiler like the standalone `info`.
+   We don't acutally need the following  features if we read our Info documents
+   from an Info compiler like the standalone `info`.
 
 File header
    Some basic information about  the file itself before the first node, such as
@@ -137,7 +137,7 @@ File header
    displayed by the reader
 
 Indirect
-   If an info file is split over multiple  files it is necessary to know how to
+   If an Info file is split over multiple  files it is necessary to know how to
    find the nodes.  This list contains the partial  files and the offsets which
    need to be subtracted from the global offset when looking for a node.
 
@@ -180,7 +180,7 @@ Tag table
    .. note::
 
       I have seen files which  begin with `^_` only instead of `^_^L`,  but the
-      info manual says the former is correct.
+      Info manual says the former is correct.
 
 Emacs local variables
    These are used by Emacs similar to the `vim:...` modeline.
@@ -196,7 +196,7 @@ Emacs local variables
 The node structure
 ==================
 
-And info document  (also called an  info file)  is made  of nodes.  These nodes
+And Info document  (also called an  Info file)  is made  of nodes.  These nodes
 usually form a  tree-like hierarchy,  but this does  not necessarily have to be
 the case.  The only truth  is that the  nodes form a  directed graph,  but this
 graph may even contain cycles or unreachable nodes.
@@ -212,7 +212,7 @@ there is some way for the user to access that node, a child node might not have
 the current node as its `Up` node.  In fact,  the child node might even be in a
 different file.
 
-The standalone info program  can access arbitrary nodes  in a file if you use a
+The standalone Info program  can access arbitrary nodes  in a file if you use a
 recent version (we take version 6.0 to be safe for our purposes).
 
 .. code-block:: sh
@@ -221,17 +221,17 @@ recent version (we take version 6.0 to be safe for our purposes).
    info --file 'bash' --node 'What is Bash?'
 
 One special file is the  `dir` file which contains  a menu that maps to all the
-other info files. It's a sort of root of roots if you will.
+other Info files. It's a sort of root of roots if you will.
 
 
 One format, two purposes
 ========================
 
-There are  two purposes to  info files:  reading and writing  them as the plain
+There are  two purposes to  Info files:  reading and writing  them as the plain
 text files  they are,  or treating  them as  a complete work  of documentation.
 Supporting the former only requires some light support for the syntax.
 
-The latter however is more complex.  Such info buffers  will not be read from a
+The latter however is more complex.  Such Info buffers  will not be read from a
 file,  instead they will be  generated by reading  the contents  of one or more
 files,  assembling  them  into one  buffer,  building a  table of  contents and
 replacing or  hiding markup elements.  This is  similar to  how a  plugin would
@@ -241,7 +241,7 @@ Both types of buffer have the same type,  but generated buffers need some extra
 options set.
 
 
-The meat and bones of info.vim
+The meat and bones of Info.vim
 ##############################
 
 With the technicalities out of the way let's focus on the actual plugin. I will
@@ -254,15 +254,15 @@ found in the following files:
    details into the public namespace.
 
 `ftplugin/info.vim`
-   File-type settings for info files.  These settings apply to  all info files,
-   whether they are  opened manually or through  the info interface.  This file
+   File-type settings for Info files.  These settings apply to  all Info files,
+   whether they are  opened manually or through  the Info interface.  This file
    also contains  definitions for any commands  and mappings that are exclusive
-   to info files.
+   to Info files.
 
-From now  on I  will be  making a  distinction between  info *files*  which are
-actual files  in the  file system,  and info  *documents*  which  is what  info
-displays. An info document can be an info file, but it can also be assembled on
-the fly from multiple files. Standalone info makes no distinction between these
+From now  on I  will be  making a  distinction between  Info *files*  which are
+actual files  in the  file system,  and Info  *documents*  which  is what  Info
+displays. An Info document can be an Info file, but it can also be assembled on
+the fly from multiple files. Standalone Info makes no distinction between these
 two.
 
 
@@ -272,14 +272,14 @@ Data structures
 The following data structures are used throughout the plugin:
 
 `b:info`
-   A dictionary  that contains  all the  information  about  the info-node.  In
+   A dictionary  that contains  all the  information  about  the Info-node.  In
    particular the file,  name of the node,  and parent, next and previous node.
    In this regard it mirrors the node header.
 
    The dictionary can contain other information as well. The `Menu` entry lists
    all menu items that occur in the node. A menu item is stored as a reference.
 
-   This variable should be used for  any information about the node itself,  it
+   This variable should be used for  any Information about the node itself,  it
    offers a single uniform location for information used by the plugin.
    
 References
@@ -297,7 +297,7 @@ URI
    reference.
 
 
-The info URI
+The Info URI
 ============
 
 We can describe a position inside the node system using a URI scheme:
@@ -335,17 +335,17 @@ are dual to  each other.  A reference  is a dictionary  of `file` ,  `node` and
 with the proper defaults (file `dir`, node `Top` and line `1`).
 
 
-Reading an info document
+Reading an Info document
 ========================
 
-We will  not be  assembling the  info  document  out of  the individual  files.
+We will  not be  assembling the  Info  document  out of  the individual  files.
 Instead we read the  output from the `info`  command-line tool into the buffer.
-There are two ways to open an info document: by passing its name to the `:Info`
+There are two ways to open an Info document: by passing its name to the `:Info`
 command and by editing a buffer with a URI that begins with `info://<topic>`.
 
 When using the `:Info` a window is chosen based on some rules and a buffer with
 a generated URI is edited.  From that point on the  flow of control is the same
-as opening an info document by URI. Here is a simplified code draft:
+as opening an Info document by URI. Here is a simplified code draft:
 
 .. code-block:: vim
 
@@ -388,7 +388,6 @@ location list.
 Testing
 #######
 
-Testing uses  Vader_ for testing.  Testing is very poor  at the moment,  so any
-more test cases are welcome.
+Testing uses Vader_ for testing, see the Contributing file for details.
 
 .. _Vader: https://github.com/junegunn/vader.vim

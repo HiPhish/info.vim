@@ -9,7 +9,7 @@ from Texinfo,  and it implements a  reader for browsing and  navigating through
 Info files installed on the user's system.
 
 Info  is the  file  format  of the  `info`  command-line  program  and  Emacs's
-info-mode.  This format is most  often generated from Texinfo  source files and
+Info-mode.  This format is most  often generated from Texinfo  source files and
 used for software documentation.  Texinfo is the official  documentation format
 of GNU. Check out this asciicast for a live demonstation:
 
@@ -130,5 +130,5 @@ the time being.
 
 - Index lookup (`:Index` command)
 - Search within a file (`:Search` command)
-- Going to a specific node in the file (`:Goto` command) (implemented, but
+- Going  to a  specific node  in the file  (`:Goto` command)  (implemented, but
   without tab-completion)
