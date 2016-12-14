@@ -1,0 +1,47 @@
+##########################################
+# Node-based navigation through the file #
+##########################################
+
+
+Before (Store old info binary so it can be restored):
+  let g:old_infoprg = g:infoprg
+  let g:infoprg = substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+
+After (Restore the original info binary):
+  let g:infoprg = g:old_infoprg
+
+
+Execute (Next node):
+  silent Info test
+  InfoNext
+
+Then:
+  AssertEqual 'info://test/Foo/', expand('%')
+  quit
+
+
+Execute (Previous node):
+  silent Info test
+  InfoPrev
+
+Then:
+  AssertEqual 'info://test/Bar/', expand('%')
+  quit
+
+
+Execute (Up node):
+  silent Info test
+  InfoUp
+
+Then:
+  AssertEqual 'info://dir/Top/', expand('%')
+  quit
+
+
+Execute (Go to a specific node):
+  silen Info test
+  GotoNode Foo
+
+Then:
+  AssertEqual 'info://test/Foo/', expand('%')
+  quit

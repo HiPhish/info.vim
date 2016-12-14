@@ -1,0 +1,41 @@
+##############################
+# Following cross-references #
+##############################
+
+
+Before (Store old info binary so it can be restored):
+  let g:old_infoprg = g:infoprg
+  let g:infoprg = substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+
+After (Restore the original info binary):
+  let g:infoprg = g:old_infoprg
+
+
+Execute (Existence of the 'Menu' key):
+  silent Info test X-Ref
+
+Then:
+  Assert exists('b:info[''XRefs'']')
+  quit
+
+
+Execute (Value of the 'XRefs' key):
+  silent Info test X-Ref
+
+Then:
+  AssertEqual
+  \ [{'File': 'test', 'Name':     'Foo', 'Node':     'Foo'},
+  \  {'File': 'test', 'Name':     'Foo', 'Node':     'Foo'},
+  \  {'File': 'test', 'Name':     'Foo', 'Node':     'Bar'},
+  \  {'File': 'test', 'Name': 'Foo Bar', 'Node': 'Foo Bar'},
+  \  {'File': 'test', 'Name':     'Foo', 'Node':     'Bar'}],
+  \ b:info['XRefs']
+  quit
+
+Execute (The ':Follow' command with argument):
+  silent Info test X-Ref
+  silent Follow Foo
+
+Then (We have successfully opened another node):
+  AssertEqual 'info://test/Foo/', expand('%')
+  quit

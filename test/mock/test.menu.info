@@ -1,0 +1,14 @@
+File: test,  Node: Menu,  Prev: Foo,  Up: Top
+
+Here we test a number of different types of menu entries. Note that the ‘tab’
+character is a valid separator.
+
+
+* Menu:
+
+* Foo::		Name and node are the same
+* Foo: Bar	Different name and node
+* Foo: (bar)Baz	Node in a different file
+There can be non-entries in between.
+* Foo: Bar.	Dot separator
+* Foo: Bar,	Comma separator

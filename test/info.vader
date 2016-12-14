@@ -11,7 +11,7 @@ Before (Store old info binary so it can be restored):
 
 After (Restore the original info binary):
   let g:infoprg = g:old_infoprg
-  
+
 
 Execute (No arguments):
   silent Info
@@ -30,8 +30,32 @@ Then:
 
 
 Execute (File and node specified):
-  silent Info test Node\ 1
+  silent Info test Foo
 
 Then:
-  AssertEqual 'info://test/Node%201/', expand('%')
+  AssertEqual 'info://test/Foo/', expand('%')
+  quit
+
+
+Execute (Existence of the 'b:info' variable and keys):
+  silent Info test
+
+Then:
+  Assert exists('b:info')
+  Assert exists('b:info[''File'']')
+  Assert exists('b:info[''Node'']')
+  Assert exists('b:info[''Next'']')
+  Assert exists('b:info[''Prev'']')
+  Assert exists('b:info[''Up'']')
+  quit
+
+Execute (Values of the 'b:info' dictionary):
+  silent Info test
+
+Then:
+  AssertEqual   'test', b:info['File']
+  AssertEqual    'Top', b:info['Node']
+  AssertEqual    'Foo', b:info['Next']
+  AssertEqual    'Bar', b:info['Prev']
+  AssertEqual  '(dir)', b:info[  'Up']
   quit

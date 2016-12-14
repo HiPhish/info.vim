@@ -134,12 +134,10 @@ augroup END
 " Filter the menu list for entries which match non-magic, case-insensitive and
 " only at the beginning of the string.
 function! s:completeMenu(ArgLead, CmdLine, CursorPos)
-	call s:buildMenu()
 	return s:completePrompt(a:ArgLead, a:CmdLine, a:CursorPos, b:info['Menu'])
 endfunction
 
 function! s:completeFollow(ArgLead, CmdLine, CursorPos)
-	call s:collectXRefs()
 	return s:completePrompt(a:ArgLead, a:CmdLine, a:CursorPos, b:info['XRefs'])
 endfunction
 
@@ -164,10 +162,10 @@ function! s:info(mods, ...)
 
 	let l:reference = {}
 	if !empty(l:file)
-		let l:reference['file'] = l:file
+		let l:reference['File'] = l:file
 	endif
 	if !empty(l:node)
-		let l:reference['node'] = l:node
+		let l:reference['Node'] = l:node
 	endif
 
 	if !s:verifyReference(l:reference)
@@ -238,7 +236,7 @@ function! s:readReference(ref)
 
 	" Normalise the URI (it might contain abbreviations, but we want full
 	" names)
-	let l:uri = s:encodeURI({'file': b:info['File'], 'node': b:info['Node']})
+	let l:uri = s:encodeURI({'File': b:info['File'], 'Node': b:info['Node']})
 
 	if bufexists(l:uri) && bufnr(l:uri) != bufnr('%')
 		let l:winbufnr = winbufnr(0)
@@ -254,6 +252,10 @@ function! s:readReference(ref)
 		\ exists('a:ref[''column'']') ? a:ref['column'] : 1
 	\ ]
 	call cursor(l:cursor)
+
+	" Assemble the menu and cross-references
+	call s:buildMenu()
+	call s:collectXRefs()
 
 	" Now lock the file and set all the remaining options
 	setlocal filetype=info
@@ -322,17 +324,19 @@ function! s:jumpToProperty(property)
 	" The node name might contain a file name: (file)Node
 	let l:property = b:info[a:property]
 
+	let l:ref = {}
+
 	let l:file = matchstr(l:property, '\v^\(\zs[^)]+\ze\)')
 	if empty(l:file)
-		let l:file = b:info['File']
+		let l:ref['File'] = b:info['File']
 	endif
 
-	let l:node = matchstr(l:property, '\v^(\([^)]*\))?\zs.+')
-	if empty(l:node)
-		let l:node = 'Top'
+	let l:node = matchstr(l:property, '\v^(\([^)]+\))?\zs[^(]+')
+	if !empty(l:node)
+		let l:ref['Node'] = l:node
 	endif
 
-	let l:uri = s:encodeURI({'file': l:file , 'node': l:node})
+	let l:uri = s:encodeURI(l:ref)
 	call s:executeURI('silent edit ', l:uri)
 endfunction
 
@@ -345,8 +349,6 @@ function s:menuPrompt()
 endfunction
 
 function! s:menu(pattern)
-	call s:buildMenu()
-
 	if a:pattern ==# ''
 		call setloclist(0, [], ' ', 'Menu')
 
@@ -358,7 +360,7 @@ function! s:menu(pattern)
 			endif
 
 			let l:uri = s:encodeURI(l:item)
-			laddexpr l:uri.'\|'.l:line.'\| '.l:item['name']
+			laddexpr l:uri.'\|'.l:line.'\| '.l:item['Name']
 		endfor
 
 		lopen
@@ -410,7 +412,6 @@ endfunction
 " 'Follow' functions {{{1
 
 function s:followPrompt()
-	call s:collectXRefs()
 	if empty(b:info['XRefs'])
 		echohl ErrorMsg
 		echo 'No cross references in this node.'
@@ -418,7 +419,7 @@ function s:followPrompt()
 		return
 	endif
 
-	let l:firstItem = b:info['XRefs'][0]['name']
+	let l:firstItem = b:info['XRefs'][0]['Name']
 	let l:pattern = input('Follow xref ('.l:firstItem.'): ', '', 'customlist,'.s:SID().'completeFollow')
 	if empty(l:pattern)
 		let l:pattern = l:firstItem
@@ -431,7 +432,6 @@ function! s:follow(pattern)
 	if a:pattern ==# ''
 		let l:xRef = s:xRefUnderCursor()
 	else
-		call s:collectXRefs()
 		let l:xRef = s:findReferenceInList(a:pattern, b:info['XRefs'])
 	endif
 
@@ -453,7 +453,7 @@ function! s:collectXRefs()
 	endif
 
 	" Pattern to search for (will match over line breaks)
-	let l:pattern = '\v\*[Nn]ote\_s*\_[^:]+\:(\_s*\_[^:.]+\.|\:)'
+	let l:pattern = '\v\*[Nn]ote\_s*\_[^:]+\:(\_s*\_[^:.,]+[:.,]|\:)'
 
 	let l:save_cursor = getcurpos()
 	let l:xRefStrings = []
@@ -541,7 +541,7 @@ endfunction
 
 " Jump to a given node inside the current file.
 function! s:gotoNode(node)
-	let l:ref = {'file': b:info['File'], 'node': a:node}
+	let l:ref = {'File': b:info['File'], 'Node': a:node}
 	if !s:verifyReference(l:ref)
 		return
 	endif
@@ -574,10 +574,10 @@ function! s:decodeURI(uri)
 
 	let l:ref = {}
 	if !empty(l:file)
-		let l:ref['file'] = l:file
+		let l:ref['File'] = l:file
 	endif
 	if !empty(l:node)
-		let l:ref['node'] = l:node
+		let l:ref['Node'] = l:node
 	endif
 
 	if !empty(l:line)
@@ -599,12 +599,12 @@ function! s:encodeURI(reference)
 	let l:line   = ''
 	let l:column = ''
 
-	if (exists('a:reference[''file'']'))
-		let l:file = s:percentEncode(a:reference['file'])
+	if (exists('a:reference[''File'']'))
+		let l:file = s:percentEncode(a:reference['File'])
 	endif
 
-	if (exists('a:reference[''node'']'))
-		let l:node = s:percentEncode(a:reference['node'])
+	if (exists('a:reference[''Node'']'))
+		let l:node = s:percentEncode(a:reference['Node'])
 	endif
 
 	if (exists('a:reference[''line'']'))
@@ -703,7 +703,7 @@ endfunction
 
 function! s:findReferenceInList(pattern, list)
 	for l:item in a:list
-		if l:item['name'] =~? a:pattern
+		if l:item['Name'] =~? a:pattern
 			return l:item
 		endif
 	endfor
@@ -715,8 +715,8 @@ function! s:completePrompt(ArgLead, CmdLine, CursorPos, list)
 
 	for l:item in a:list
 		" Match only at the beginning of the string
-		if empty(a:ArgLead) || !empty(matchstr(l:item['name'], '\c\M^'.a:ArgLead))
-			call add(l:candidates, l:item['name'])
+		if empty(a:ArgLead) || !empty(matchstr(l:item['Name'], '\c\M^'.a:ArgLead))
+			call add(l:candidates, l:item['Name'])
 		endif
 	endfor
 
@@ -727,26 +727,26 @@ endfunction
 function! s:decodeRefString(string)
 	" Strip away the leading cruft first: '* ' and '*Note '
 	let l:reference = matchstr(a:string, '\v^\*([Nn]ote\s+)?\s*\zs.+')
-	" Try the '* Node::' type of reference first
+	" Try the '* Note::' type of reference first
 	let l:name = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
 
 	if empty(l:name)
 		" The format is '* Name: (file)Node.*
-		let l:name = matchstr(l:reference, '\v^\zs[^:]+\ze\:')
+		let [l:name, l:node] = split(l:reference, '\v\:')
 
-		let l:file = matchstr(l:reference, '\v^[^:]+\:\s*\(\zs[^)]+\ze\)')
+		let l:file = matchstr(l:node, '\v^\s*\(\zs[^)]+\ze\)')
 		" If there is no file the current one is implied
 		if empty(l:file)
 			let l:file = b:info['File']
 		endif
 
-		let l:node = matchstr(l:reference, '\v^[^:]+\:\s*(\([^)]+\))?\zs[^.]+\ze\.')
+		let l:node = matchstr(l:node, '\v^\s*(\([^)]+\))?\zs[^.,[:tab:]]+')
 	else
 		let l:node = l:name
 		let l:file = b:info['File']
 	endif
 
-	return {'name': l:name, 'file': l:file, 'node': l:node}
+	return {'Name': l:name, 'File': l:file, 'Node': l:node}
 endfunction
 
 
@@ -754,11 +754,11 @@ endfunction
 " redirection of stdin and stderr
 function s:encodeCommand(ref, kwargs)
 	let l:cmd = g:infoprg
-	if exists('a:ref[''file'']')
-		let l:cmd .= ' --file '.shellescape(a:ref['file'])
+	if exists('a:ref[''File'']')
+		let l:cmd .= ' --file '.shellescape(a:ref['File'])
 	endif
-	if exists('a:ref[''node'']')
-		let l:cmd .= ' --node '.shellescape(a:ref['node'])
+	if exists('a:ref[''Node'']')
+		let l:cmd .= ' --node '.shellescape(a:ref['Node'])
 	endif
 	" The path to the 'doc' directory has been added so we can find the
 	" documents included with the plugin. Output is directed stdout

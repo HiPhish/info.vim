@@ -1,0 +1,53 @@
+#################################################
+# ':Menu' command, only works in 'info' buffers #
+#################################################
+
+
+Before (Store old info binary so it can be restored):
+  let g:old_infoprg = g:infoprg
+  let g:infoprg = substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+
+After (Restore the original info binary):
+  let g:infoprg = g:old_infoprg
+
+
+Execute (Existence of the 'Menu' key):
+  silent Info test Menu
+
+Then:
+  Assert exists('b:info[''Menu'']')
+
+
+Execute (Value of the 'Menu' key):
+  silent Info test Menu
+
+Then:
+  AssertEqual
+  \ [{'File': 'test', 'Name': 'Foo', 'Node': 'Foo'},
+  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
+  \  {'File':  'bar', 'Name': 'Foo', 'Node': 'Baz'},
+  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'}],
+  \ b:info['Menu']
+  quit
+
+
+Execute (The ':Menu' command without arguments):
+  silent Info test Menu
+  Menu
+
+Expect qf (Location list contains menu entries):
+  info://test/Foo/|1| Foo
+  info://test/Bar/|1| Foo
+  info://bar/Baz/|1| Foo
+  info://test/Bar/|1| Foo
+  info://test/Bar/|1| Foo
+
+
+Execute (The ':Menu' command with argument):
+  silent Info test Menu
+  silent Menu Foo
+
+Then (We have successfully opened another node):
+  AssertEqual 'info://test/Foo/', expand('%')
+  quit
