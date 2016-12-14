@@ -388,6 +388,6 @@ location list.
 Testing
 #######
 
-Testing uses Vader_ for testing, see the Contributing file for details.
+We use Vader_ for testing, see the Contributing file for details.
 
 .. _Vader: https://github.com/junegunn/vader.vim

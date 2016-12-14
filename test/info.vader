@@ -4,6 +4,13 @@
 
 # We'll use the tutorial as a general sample file because we don't want to rely
 # on what is installed on the user's machine.
+
+Before (Store old info binary so it can be restored):
+  let g:old_infoprg = g:infoprg
+  let g:infoprg = substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+
+After (Restore the original info binary):
+  let g:infoprg = g:old_infoprg
   
 
 Execute (No arguments):
@@ -14,17 +21,17 @@ Then (Load up the 'dir' node):
   quit
 
 
-Execute (Load up the tutorial):
-  silent Info info.vim
+Execute (Top node is implied):
+  silent Info test
 
 Then:
-  AssertEqual 'info://info.vim.info/Top/', expand('%')
+  AssertEqual 'info://test/Top/', expand('%')
   quit
 
 
-Execute (File and node):
-  silent Info info.vim Advanced
+Execute (File and node specified):
+  silent Info test Node\ 1
 
 Then:
-  AssertEqual 'info://info.vim.info/Advanced/', expand('%') 
+  AssertEqual 'info://test/Node%201/', expand('%')
   quit
