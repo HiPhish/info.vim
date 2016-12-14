@@ -368,10 +368,9 @@ write-lock the buffer only after the document has been written.
 Processing menus
 ================
 
-Menus are straight-forward,  but ugly to work with.  Since a menu is not always
-needed we  are going  to make  it lazy  by generating  the menu  list only when
-necessary. Internally a menu is a list of entries in the same order they appear
-in the document.
+Menus are straight-forward, but ugly to work  with. Internally a menu is a list
+of entries in the same order they appear in the document. If a node has no menu
+then no menu variable will exist in that node.
 
 Each entry is a reference with  keys `name` (human-readable title),  `file` and
 `node`.  Menu entries  can be  written in  two forms  as discussed above,  so a
