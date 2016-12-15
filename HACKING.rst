@@ -387,6 +387,6 @@ location list.
 Testing
 #######
 
-We use Vader_ for testing, see the Contributing file for details.
+See `test/README.rst`_ for details.
 
-.. _Vader: https://github.com/junegunn/vader.vim
+.. _test/README.rst: test/README.rst
