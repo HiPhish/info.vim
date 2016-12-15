@@ -213,15 +213,15 @@ COMMANDS                                                       *info-commands*
 
     With no argument  open the location  list populated with  the menu entries
     for the  current node.  With an argument  jump to that node.  The argument
-    does not have  to be a perfect match,  it only needs to  match at the head
-    case-insensitively.
+    does not have to be a perfect match, it only needs to  match at the head.
 
 
 ------------------------------------------------------------------------------
 :Follow [{xRef}]                                                *info-:Follow*
 
-    Follow the  given cross-reference.  Without argument follow  the reference
-    under the cursor. If there is none only a message will be printed.
+    Follow the given  cross-reference.  Without argument  the location list is
+    populated with all cross references in the current node. The argument does
+    not have to be a perfect mtach, it only needs to match at the head.
 
 
 ------------------------------------------------------------------------------

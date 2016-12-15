@@ -3,3 +3,5 @@ File: test,  Node: X-Ref,  Prev: Foo,  Up: Top
 *Note Foo:: is a reference with ‘N’, but *note Foo:: has a ‘n’. We can have
 separate name and node like *note Foo: Bar, and even line breaks as *note Foo
 Bar::; valid separators are comma and dot *note Foo: Bar.
+
+The reference *note Nul: Nil, is a dead link.

@@ -11,6 +11,13 @@ After (Restore the original info binary):
   let g:infoprg = g:old_infoprg
 
 
+Execute (Absence of the 'Menu' key):
+  silent Info test
+
+Then:
+  Assert !exists('b:info[''Menu'']')
+
+
 Execute (Existence of the 'Menu' key):
   silent Info test Menu
 
@@ -27,7 +34,8 @@ Then:
   \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
   \  {'File':  'bar', 'Name': 'Foo', 'Node': 'Baz'},
   \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
-  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'}],
+  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Nul', 'Node': 'Nil'}],
   \ b:info['Menu']
   quit
 
@@ -42,6 +50,7 @@ Expect qf (Location list contains menu entries):
   info://bar/Baz/|1| Foo
   info://test/Bar/|1| Foo
   info://test/Bar/|1| Foo
+  info://test/Nil/|1| Nul
 
 
 Execute (The ':Menu' command with argument):
@@ -50,4 +59,23 @@ Execute (The ':Menu' command with argument):
 
 Then (We have successfully opened another node):
   AssertEqual 'info://test/Foo/', expand('%')
+  quit
+
+
+Execute (Following reference under cursor):
+  silent Info test Menu
+  call cursor(9, 1)
+  normal K
+
+Then:
+  AssertEqual 'info://test/Foo/', expand('%')
+  quit
+
+
+Execute (Dead link):
+  silent Info test Menu
+  silent Menu Nul
+
+Then:
+  AssertEqual 'info://test/Menu/', expand('%')
   quit

@@ -15,15 +15,14 @@ Info document is  a regular buffer in  that regard. This applies  all other Vim
 modes as well.
 
     Let's move on to the first lesson. You can either move the cursor down onto
-the left-hand  item of the first  menu entry and  press ‘K’ or use  the ‘:Menu’
-command. If you use the command you must  give the name of the menu entry as an
-argument. You can use the ‘Tab’ key  to complete the argument if you don't feel
-like typing everything. Finally, you can also execute the ‘:InfoNext’ command.
+the left-hand item of  the first menu entry and press ‘K’.  You will soon learn
+how to use menus properly.
 
 * Menu:
 
 * Getting Started::  Getting started using the Info.vim reader.
 * Advanced::         Advanced Info.vim commands.
+* Info: (info)Top.   The official Info manual.
 
 
 File: info.vim.info,  Node: Getting Started,  Next: Advanced,  Prev: Top,  Up: Top
@@ -33,7 +32,7 @@ File: info.vim.info,  Node: Getting Started,  Next: Advanced,  Prev: Top,  Up: T
 
 The first  part of this Info  tutorial will briefly explain  how Info documents
 are structured and how to navigate them.  Repeat what you did previously to get
-here to move on (except for ‘:InfoNext’, you cannot use that one right now).
+here to move on.
 
 * Menu:
 
@@ -65,7 +64,7 @@ the information about  the current node of  the file. You can  also access this
 information through scripting (*note Advanced::).
 
     Now it is time to learn  how to navigate between nodes. Execute ‘:InfoNext’
-one more time.
+to move to the next node.
 
 
 File: info.vim.info,  Node: Node-Navigation,  Next: Menu-Navigation,  Prev: Info-Structure,  Up: Getting Started
@@ -74,7 +73,7 @@ File: info.vim.info,  Node: Node-Navigation,  Next: Menu-Navigation,  Prev: Info
 ========================================
 
 There are two ways of navigating  nodes: via commands or mappings. Commands are
-one  option that  works out  of  the box,  so that  is  what we  will be  using
+the one  option that works  out of the  box, so that is  what we will  be using
 throughout this tutorial. See the manual of Info.vim for the mappings.
 
     The naming  convention for  the commands is  ‘:InfoWhich’ where  ‘Which’ is

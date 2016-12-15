@@ -123,6 +123,14 @@ augroup InfoFiletype
 	autocmd FileType info command! -buffer InfoNext  call <SID>next()
 	autocmd FileType info command! -buffer InfoPrev  call <SID>prev()
 
+	" Look up the reference under the cursor (for cross-references and menus)
+	autocmd FileType info if &buftype =~? 'nofile' | 
+				\nnoremap <silent> <buffer> K :call <SID>xRefUnderCursor()<CR> | 
+				\endif
+
+	autocmd FileType info if &buftype =~? 'nofile' | 
+				\nnoremap <silent> <buffer> <C-]> K | 
+				\endif
 
 	autocmd BufReadCmd info://* call <SID>readReference(<SID>decodeURI(expand('<amatch>')))
 augroup END
@@ -349,22 +357,15 @@ function s:menuPrompt()
 endfunction
 
 function! s:menu(pattern)
-	if a:pattern ==# ''
-		call setloclist(0, [], ' ', 'Menu')
-
-		for l:item in b:info['Menu']
-			if exists('l:item[''line'']')
-				let l:line = l:item['line']
-			else
-				let l:line = 1
-			endif
-
-			let l:uri = s:encodeURI(l:item)
-			laddexpr l:uri.'\|'.l:line.'\| '.l:item['Name']
-		endfor
-
-		lopen
+	if !exists('b:info[''Menu'']')
+		echohl ErrorMsg
+		echo 'No menu in this node.'
+		echohl NONE
 		return
+	endif
+
+	if a:pattern ==# ''
+		return s:populateLocList('Menu', b:info['Menu'])
 	endif
 
 	let l:entry = s:findReferenceInList(a:pattern, b:info['Menu'])
@@ -376,6 +377,10 @@ function! s:menu(pattern)
 		return
 	endif
 
+	if !s:verifyReference(l:entry)
+		return
+	endif
+
 	let l:uri = s:encodeURI(l:entry)
 	call s:executeURI('silent edit ', l:uri)
 endfunction
@@ -383,14 +388,8 @@ endfunction
 
 " Build up a list of menu entries in a node.
 function! s:buildMenu()
-	" This function will be called lazily when we need a menu. Don't rebuild
-	" it is one already exists.
-	if exists('b:info[''Menu'']')
-		return
-	endif
-
 	let l:save_cursor = getcurpos()
-	let b:info['Menu'] = []
+	let l:menu = []
 	let l:menuLine = search('\v^\* [Mm]enu\:')
 
 	if l:menuLine == 0
@@ -401,9 +400,13 @@ function! s:buildMenu()
 	" beginning of the file or we will be stuck in an infinite loop.
 	let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	while l:entryLine != 0
-		call add(b:info['Menu'], s:decodeRefString(getline(l:entryLine)))
+		call add(l:menu, s:decodeRefString(getline(l:entryLine)))
 		let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	endwhile
+
+	if !empty(l:menu)
+		let b:info['Menu'] = l:menu
+	endif
 
 	call setpos('.', l:save_cursor)
 endfunction
@@ -429,16 +432,28 @@ endfunction
 
 " Follow the cross-reference under the cursor.
 function! s:follow(pattern)
-	if a:pattern ==# ''
-		let l:xRef = s:xRefUnderCursor()
-	else
-		let l:xRef = s:findReferenceInList(a:pattern, b:info['XRefs'])
+	if !exists('b:info[''XRefs'']')
+		echohl ErrorMsg
+		echo 'No cross reference in this node.'
+		echohl NONE
+		return
 	endif
+
+	if a:pattern ==# ''
+		return s:populateLocList('Cross references', b:info['XRefs'])
+		return
+	endif
+
+	let l:xRef = s:findReferenceInList(a:pattern, b:info['XRefs'])
 
 	if empty(l:xRef)
 		echohl ErrorMsg
-		echo 'No cross reference under cursor.'
+		echo 'No cross reference matches '''.a:pattern.'''.'
 		echohl NONE
+		return
+	endif
+
+	if !s:verifyReference(l:xRef)
 		return
 	endif
 
@@ -448,10 +463,6 @@ endfunction
 
 
 function! s:collectXRefs()
-	if exists('b:info[''XRefs'']')
-		return
-	endif
-
 	" Pattern to search for (will match over line breaks)
 	let l:pattern = '\v\*[Nn]ote\_s*\_[^:]+\:(\_s*\_[^:.,]+[:.,]|\:)'
 
@@ -475,13 +486,16 @@ function! s:collectXRefs()
 	endfor
 
 
-	let b:info['XRefs'] = l:xRefs
+	if !empty(l:xRefs)
+		let b:info['XRefs'] = l:xRefs
+	endif
+
 	call setpos('.', l:save_cursor)
 endfunction
 
 " Parse the current line for the existence of a reference element.
 function! s:xRefUnderCursor()
-	let l:referencePattern = '\v\*([Nn]ote\s+)?[^:]+\:(\:|[^.]+\.)'
+	let l:referencePattern = '\v\*([Nn]ote\s+)?\_[^:]+\:(\:|\_[^.,]+[.,])'
 	" Test-cases for the reference pattern
 	" *Note Directory: (dir)Top.
 	" *Note Directory::
@@ -499,29 +513,33 @@ function! s:xRefUnderCursor()
 	let l:line .= getline('.'          ) . ' '
 	let l:line .= getline(line('.') + 1)
 
-	" The match and matchend are 0-indexed, so we subtract one
-	let l:col = len(getline(line('.') - 1)) + col('.') - 1
+	" +1 because of space we added
+	let l:col = len(getline(line('.') - 1)) + col('.') + 1
 	let l:start = 0
 
 	while l:col >= l:start
-		let l:start = match(l:line, l:referencePattern)
+		" match is zero-indexed, so add one
+		let l:start = match(l:line, l:referencePattern) + 1
 		let l:end = matchend(l:line, l:referencePattern)
 
-		if l:start < 0
+		if l:start < 0 || l:end < 0
 			break
 		endif
 
 		if l:col < l:end
 			let l:xRefString = matchstr(l:line, l:referencePattern)
 			let l:xRef = s:decodeRefString(l:xRefString)
-			return l:xRef
+			call s:executeURI('silent edit ', s:encodeURI(l:xRef))
+			return
 		endif
 
 		let l:line = l:line[l:end :]
 		let l:col -= l:end
 	endwhile
 
-	return {}
+	echohl ErrorMsg
+	echo 'No cross reference under cursor.'
+	echohl NONE
 endfunction
 
 
@@ -721,6 +739,24 @@ function! s:completePrompt(ArgLead, CmdLine, CursorPos, list)
 	endfor
 
 	return l:candidates
+endfunction
+
+" Populate the location list with items from 'from'
+function! s:populateLocList(title, from)
+	call setloclist(0, [], '', a:title)
+
+	for l:item in a:from
+		if exists('l:item[''line'']')
+			let l:line = l:item['line']
+		else
+			let l:line = 1
+		endif
+
+		let l:uri = s:encodeURI(l:item)
+		laddexpr l:uri.'\|'.l:line.'\| '.l:item['Name']
+	endfor
+
+	lopen
 endfunction
 
 " Parse a reference string into a reference object.

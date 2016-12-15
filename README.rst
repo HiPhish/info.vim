@@ -77,10 +77,13 @@ You can follow cross-references using the `:Follow` command:
 
 .. code-block:: vim
 
+   " Display all cross references in location list
+   :Follow
    " Follow a named cross-reference
    :Follow Name of the reference
-   " Follow reference under cursor (works for any kind of reference)
-   :Follow
+
+Use the `K` key in normal mode  to follow the reference under the cursor, works
+for both menu entries and cross references.
 
 
 Navigation

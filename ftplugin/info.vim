@@ -34,12 +34,6 @@ setlocal shiftwidth=8
 nnoremap <buffer> g? :call <SID>help()<CR>
 
 
-if &buftype =~? 'nofile'
-	nnoremap <silent> <buffer> K      :Follow<CR>
-	nnoremap <silent> <buffer> <C-]>  :Follow<CR>
-endif
-
-
 " Echo a quick instruction list
 function! s:help()
 	echomsg 'Execute '':Info info.vim'' for an interactive tutorial. The following'

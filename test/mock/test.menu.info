@@ -12,3 +12,4 @@ character is a valid separator.
 There can be non-entries in between.
 * Foo: Bar.	Dot separator
 * Foo: Bar,	Comma separator
+* Nul: Nil	Non-existing node
