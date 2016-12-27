@@ -33,6 +33,14 @@ Execute:
   AssertEqual 'infoHeading', SyntaxAt(8, 1)
 
 
+Given info (False headings):
+    This is not a heading because it is indented
+    ...
+
+Execute:
+  AssertEqual '', SyntaxAt(1, 1)
+
+
 Given info (Menus):
   * Menu:
 

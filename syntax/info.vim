@@ -58,7 +58,8 @@ syntax match infoMenuEntry '\v^\*\s+[^:]+\:\:'
 syntax match infoHeader '\v^((File|Node|Next|Prev|Up)\:\s*[^,]+,?\s*)+'
 
 " Section titles, normal text followed by underline characters on next line
-syntax match infoHeading '\v^(\s*).+\n\1[*.=-]+$'
+" Note: We do not recognise headings with indentation.
+syntax match infoHeading '\v^\S.+\n[*.=-]+$'
 
 " Footnotes
 syntax match infoFootnotes '\v^\s*\-+ Footnotes \-+$'
