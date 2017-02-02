@@ -127,7 +127,9 @@ augroup InfoFiletype
 	autocmd FileType info if &buftype =~? 'nofile' | 
 				\nnoremap <silent> <buffer> K :call <SID>xRefUnderCursor()<CR> | 
 				\endif
-
+	autocmd FileType info if &buftype =~? 'nofile' | 
+				\nnoremap <silent> <buffer> <2-LeftMouse> :call <SID>xRefUnderCursor()<CR> | 
+				\endif
 	autocmd FileType info if &buftype =~? 'nofile' | 
 				\nnoremap <silent> <buffer> <C-]> K | 
 				\endif
