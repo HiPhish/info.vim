@@ -473,11 +473,11 @@ function! s:collectXRefs()
 	let l:xRefs = []
 
 	" This is an ugly hack that modifies the buffer and then undoes the changes.
-	set modifiable
-	set noreadonly
+	setlocal modifiable
+	setlocal noreadonly
 	silent execute '%s/'.l:pattern.'/\=len(add(l:xRefStrings, submatch(0))) ? submatch(0) : ''''/ge'
-	set readonly
-	set nomodifiable
+	setlocal readonly
+	setlocal nomodifiable
 
 	for l:xRefString in l:xRefStrings
 		" Due to line breaks the strings might contain newline and multiple

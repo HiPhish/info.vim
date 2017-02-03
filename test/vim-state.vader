@@ -1,0 +1,28 @@
+############################################################
+# The state of the Vim editor must not be affected by Info #
+############################################################
+
+
+Before (Store old info binary so it can be restored):
+  let g:old_infoprg = g:infoprg
+  let g:infoprg = substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+
+After (Restore the original info binary):
+  let g:infoprg = g:old_infoprg
+
+
+Execute:
+  silent Info test
+
+Then (Info buffer is unmodifiable, old buffer is modifiable):
+  AssertEqual &modifiable, 0
+  buffer 1
+  AssertEqual &modifiable, 1
+
+
+Execute:
+  silent Info test
+
+Then (New buffers are modifiable):
+  new
+  AssertEqual &modifiable, 1
