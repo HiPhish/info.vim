@@ -46,8 +46,8 @@ endif
 syntax match infoMenu '\v^\* Menu\:'
 
 " Menu entries have two forms: '* Name: Node.' and '* Node::'
-syntax match infoMenuEntry '\v^\*\s+[^:]+\:\s*[^.,[:tab:]]+[.,]?'
-syntax match infoMenuEntry '\v^\*\s+[^:]+\:\:'
+syntax match infoMenuEntry '\v^\*\s+.+\:\s+[^.,[:tab:]]+[.,]?'
+syntax match infoMenuEntry '\v^\*\s+.+\:\:'
 
 " }}}
 
@@ -62,17 +62,15 @@ syntax match infoHeader '\v^((File|Node|Next|Prev|Up)\:\s*[^,]+,?\s*)+'
 syntax match infoHeading '\v^\S.+\n[*.=-]+$'
 
 " Footnotes
-syntax match infoFootnotes '\v^\s*\-+ Footnotes \-+$'
+syntax match infoFootnotes '\v^\s+\-+ Footnotes \-+$'
 
 " }}}
 
 
 " Inline markup may appear anywhere in text {{{
 
-" References look like *Note Reference:: or *Note topic reference:
-" (foo)Bar.
-syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\:'
-syntax match infoXRef '\v\*[Nn]ote\_[^:]+\:\_[^.,:]+[.,:]'
+" References look like *Note Foo:: or *Note Foo Bar: (foo)Bar.
+syntax match infoXRef '\v\*[Nn]ote\_.{-1,}(\:\:|[\.,])'
 
 " File path, code literals and so on
 syntax region infoLiteral start='\v‘' end='\v’'

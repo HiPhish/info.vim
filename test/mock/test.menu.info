@@ -13,3 +13,4 @@ There can be non-entries in between.
 * Foo: Bar.	Dot separator
 * Foo: Bar,	Comma separator
 * Nul: Nil	Non-existing node
+* :Foo: Foo	Name containing a colon

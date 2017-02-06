@@ -770,7 +770,7 @@ function! s:decodeRefString(string)
 
 	if empty(l:name)
 		" The format is '* Name: (file)Node.*
-		let [l:name, l:node] = split(l:reference, '\v\:')
+		let [l:name, l:node] = split(l:reference, '\v\:\s')
 
 		let l:file = matchstr(l:node, '\v^\s*\(\zs[^)]+\ze\)')
 		" If there is no file the current one is implied

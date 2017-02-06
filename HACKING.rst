@@ -74,9 +74,9 @@ Node header
    `Up`. `File` is the first key, the other keys can appear in any order.  Only
    `File` and `Node` are mandatory.
 
-   The keyword is  separated from the value by a colon (`:`),  spaces and tabs.
-   The value  is terminated  by a comma,  tabs or  a newline,  but not  spaces,
-   spaces count as part of the value (name of the file/node).
+   The  keyword is  separated  from the  value  by a  colon  (`:`) followed  by
+   whitespace.  The value is terminated by a comma, tabs or  a newline, but not
+   spaces, spaces count as part of the value (name of the file/node).
 
    The name of a node can be given as a plain name (e.g. `Definitions`) or with
    the name of a file  prepended in parentheses (e.g. `(bash)Definitions`).  If
@@ -100,8 +100,8 @@ Menu entry
 
       * Human-readable topic: Actual node.    Description.
 
-   The topic terminator  `:` can be followed  by any amount of tabs and spaces.
-   If the topic and name of the node are the same a shorthand is preferred:
+   The topic terminator `:` can be followed by at least one whitespace.  If the
+   topic and name of the node are the same a shorthand is preferred:
 
    .. code-block::
 

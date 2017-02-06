@@ -57,6 +57,7 @@ Given info (Menus):
         Terminated by new line
 
   * Node:: Comment ends in dot but should not be matched.
+  * Pretty:name: Actual node.  Name containing a colon
 
 Execute:
   AssertEqual      'infoMenu', SyntaxAt( 1,  1)
@@ -77,6 +78,7 @@ Execute:
 
   AssertEqual 'infoMenuEntry', SyntaxAt(15,  1)
   AssertEqual              '', SyntaxAt(15, 10)
+  AssertEqual 'infoMenuEntry', SyntaxAt(16,  1)
 
 
 Given info (In-line code literal):
@@ -92,11 +94,19 @@ Given info (Cross-references):
   elit. Let's try a line break: Sed eu purus at ipsum mollis varius in *note id
   orci::. Donec rutrum odio at felis facilisis aliquam ac sit amet nisl.
 
+  Let's try a colon in the name with *note foo:bar:: and *note foo:bar: baz.
+
 Execute:
   AssertEqual 'infoXRef', SyntaxOf('\v\*Note Lorem\:\:')
   AssertEqual 'infoXRef', SyntaxOf('\v\*note sit\:\: amet\,')
   AssertEqual 'infoXRef', SyntaxOf('\v\*note consectetur\: adipiscing\,')
   AssertEqual 'infoXRef', SyntaxOf('\v\*note id\_\s*orci\:\:')
+  AssertEqual 'infoXRef', SyntaxOf('\v\*note foo\:bar\:\:')
+  AssertEqual 'infoXRef', SyntaxOf('\v\*note foo\:bar\: baz\.')
+  " Make sure the boundaries of references are respected
+  AssertEqual '', SyntaxOf(' ipsum dolor ')
+  AssertEqual '', SyntaxOf(' amet, ')
+  AssertEqual '', SyntaxOf('try a line break')
 
 
 Given info (Footnotes):

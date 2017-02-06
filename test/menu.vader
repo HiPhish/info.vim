@@ -30,12 +30,13 @@ Execute (Value of the 'Menu' key):
 
 Then:
   AssertEqual
-  \ [{'File': 'test', 'Name': 'Foo', 'Node': 'Foo'},
-  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
-  \  {'File':  'bar', 'Name': 'Foo', 'Node': 'Baz'},
-  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
-  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
-  \  {'File': 'test', 'Name': 'Nul', 'Node': 'Nil'}],
+  \ [{'File': 'test', 'Name': 'Foo',  'Node': 'Foo'},
+  \  {'File': 'test', 'Name': 'Foo',  'Node': 'Bar'},
+  \  {'File':  'bar', 'Name': 'Foo',  'Node': 'Baz'},
+  \  {'File': 'test', 'Name': 'Foo',  'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Foo',  'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Nul',  'Node': 'Nil'},
+  \  {'File': 'test', 'Name': ':Foo', 'Node': 'Foo'}],
   \ b:info['Menu']
   quit
 
@@ -51,6 +52,7 @@ Expect qf (Location list contains menu entries):
   info://test/Bar/|1| Foo
   info://test/Bar/|1| Foo
   info://test/Nil/|1| Nul
+  info://test/Foo/|1| :Foo
 
 
 Execute (The ':Menu' command with argument):
