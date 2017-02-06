@@ -53,11 +53,6 @@ Digraph       Decimal  Hexadecimal  Acronym  Name
 `^?`              127         0x7F      DEL  Delete
 ============  =======  ===========  =======  ==================================
 
-.. warning::
-
-   Contrary to what is written here nodes do not have to form a tree,  although
-   they more often than not do. That part of the document has to be rewritten.
-
 
 Node
    A node begins with `^_`,  followed by a newline or `^L` and node header (see
