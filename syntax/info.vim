@@ -56,6 +56,17 @@ syntax match infoMenuEntry '\v^\*\s+.+\:\:'
 
 " Header at the beginning of every node
 syntax match infoHeader '\v^((File|Node|Next|Prev|Up)\:\s*[^,]+,?\s*)+'
+" Substitute the items contained in the header
+syntax match infoFile  "\vFile:\s+" containedin=infoHeader transparent contained conceal
+syntax match infoNode  "\vNode:\s*\ze " containedin=infoHeader transparent contained conceal cchar=◼︎
+syntax match infoNext  "\vNext:\s*\ze " containedin=infoHeader transparent contained conceal cchar=▶︎
+syntax match infoPrev  "\vPrev:\s*\ze " containedin=infoHeader transparent contained conceal cchar=◀︎
+syntax match infoUp    "\vUp:\s*\ze "   containedin=infoHeader transparent contained conceal cchar=▲
+syntax match infoComma "\v,\ze  "   containedin=infoHeader transparent contained conceal cchar= 
+
+for item in ['File', 'Node', 'Next', 'Prev', 'Up']
+	" exe 'syntax region info'.item.' matchgroup=derp start="\v'.item.':\s+" end="\v\,|$" containedin=infoHeader transparent contained concealends'
+endfor
 
 " Section titles, normal text followed by underline characters on next line
 " Note: We do not recognise headings with indentation.
