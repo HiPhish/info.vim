@@ -256,10 +256,10 @@ function! s:readReference(ref)
 		call s:executeURI('silent file ', l:uri)
 	endif
 
-	" Jump to the given line
+	" Jump to the given position or second line so header concealing can work
 	let l:cursor = [
-		\ exists('a:ref[''line'']'  ) ? a:ref['line'  ] : 1,
-		\ exists('a:ref[''column'']') ? a:ref['column'] : 1
+		\ has_key(a:ref, 'line'  ) ? a:ref['line'  ] : 2,
+		\ has_key(a:ref, 'column') ? a:ref['column'] : 1
 	\ ]
 	call cursor(l:cursor)
 
@@ -277,6 +277,8 @@ function! s:readReference(ref)
 	setlocal colorcolumn=0
 	setlocal nolist
 	setlocal nospell
+	setlocal concealcursor="nc"
+	setlocal conceallevel=2
 endfunction
 
 
