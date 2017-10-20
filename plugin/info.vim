@@ -648,54 +648,34 @@ endfunction
 
 function! s:percentEncode(string)
 	" Important: encode the percent symbol first
+	let l:subst = [
+		\ ['%', '25'], [' ', '20'], ['!', '21'], ['#', '23'],
+		\ ['$', '24'], ['&', '26'], ["'", '27'], ['(', '28'],
+		\ [')', '29'], ['*', '2a'], ['+', '2b'], [',', '2c'],
+		\ ['/', '2f'], [':', '3a'], [';', '3b'], ['=', '3d'],
+		\ ['?', '3f'], ['@', '40'], ['[', '5b'], [']', '5d'],
+	\ ]
 	let l:string = a:string
-	let l:string = substitute(l:string, '\v\%', '%25', 'g')
-	let l:string = substitute(l:string, '\v\ ', '%20', 'g')
-	let l:string = substitute(l:string, '\v\!', '%21', 'g')
-	let l:string = substitute(l:string, '\v\#', '%23', 'g')
-	let l:string = substitute(l:string, '\v\$', '%24', 'g')
-	let l:string = substitute(l:string, '\v\&', '%26', 'g')
-	let l:string = substitute(l:string, "\v\'", '%27', 'g')
-	let l:string = substitute(l:string, '\v\(', '%28', 'g')
-	let l:string = substitute(l:string, '\v\)', '%29', 'g')
-	let l:string = substitute(l:string, '\v\*', '%2a', 'g')
-	let l:string = substitute(l:string, '\v\+', '%2b', 'g')
-	let l:string = substitute(l:string, '\v\,', '%2c', 'g')
-	let l:string = substitute(l:string, '\v\/', '%2f', 'g')
-	let l:string = substitute(l:string, '\v\:', '%3a', 'g')
-	let l:string = substitute(l:string, '\v\;', '%3b', 'g')
-	let l:string = substitute(l:string, '\v\=', '%3d', 'g')
-	let l:string = substitute(l:string, '\v\?', '%3f', 'g')
-	let l:string = substitute(l:string, '\v\@', '%40', 'g')
-	let l:string = substitute(l:string, '\v\[', '%5b', 'g')
-	let l:string = substitute(l:string, '\v\]', '%5d', 'g')
+	for [symbol, substitution] in l:subst
+		let l:string = substitute(l:string, '\v\'.symbol, '%'.substitution, 'g')
+	endfor
 
 	return l:string
 endfunction
 
 function! s:percentDecode(string)
 	" Important: Decode the percent symbol last
+	let l:subst = [
+		\ [' ', '20'], ['!', '21'], ['#', '23'], ['$', '24'],
+		\ ['&', '26'], ["'", '27'], ['(', '28'], [')', '29'], 
+		\ ['*', '2a'], ['+', '2b'], [',', '2c'], ['/', '2f'], 
+		\ [':', '3a'], [';', '3b'], ['=', '3d'], ['?', '3f'], 
+		\ ['@', '40'], ['[', '5b'], [']', '5d'], ['%', '25'],
+	\ ]
 	let l:string = a:string
-	let l:string = substitute(l:string, '\v\%20', ' ', 'g')
-	let l:string = substitute(l:string, '\v\%21', '!', 'g')
-	let l:string = substitute(l:string, '\v\%23', '#', 'g')
-	let l:string = substitute(l:string, '\v\%24', '$', 'g')
-	let l:string = substitute(l:string, '\v\%26', '&', 'g')
-	let l:string = substitute(l:string, '\v\%27', "'", 'g')
-	let l:string = substitute(l:string, '\v\%28', '(', 'g')
-	let l:string = substitute(l:string, '\v\%29', ')', 'g')
-	let l:string = substitute(l:string, '\v\%2a', '*', 'g')
-	let l:string = substitute(l:string, '\v\%2b', '+', 'g')
-	let l:string = substitute(l:string, '\v\%2c', ',', 'g')
-	let l:string = substitute(l:string, '\v\%2f', '/', 'g')
-	let l:string = substitute(l:string, '\v\%3a', ':', 'g')
-	let l:string = substitute(l:string, '\v\%3b', ';', 'g')
-	let l:string = substitute(l:string, '\v\%3d', '=', 'g')
-	let l:string = substitute(l:string, '\v\%3f', '?', 'g')
-	let l:string = substitute(l:string, '\v\%40', '@', 'g')
-	let l:string = substitute(l:string, '\v\%5b', '[', 'g')
-	let l:string = substitute(l:string, '\v\%5d', ']', 'g')
-	let l:string = substitute(l:string, '\v\%25', '%', 'g')
+	for [symbol, substitution] in l:subst
+		let l:string = substitute(l:string, '\v\%'.substitution, symbol, 'g')
+	endfor
 
 	return l:string
 endfunction
