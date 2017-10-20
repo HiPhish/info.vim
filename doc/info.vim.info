@@ -54,7 +54,7 @@ the  fly,  such  as  the  *note  (dir)::  file.  The  current  file  is  called
 ‘info.vim.info’.
 
     Files are further split into ‘nodes’.  A node is like a  section in a book,
-it can be a chapter,  a section, sa  ub-section and so on.  Usually they form a
+it can be a chapter,  a section,  a sub-section and so on.  Usually they form a
 tree-structure,  but they don't have to.  Each node  can have a ‘Next’,  ‘Prev’
 (previous),  and ‘Up’ node.  The  current node  is named  ‘Info-Structure’, the
 previous node is ‘Getting Started’ and the next node is ‘Node-Navigation’.
@@ -84,16 +84,15 @@ there you can move back to this node by executing ‘:InfoNext’.  Go ahead, do
 now.
 
     Back again?  Let's try ‘:InfoUp’ next to go to the parent node.  Once there
-you will have to execute ‘:InfoNext’ twice since this node is the second child.
-Go ahead and try it out.
+you will have to follow the steps outlined to get back to this node.
 
     Keep in mind  that nodes do not  have any notion of "children",  it just so
 happens that the next node of *note Getting Started:: is its child and the next
-node of  that is the second child.  All this will  generally hold true  for any
-sane Info files, but the file format does no mandate it.
+node of  that is the second child.  All this will generally hold true  for most
+Info files, but the file format does not mandate it.
 
     From now on we  won't be mentioning how to move between nodes,  it is up to
-you whether you wish to use commands of mappings. Move on to the next node.
+you whether you wish to use commands or mappings. Move on to the next node.
 
 
 File: info.vim.info,  Node: Menu-Navigation,  Next: XRef-Navigation,  Prev: Node-Navigation,  Up: Getting Started
@@ -111,14 +110,14 @@ it is not a menu.
     You can navigate  a menu using the ‘:Menu <entry>’  command where ‘<entry>’
 is the name of the menu entry. You can use the ‘<Tab>’ key to complete the name
 of an entry. The argument does not have to match the name exactly as long as it
-matches  one entry uniquely.  There is also a  menu prompt you can map to,  but
+uniquely matches  one entry.  There is also a menu  prompt you can map to,  but
 that is an advanced topic.
 
-    Below you can see a menu with two entries,  they both point to  nodes which
-are not accessible using regular node navigation. This is intentional, you have
+    Below you can  see a menu with two entries,  they both point to nodes which
+are not accessible using node-based navigation.  This is intentional,  you have
 to use the menu to reach them.
 
-    Note how to two have different markup.  In the case of  the first entry the
+    Note how the two have different markup.  In the case of the first entry the
 name of the entry is the same as the name of the target node, but in the second
 example they differ.  The name of the entry is the first part,  that is the one
 you have to pass as an argument.  Try them both out now,  the node explains how
