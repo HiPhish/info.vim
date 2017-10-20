@@ -326,7 +326,7 @@ endfunction
 
 " Common code for next, previous, and so on nodes
 function! s:jumpToProperty(property)
-	if !exists('b:info['''.a:property.''']')
+	if !has_key(b:info, a:property)
 		echohl ErrorMsg
 		echo 'No '''.a:property.''' pointer for this node.'
 		echohl None
@@ -361,7 +361,7 @@ function s:menuPrompt()
 endfunction
 
 function! s:menu(pattern)
-	if !exists('b:info[''Menu'']')
+	if !has_key(b:info, 'Menu')
 		echohl ErrorMsg
 		echo 'No menu in this node.'
 		echohl NONE
@@ -436,7 +436,7 @@ endfunction
 
 " Follow the cross-reference under the cursor.
 function! s:follow(pattern)
-	if !exists('b:info[''XRefs'']')
+	if !has_key(b:info, 'XRefs')
 		echohl ErrorMsg
 		echo 'No cross reference in this node.'
 		echohl NONE
@@ -621,19 +621,19 @@ function! s:encodeURI(reference)
 	let l:line   = ''
 	let l:column = ''
 
-	if (exists('a:reference[''File'']'))
+	if (has_key(a:reference, 'File'))
 		let l:file = s:percentEncode(a:reference['File'])
 	endif
 
-	if (exists('a:reference[''Node'']'))
+	if (has_key(a:reference, 'Node'))
 		let l:node = s:percentEncode(a:reference['Node'])
 	endif
 
-	if (exists('a:reference[''line'']'))
+	if (has_key(a:reference, 'line'))
 		let l:line = a:reference['line']
 	endif
 
-	if (exists('a:reference[''column'']'))
+	if (has_key(a:reference, 'column'))
 		let l:line = a:reference['column']
 	endif
 
@@ -745,22 +745,18 @@ function! s:completePrompt(ArgLead, CmdLine, CursorPos, list)
 	return l:candidates
 endfunction
 
-" Populate the location list with items from 'from'
-function! s:populateLocList(title, from)
-	call setloclist(0, [], '', a:title)
-
-	for l:item in a:from
-		if exists('l:item[''line'']')
-			let l:line = l:item['line']
-		else
-			let l:line = 1
-		endif
-
-		let l:uri = s:encodeURI(l:item)
-		laddexpr l:uri.'\|'.l:line.'\| '.l:item['Name']
-	endfor
-
+" Populate the location list with items from 'items'
+function! s:populateLocList(title, items)
+	function! ReferenceToEntry(index, reference)
+		return {
+			\ 'filename': s:encodeURI(a:reference), 
+			\ 'lnum': has_key(a:reference, 'line') ? a:reference.line : 1, 
+			\ 'text': a:reference.Name,
+		\ }
+	endfunction
+	call setloclist(0, map(copy(a:items), function('ReferenceToEntry')), 'r')
 	lopen
+	let w:quickfix_title = a:title
 endfunction
 
 " Parse a reference string into a reference object.
@@ -794,17 +790,17 @@ endfunction
 " redirection of stdin and stderr
 function s:encodeCommand(ref, kwargs)
 	let l:cmd = g:infoprg
-	if exists('a:ref[''File'']')
+	if has_key(a:ref, 'File')
 		let l:cmd .= ' --file '.shellescape(a:ref['File'])
 	endif
-	if exists('a:ref[''Node'']')
+	if has_key(a:ref, 'Node')
 		let l:cmd .= ' --node '.shellescape(a:ref['Node'])
 	endif
 	" The path to the 'doc' directory has been added so we can find the
 	" documents included with the plugin. Output is directed stdout
 	let l:cmd .= ' -d '.s:doc_path.' --output -'
 
-	if exists('a:kwargs[''stderr'']')
+	if has_key(a:kwargs, 'stderr')
 		let l:cmd .= ' 2>'.a:kwargs['stderr']
 		" Adjust the redirection syntax for special snowflake shells
 		if &shell =~# 'fish$'
@@ -812,7 +808,7 @@ function s:encodeCommand(ref, kwargs)
 		endif
 	endif
 
-	if exists('a:kwargs[''stdout'']')
+	if has_key(a:kwargs, 'stdout')
 		let l:cmd .= ' >'.a:kwargs['stdout']
 	endif
 
