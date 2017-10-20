@@ -258,8 +258,8 @@ function! s:readReference(ref)
 
 	" Jump to the given position or second line so header concealing can work
 	let l:cursor = [
-		\ has_key(a:ref, 'line'  ) ? a:ref['line'  ] : 2,
-		\ has_key(a:ref, 'column') ? a:ref['column'] : 1
+		\ get(a:ref,   'line', 2),
+		\ get(a:ref, 'column', 1),
 	\ ]
 	call cursor(l:cursor)
 
@@ -616,26 +616,10 @@ endfunction
 
 " Encodes a node reference into a URI
 function! s:encodeURI(reference)
-	let l:file   = ''
-	let l:node   = ''
-	let l:line   = ''
-	let l:column = ''
-
-	if (has_key(a:reference, 'File'))
-		let l:file = s:percentEncode(a:reference['File'])
-	endif
-
-	if (has_key(a:reference, 'Node'))
-		let l:node = s:percentEncode(a:reference['Node'])
-	endif
-
-	if (has_key(a:reference, 'line'))
-		let l:line = a:reference['line']
-	endif
-
-	if (has_key(a:reference, 'column'))
-		let l:line = a:reference['column']
-	endif
+	let l:file   = s:percentEncode(get(a:reference,   'File', ''))
+	let l:node   = s:percentEncode(get(a:reference,   'Node', ''))
+	let l:line   = s:percentEncode(get(a:reference,   'line', ''))
+	let l:column = s:percentEncode(get(a:reference, 'column', ''))
 
 	let l:uri = 'info://'
 
@@ -750,7 +734,7 @@ function! s:populateLocList(title, items)
 	function! ReferenceToEntry(index, reference)
 		return {
 			\ 'filename': s:encodeURI(a:reference), 
-			\ 'lnum': has_key(a:reference, 'line') ? a:reference.line : 1, 
+			\ 'lnum': get(a:reference, 'line', 1),
 			\ 'text': a:reference.Name,
 		\ }
 	endfunction
