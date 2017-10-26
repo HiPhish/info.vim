@@ -11,7 +11,7 @@ NODE='Top'
 
 # Printing the version goes first
 if [ "$1" = '--version' ] || [ "$1" = '-v' ]; then
-	echo '6.0'
+	echo '6.4'
 	exit 0
 fi
 

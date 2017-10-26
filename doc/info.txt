@@ -83,7 +83,7 @@ g:infoprg                                                          *g:infoprg*
 Default: 'info'~
 
     Name or path to the standalone GNU Info program. You need at least version
-    6.0, so you can use this variable to override your system's default Info.
+    6.4, so you can use this variable to override your system's default Info.
 
 
 ------------------------------------------------------------------------------

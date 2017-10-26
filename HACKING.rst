@@ -208,7 +208,7 @@ the current node as its `Up` node.  In fact,  the child node might even be in a
 different file.
 
 The standalone Info program  can access arbitrary nodes  in a file if you use a
-recent version (we take version 6.0 to be safe for our purposes).
+recent version (we take version 6.4 to be safe for our purposes).
 
 .. code-block:: sh
 

@@ -27,9 +27,10 @@ of GNU. Check out this asciicast for a live demonstation:
 Installation
 ############
 
-Install it like any other Vim plugin. You must have at least version 6.0 of the
-GNU Info command-line tool installed on your system.  You can set the binary by
-setting the `g:infoprg` variable to its path.
+Install it like any other Vim plugin. You must have at least version 6.4 of the
+GNU Info command-line tool installed on your system (older versions might work,
+but I haven't tested them).  You can set the binary  by setting the `g:infoprg`
+variable to its path.
 
 
 Quickstart

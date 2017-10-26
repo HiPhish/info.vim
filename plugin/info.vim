@@ -802,7 +802,7 @@ function! s:verifyInfoVersion()
 
 	if l:major < 6
 		echohl WarningMsg
-		echom 'Warning: Version 6.0+ of standalone info needed, you have '.l:version.'; please set'
+		echom 'Warning: Version 6.4+ of standalone info needed, you have '.l:version.'; please set'
 		echom 'the ''g:infoprg'' variable to a compatible binary. Info might still work with'
 		echom 'your binary, but it is not guaranteed.'
 		echohl NONE

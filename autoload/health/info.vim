@@ -27,15 +27,16 @@ function! health#info#check() abort
 
 	let l:version = matchstr(system(g:infoprg.' --version'), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
+	let l:minor = matchstr(l:version, '\v\d+\.\zs\d+\ze')
 
 	if empty(l:version)
 		let l:msg  = 'No standalone info binary found.'
-		let l:sug1 = 'Install at least version 6.0 of GNU Texinfo.'
+		let l:sug1 = 'Install at least version 6.4 of GNU Texinfo.'
 		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
 		call health#report_error(l:msg,[l:sug1, l:sug2])
-	elseif l:major < 6
-		let l:msg = 'You need at least version 6.0 of standalone info.'
-		let l:sug1 = 'Install at least version 6.0 of GNU Texinfo.'
+	elseif l:major < 6 || l:minor < 4
+		let l:msg = 'You need at least version 6.4 of standalone info.'
+		let l:sug1 = 'Install at least version 6.4 of GNU Texinfo.'
 		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
 		call health#report_error(l:msg, [l:sug1, l:sug2])
 	else

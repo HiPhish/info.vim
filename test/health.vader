@@ -23,21 +23,21 @@ Then:
   AssertNotEqual 0, message
 
 
-Execute (Info version < 6.0):
+Execute (Info version < 6.4):
   let g:infoprg = 'echo 1.0'
   CheckHealth info
 
 Then:
-  let message = search('You need at least version 6.0 of standalone info')
+  let message = search('You need at least version 6.4 of standalone info')
   quit
   AssertNotEqual 0, message
 
 
 Execute (Correct info version number):
-  let g:infoprg = 'echo 6.0'
+  let g:infoprg = 'echo 6.4'
   CheckHealth info
 
 Then:
-  let message = search('Version 6.0 of standalone info installed')
+  let message = search('Version 6.4 of standalone info installed')
   quit
   AssertNotEqual 0, message
