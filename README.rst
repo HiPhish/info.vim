@@ -18,11 +18,6 @@ of GNU. Check out this asciicast for a live demonstation:
    :align: center
    :target: https://asciinema.org/a/92884
 
-.. warning::
-
-   At the moment Info.vim is still *very* early work in progress. It is not yet
-   feature-complete and the interface might change.
-
 
 Installation
 ############
