@@ -22,64 +22,6 @@
 "    USE OR OTHER DEALINGS IN THE SOFTWARE.
 " }}}
 
-" How it works {{{
-" ============
-"
-" This file does a lot of thins as the same time, so here is my attempt at
-" making sense of it. The groups are as follows:
-"
-"   Public interface: Auto-commands, mappings and commands. Anything that is
-"                     meant to be exposed to the user
-"
-"   Completion functions: Tab-complete commands
-"
-"   Reading functions: Getting content into the buffer and opening info files
-"
-"   Navigation functions: Node navigation
-"
-"   Menu function: Anything related to menus
-"
-"   Reference function: Anything related to (cross-)references
-"
-"   URI-handing functions: Anything URI-related
-"
-" The fundamental idea of this plugin is to use standalone info as much as
-" possible and make use of the URI-reference duality. What this means is that
-" internally we pass reference objects around, but when it comes to actually
-" reading a buffer we send a URI to Vim. Vim tries to open the URI, which
-" triggers an auto-command, converting the URI back to a reference and
-" allowing the plugin to send the required information to info.
-"
-" The scheme is:
-" 	1) Call ':Info', this generates a URI and find a window
-" 	2) Edit the URI
-" 	3) This fires and auto-command, converting the URI back to a reference
-" 	4) The reference is used for everything else from now
-" The first step is optional, it does not matter how we get Vim to ':edit' the
-" URI. For instance, when following a reference or going to the next node we
-" convert the reference to a URI and ':edit' it in the current window.
-" }}}
-
-" Read first before writing code {{{
-" ==============================
-"
-" VimScript is full of ugly pitfalls, and this code is full of ugly
-" workarounds, so here is a list of things to look out for.
-"
-" Executing commands containing a URI
-" 	 A URI may contain percent characters (percent encoding), which in an
-" 	 ex-command are interpreted as "the current file". For this reason they
-" 	 must be escaped. To cut down the redundancy use the 's:executeURI'
-" 	 function.
-"
-" Calling an external tool (e.g. info)
-"    External tools are called from the shell, so the command strings needs to
-"    be properly escaped. This does not just mean escaping spaces, but also
-"    adjusting redirection for different shells. Use the 's:encodeCommand'
-"    function.
-" }}}
-
-
 if exists('g:loaded_info')
   finish
 endif
@@ -356,6 +298,12 @@ endfunction
 " 'Menu' functions {{{1
 
 function s:menuPrompt()
+	if !has_key(b:info, 'Menu')
+		echohl ErrorMsg
+		echo 'No menu in this node.'
+		echohl NONE
+		return
+	endif
 	let l:pattern = input('Menu item: ', '', 'customlist,'.s:SID().'completeMenu')
 	call s:menu(l:pattern)
 endfunction
@@ -419,9 +367,9 @@ endfunction
 " 'Follow' functions {{{1
 
 function s:followPrompt()
-	if empty(b:info['XRefs'])
+	if !has_key(b:info, 'XRefs')
 		echohl ErrorMsg
-		echo 'No cross references in this node.'
+		echo 'No cross reference in this node.'
 		echohl NONE
 		return
 	endif
