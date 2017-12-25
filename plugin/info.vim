@@ -83,14 +83,22 @@ augroup END
 
 " Completion function {{{1
 
-" Filter the menu list for entries which match non-magic, case-insensitive and
-" only at the beginning of the string.
+" Filter the list for of candidates for entries which match non-magic,
+" case-insensitive and only at the beginning of the string.
+function! s:completePrompt(ArgLead, list)
+	let l:candidates = map(copy(a:list), {idx, val -> val['Name']})
+	if empty(a:ArgLead)
+		return l:candidates
+	endif
+	return filter(l:candidates, {idx,val->!empty(matchstr(val,'\c\M^'.a:ArgLead))})
+endfunction
+
 function! s:completeMenu(ArgLead, CmdLine, CursorPos)
-	return s:completePrompt(a:ArgLead, a:CmdLine, a:CursorPos, b:info['Menu'])
+	return s:completePrompt(a:ArgLead, b:info['Menu'])
 endfunction
 
 function! s:completeFollow(ArgLead, CmdLine, CursorPos)
-	return s:completePrompt(a:ArgLead, a:CmdLine, a:CursorPos, b:info['XRefs'])
+	return s:completePrompt(a:ArgLead, b:info['XRefs'])
 endfunction
 
 
@@ -642,19 +650,6 @@ function! s:findReferenceInList(pattern, list)
 		endif
 	endfor
 	return {}
-endfunction
-
-function! s:completePrompt(ArgLead, CmdLine, CursorPos, list)
-	let l:candidates = []
-
-	for l:item in a:list
-		" Match only at the beginning of the string
-		if empty(a:ArgLead) || !empty(matchstr(l:item['Name'], '\c\M^'.a:ArgLead))
-			call add(l:candidates, l:item['Name'])
-		endif
-	endfor
-
-	return l:candidates
 endfunction
 
 " Populate the location list with items from 'items'
