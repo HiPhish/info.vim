@@ -31,21 +31,20 @@ Execute (Value of the 'XRefs' key):
 
 Then:
   AssertEqual
-  \ [{'File': 'test', 'Name':     'Foo', 'Node':     'Foo'},
-  \  {'File': 'test', 'Name':     'Foo', 'Node':     'Foo'},
-  \  {'File': 'test', 'Name':     'Foo', 'Node':     'Bar'},
-  \  {'File': 'test', 'Name': 'Foo Bar', 'Node': 'Foo Bar'},
-  \  {'File': 'test', 'Name':     'Foo', 'Node':     'Bar'},
-  \  {'File': 'test', 'Name':     'Nul', 'Node':     'Nil'}],
+  \ [{'File': 'test', 'Name': 'Foo Bar', 'Node': 'Foo Bar'},
+  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Foo', 'Node': 'Foo'},
+  \  {'File': 'test', 'Name': 'Nul', 'Node': 'Nil'}],
   \ b:info['XRefs']
   quit
+  
 
 Execute (The ':Follow' command with argument):
   silent Info test X-Ref
-  silent Follow Foo
+  silent Follow Foo Bar
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info://test/Foo%20Bar/', expand('%')
   quit
 
 

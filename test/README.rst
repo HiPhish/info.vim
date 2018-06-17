@@ -14,7 +14,7 @@ comment describing what the purpose of the  test is. Avoid terms like "test" or
 "check" when possible, it's obvious we are doings tests when in a test suite.
 
 Tests involving Standalone Info must use a  mock shell script in place of Info.
-The mock takes the  same arguments as Info, so you have  to set the `g:infoprg`
+The mock takes the same arguments as Info,  so you have  to set the `g:infoprg`
 variable to it using `Before` and `After`. Example:
 
 .. code-block:: vader

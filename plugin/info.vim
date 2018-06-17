@@ -445,16 +445,9 @@ function! s:collectXRefs()
 		call add(l:xRefs, l:xRef)
 	endfor
 
-
 	if !empty(l:xRefs)
-		let b:info['XRefs'] = []
-		" Iterate through the list of collected x-refs, skipping duplicates
-		" (unlike the 'uniq(sort(list))' ritual this preserves order
-		for l:i in range(len(l:xRefs))
-			if index(l:xRefs[ : l:i - 1], l:xRefs[l:i]) < 0
-				call add(b:info['XRefs'], l:xRefs[l:i])
-			endif
-		endfor
+		" Sort items and filter out duplicates
+		let b:info['XRefs'] = uniq(sort(l:xRefs, 'i'))
 	endif
 
 	call setpos('.', l:save_cursor)
