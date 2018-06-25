@@ -6,7 +6,9 @@ character is a valid separator.
 
 * Menu:
 
+* Foo Bar::	Two words in a name
 * Foo::		Name and node are the same
+* Bar::         Bar should match this, not "Foo Bar"
 * Foo: Bar	Different name and node
 * Foo: (bar)Baz	Node in a different file
 There can be non-entries in between.

@@ -332,7 +332,7 @@ function! s:menu(pattern)
 
 	if empty(l:entry)
 		echohl ErrorMsg
-		echo 'Cannot find menu entry ' . a:pattern
+		echo 'Cannot find node ''' . a:pattern . ''''
 		echohl None
 		return
 	endif
@@ -644,6 +644,19 @@ function! s:SID()
 endfunction
 
 function! s:findReferenceInList(pattern, list)
+	" Try exact matches first
+	for l:item in a:list
+		if l:item['Name'] ==? a:pattern
+			return l:item
+		endif
+	endfor
+	" Prefer matching at the beginning of the pattern
+	for l:item in a:list
+		if l:item['Name'] =~? '\v^' . a:pattern
+			return l:item
+		endif
+	endfor
+	" Finially, try regex matches
 	for l:item in a:list
 		if l:item['Name'] =~? a:pattern
 			return l:item

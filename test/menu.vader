@@ -30,13 +30,15 @@ Execute (Value of the 'Menu' key):
 
 Then:
   AssertEqual
-  \ [{'File': 'test', 'Name': 'Foo',  'Node': 'Foo'},
-  \  {'File': 'test', 'Name': 'Foo',  'Node': 'Bar'},
-  \  {'File':  'bar', 'Name': 'Foo',  'Node': 'Baz'},
-  \  {'File': 'test', 'Name': 'Foo',  'Node': 'Bar'},
-  \  {'File': 'test', 'Name': 'Foo',  'Node': 'Bar'},
-  \  {'File': 'test', 'Name': 'Nul',  'Node': 'Nil'},
-  \  {'File': 'test', 'Name': ':Foo', 'Node': 'Foo'}],
+  \ [{'File': 'test', 'Name': 'Foo Bar', 'Node': 'Foo Bar'},
+  \  {'File': 'test', 'Name': 'Foo',     'Node': 'Foo'},
+  \  {'File': 'test', 'Name': 'Bar',     'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Foo',     'Node': 'Bar'},
+  \  {'File':  'bar', 'Name': 'Foo',     'Node': 'Baz'},
+  \  {'File': 'test', 'Name': 'Foo',     'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Foo',     'Node': 'Bar'},
+  \  {'File': 'test', 'Name': 'Nul',     'Node': 'Nil'},
+  \  {'File': 'test', 'Name': ':Foo',    'Node': 'Foo'}],
   \ b:info['Menu']
   quit
 
@@ -46,7 +48,9 @@ Execute (The ':Menu' command without arguments):
   Menu
 
 Expect qf (Location list contains menu entries):
+  info://test/Foo%20Bar/|1| Foo Bar
   info://test/Foo/|1| Foo
+  info://test/Bar/|1| Bar
   info://test/Bar/|1| Foo
   info://bar/Baz/|1| Foo
   info://test/Bar/|1| Foo
@@ -64,9 +68,27 @@ Then (We have successfully opened another node):
   quit
 
 
+Execute (Follow a reference with a name contained in another reference):
+  silent Info test Menu
+  silent Menu Bar
+
+Then (The matcher prefers exact matches over regex matches):
+  AssertEqual 'info://test/Bar/', expand('%')
+  quit
+
+
+Execute (Follow a partial reference contained in another reference):
+  silent Info test Menu
+  silent Menu ba
+
+Then (The mather prefers matches are beginning over general matches):
+  AssertEqual 'info://test/Bar/', expand('%')
+  quit
+
+
 Execute (Following reference under cursor):
   silent Info test Menu
-  call cursor(9, 1)
+  call cursor(10, 1)
   normal K
 
 Then:
