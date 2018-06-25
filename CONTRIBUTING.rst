@@ -36,10 +36,6 @@ follow:
 - Use  tabs for indentation in  VimScript files, spaces everywhere  else. Three
   spaces in reStructuredText, two spaces in Vader.
 
-- Justify text in reStructuredText files.  I use `par -w79j`  as my `formatprg`
-  option.  Do not put extra spaces in inline `code literals` and do not justify
-  code blocks.
-
 For everything else use your best judgment and imitate the existing style.
 
 
