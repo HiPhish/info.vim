@@ -5,7 +5,7 @@
 
 Before (Store old info binary so it can be restored):
   let g:old_infoprg = g:infoprg
-  let g:infoprg = substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+  let g:infoprg = 'sh '.substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
 
 After (Restore the original info binary):
   let g:infoprg = g:old_infoprg
