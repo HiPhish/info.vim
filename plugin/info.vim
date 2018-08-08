@@ -25,21 +25,33 @@
 if exists('g:loaded_info')
   finish
 endif
-let g:loaded_info = 1
 
-" This is the program that assembles info files, we might later decide to make
-" it possible to define your own one.
+" This is the program that assembles info files
 if !exists('g:infoprg')
 	let g:infoprg = 'info'
 endif
+
+" A handy function for constructing function names that use <SID>
+function! s:SID()
+	return matchstr(expand('<sfile>'), '\v\<SNR\>\d+_')
+endfunction
+
+" Lazy loading: First only the Info command is defined; when the command is
+" called this script is sourced a second time, executing the rest of it.
+if !exists('s:did_load')
+	command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
+	let s:did_load = 1
+	execute 'autocmd FuncUndefined *info source ' . expand('<sfile>')
+	finish
+endif
+
+let g:loaded_info = 1
 
 " Path to the documentation in Info format
 let s:doc_path = expand('<sfile>:p:h:h').'/doc/'
 
 
 " Public interface {{{1
-command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
-
 nnoremap <silent> <Plug>(InfoUp)      :call <SID>up()<CR>
 nnoremap <silent> <Plug>(InfoNext)    :call <SID>next()<CR>
 nnoremap <silent> <Plug>(InfoPrev)    :call <SID>prev()<CR>
@@ -638,10 +650,6 @@ endfunction
 
 
 " Generally useful functions {{{1
-
-function! s:SID()
-	return matchstr(expand('<sfile>'), '\v\<SNR\>\d+_')
-endfunction
 
 function! s:findReferenceInList(pattern, list)
 	" Try exact matches first
