@@ -81,14 +81,6 @@ Execute:
   AssertEqual 'infoMenuEntry', SyntaxAt(16,  1)
 
 
-Given info (In-line code literal):
-  Lorem ipsum dolor ‘sit’ amet, `consectetur' adipiscing elit.
-
-Execute:
-  AssertEqual 'infoLiteral', SyntaxOf('\v‘.*’')
-  AssertEqual 'infoLiteral', SyntaxOf('\v`.*''')
-
-
 Given info (Cross-references):
   *Note Lorem:: ipsum dolor *note sit:: amet, *note consectetur: adipiscing,
   elit. Let's try a line break: Sed eu purus at ipsum mollis varius in *note id

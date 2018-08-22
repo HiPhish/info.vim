@@ -83,13 +83,6 @@ syntax match infoFootnotes '\v^\s+\-+ Footnotes \-+$'
 " References look like *Note Foo:: or *Note Foo Bar: (foo)Bar.
 syntax match infoXRef '\v\*[Nn]ote\_.{-1,}(\:\:|[\.,])'
 
-" File path, code literals and so on
-syntax region infoLiteral start='\v‘' end='\v’'
-" This one can abort too early in literal Lisp code: `(cons 'a 12)', but it's
-" better than skipping the inner tick, or else we would match beyond the
-" literal in a sentence like 'These two values are `cons'ed together'.
-syntax region infoLiteral start='\v`' end=/\v'/
-
 " }}}
 
 
@@ -100,7 +93,7 @@ highlight link infoHeading           Label
 highlight link infoHeader          Special
 highlight link infoFootnotes         Label
 highlight link infoXRef         Identifier
-highlight link infoLiteral          String
+" highlight link infoLiteral          String
 highlight link infoMenu              Label
 highlight link infoMenuEntry    Identifier
 
