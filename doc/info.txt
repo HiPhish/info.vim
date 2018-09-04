@@ -46,15 +46,13 @@ INTRODUCTION                                               *info-introduction*
 document browser. You can open any Info file and browse its nodes as you could
 in the standalone command-line program or Emacs's Info mode.
 
-Note  Info.vim is still very early work; it is feature-complete but you should
-      consider it to be "wet paint" at this point.
-
-You can read the Info document for a topic like `bash` by executing `:Info`:
+You can  read  the  Info  document  for  a  topic  like `bash` by executing  the
+`:Info` command:
 >
     :Info bash
 <
-An alternative way  of loading an Info document  is to give an |info-uri| as the
-file name:
+An alternative way  of loading an  Info document  is to provide an |info-uri| as
+the file name:
 >
     :edit info://bash
 <
@@ -82,8 +80,8 @@ VARIABLES                                                     *info-variables*
 g:infoprg                                                          *g:infoprg*
 Default: 'info'~
 
-    Name or path to the standalone GNU Info program. You need at least version
-    6.4, so you can use this variable to override your system's default Info.
+    Name or  path to  the standalone  GNU Info program;  set this  variable to
+    override your system's default. You need at least version 6.4.
 
 
 ------------------------------------------------------------------------------
@@ -106,7 +104,7 @@ b:info                                                                *b:info*
 	Name of the previous node.
 
     Not all of these keys have to be present in a node. There is also a number
-    of extra keys which warrant a more detailed explanation.
+    of extra keys which warrant a more detailed explanation further below.
 
 
 ------------------------------------------------------------------------------
