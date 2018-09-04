@@ -96,7 +96,7 @@ b:info                                                                *b:info*
 
     b:info['File']~
 	Name of the Info file (document).
-    b:info['Up']~
+    b:info['Node']~
 	Name of the current node.
     b:info['Up']~
 	Name of the parent node.
