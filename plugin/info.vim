@@ -41,11 +41,16 @@ endfunction
 if !exists('s:did_load')
 	command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
 	let s:did_load = 1
-	execute 'autocmd FuncUndefined *info source ' . expand('<sfile>')
+	augroup InfoLazyLoading  " These load the rest of script as needed
+		exe 'autocmd FuncUndefined *info    source '.expand('<sfile>')
+		exe 'autocmd BufReadCmd    info://* source '.expand('<sfile>').
+		    \'| call '.s:SID().'readReference('.s:SID().'decodeURI(expand(''<amatch>'')))'
+	augroup END
 	finish
 endif
 
 let g:loaded_info = 1
+autocmd! InfoLazyLoading
 
 " Path to the documentation in Info format
 let s:doc_path = expand('<sfile>:p:h:h').'/doc/'
@@ -62,6 +67,7 @@ nnoremap <silent> <Plug>(InfoGoto)    :call <SID>gotoPrompt()<CR>
 augroup InfoFiletype
 	autocmd!
 
+	" Set up commands for navigating manuals
 	autocmd FileType info command! -buffer
 		\ -complete=customlist,<SID>completeMenu -nargs=?
 		\ Menu call <SID>menu(<q-args>)
@@ -73,6 +79,7 @@ augroup InfoFiletype
 	autocmd FileType info command! -buffer -nargs=?
 		\ GotoNode call <SID>gotoNode(<q-args>)
 
+	" Set up mappings for inside manuals
 	autocmd FileType info command! -buffer InfoUp    call <SID>up()
 	autocmd FileType info command! -buffer InfoNext  call <SID>next()
 	autocmd FileType info command! -buffer InfoPrev  call <SID>prev()
@@ -88,6 +95,7 @@ augroup InfoFiletype
 				\nnoremap <silent> <buffer> <C-]> K | 
 				\endif
 
+	" Opening a file with Info URI
 	autocmd BufReadCmd info://* call <SID>readReference(<SID>decodeURI(expand('<amatch>')))
 augroup END
 
