@@ -131,3 +131,15 @@ the time being.
 - Search within a file (`:Search` command)
 - Going  to a  specific node  in the file  (`:Goto` command)  (implemented, but
   without tab-completion)
+
+
+Self-promotion
+##############
+
+If you like this plugin please consider financially supporting its development,
+every small amount helps. Feel free to explore my other software projects as
+well.
+
+* http://hiphish.github.io/
+
+* https://liberapay.com/HiPhish/
