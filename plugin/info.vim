@@ -42,6 +42,7 @@ if !exists('s:did_load')
 	command! -nargs=* Info call <SID>info(<q-mods>, <f-args>)
 	let s:did_load = 1
 	augroup InfoLazyLoading  " These load the rest of script as needed
+		autocmd!
 		exe 'autocmd FuncUndefined *info    source '.expand('<sfile>')
 		exe 'autocmd BufReadCmd    info://* source '.expand('<sfile>').
 		    \'| call '.s:SID().'readReference('.s:SID().'decodeURI(expand(''<amatch>'')))'
@@ -51,6 +52,7 @@ endif
 
 let g:loaded_info = 1
 autocmd! InfoLazyLoading
+augroup! InfoLazyLoading
 
 " Path to the documentation in Info format
 let s:doc_path = expand('<sfile>:p:h:h').'/doc/'
