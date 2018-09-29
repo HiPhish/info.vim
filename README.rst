@@ -13,8 +13,7 @@ Info-mode.  This format is most  often generated from Texinfo  source files and
 used for software documentation.  Texinfo is the official  documentation format
 of GNU. Check out this asciicast for a live demonstation:
 
-.. image:: https://asciinema.org/a/92884.png
-   :width: 75%
+.. image:: doc/screenshot.png
    :align: center
    :target: https://asciinema.org/a/92884
 
