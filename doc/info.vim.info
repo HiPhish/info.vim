@@ -11,12 +11,12 @@ tutorial  is not  a substitute  to  the original,  it only  replaces the  parts
 specific to the reader implementation.
 
     You can move around the document using all of  Vim's movement commands,  an
-Info document is a regular buffer in  that regard.  This applies  all other Vim
+Info document is a regular buffer in that regard. This applies to all other Vim
 modes as well.
 
-    Let's move on to the first lesson. You can either move the cursor down onto
-the left-hand item of  the first menu entry and press ‘K’.  You will soon learn
-how to use menus properly.
+    Let's move on to the  first lesson.  You can move the cursor  down onto the
+left-hand  item of the first menu entry and press ‘K’.  You will soon learn how
+to use menus properly.
 
 * Menu:
 
