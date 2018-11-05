@@ -136,9 +136,12 @@ Self-promotion
 ##############
 
 If you like this plugin please consider financially supporting its development,
-every small amount helps. Feel free to explore my other software projects as
-well.
+every small amount helps; you can become a regular supporter through LiberaPay
+or tip me with a one-time donation over Ko-Fi. Feel free to explore my other
+software projects as well.
 
 * http://hiphish.github.io/
+
+* https://ko-fi.com/hiphish/
 
 * https://liberapay.com/HiPhish/
