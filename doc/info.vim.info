@@ -1,3 +1,5 @@
+This is info.vim.info, written by hand and not generated
+
 
 File: info.vim.info,  Node: Top,  Next: Getting Started,  Up: (dir)
 
@@ -369,3 +371,8 @@ and  then wrap  everything up  in parentheses.  The ‘if’  block checks  for 
 presence of  the ‘b:info’ variable  to detect  Info buffers.  Checking the file
 type alone is not  enough because the user might have opened  an Info file from
 the disc for editing.
+
+
+
+
+coding: utf-8

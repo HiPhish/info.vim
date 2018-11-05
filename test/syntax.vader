@@ -58,6 +58,7 @@ Given info (Menus):
 
   * Node:: Comment ends in dot but should not be matched.
   * Pretty:name: Actual node.  Name containing a colon
+  * Foo: Bar. 	Description containing: a colon
 
 Execute:
   AssertEqual      'infoMenu', SyntaxAt( 1,  1)
@@ -79,6 +80,8 @@ Execute:
   AssertEqual 'infoMenuEntry', SyntaxAt(15,  1)
   AssertEqual              '', SyntaxAt(15, 10)
   AssertEqual 'infoMenuEntry', SyntaxAt(16,  1)
+  AssertEqual 'infoMenuEntry', SyntaxAt(17,  1)
+  AssertEqual              '', SyntaxAt(17, 16)
 
 
 Given info (Cross-references):

@@ -46,8 +46,7 @@ endif
 syntax match infoMenu '\v^\* Menu\:'
 
 " Menu entries have two forms: '* Name: Node.' and '* Node::'
-syntax match infoMenuEntry '\v^\*\s+.+\:\s+[^.,[:tab:]]+[.,]?'
-syntax match infoMenuEntry '\v^\*\s+.+\:\:'
+syntax match infoMenuEntry '\v^\*\s+.{-}\:(:|\s+.{-}(,|\. |:|	|$))'
 
 " }}}
 

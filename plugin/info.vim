@@ -382,7 +382,11 @@ function! s:buildMenu()
 	" beginning of the file or we will be stuck in an infinite loop.
 	let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	while l:entryLine != 0
-		call add(l:menu, s:decodeRefString(getline(l:entryLine)))
+		let l:entry = getline(l:entryLine)
+		" The line might contain the description of the entry, so we need to
+		" strip it out. This is the same regex as used by syntax
+		let l:entry = matchstr(l:entry, '\v^\*\s+.{-}\:(:|\s+.{-}(,|\. |:|	|$))')
+		call add(l:menu, s:decodeRefString(l:entry))
 		let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	endwhile
 
