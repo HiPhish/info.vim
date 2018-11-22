@@ -62,7 +62,7 @@ let s:doc_path = expand('<sfile>:p:h:h').'/doc/'
 nnoremap <silent> <Plug>(InfoUp)      :call <SID>up()<CR>
 nnoremap <silent> <Plug>(InfoNext)    :call <SID>next()<CR>
 nnoremap <silent> <Plug>(InfoPrev)    :call <SID>prev()<CR>
-nnoremap <silent> <Plug>(InfoMenu)    :call <SID>menuPrompt()<CR>
+nnoremap <silent> <Plug>(InfoMenu)    :<C-U>call <SID>menuPrompt(v:count)<CR>
 nnoremap <silent> <Plug>(InfoFollow)  :call <SID>followPrompt()<CR>
 nnoremap <silent> <Plug>(InfoGoto)    :call <SID>gotoPrompt()<CR>
 
@@ -327,14 +327,19 @@ endfunction
 
 " 'Menu' functions {{{1
 
-function s:menuPrompt()
+" If a count is provided jump to that entry without even displaying a prompt.
+function s:menuPrompt(count)
 	if !has_key(b:info, 'Menu')
 		echohl ErrorMsg
 		echo 'No menu in this node.'
 		echohl NONE
 		return
 	endif
-	let l:pattern = input('Menu item: ', '', 'customlist,'.s:SID().'completeMenu')
+	if a:count == 0 || !exists('b:info.Menu[a:count-1]')
+		let l:pattern = input('Menu item: ', '', 'customlist,'.s:SID().'completeMenu')
+	else
+		let l:pattern = b:info.Menu[a:count-1].Node
+	endif
 	call s:menu(l:pattern)
 endfunction
 

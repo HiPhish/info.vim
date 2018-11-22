@@ -159,6 +159,8 @@ CTRL-]                                                           *info-CTRL-]*
 
     Display a menu prompt, similar to standalone Info's `m`. See also `:Menu`.
 
+    If a [count] is provided jump to that entry without displaying a prompt.
+
 
 <Plug>(InfoFollow)                                        *<Plug>(InfoFollow)*
 
