@@ -63,7 +63,7 @@ nnoremap <silent> <Plug>(InfoUp)      :call <SID>up()<CR>
 nnoremap <silent> <Plug>(InfoNext)    :call <SID>next()<CR>
 nnoremap <silent> <Plug>(InfoPrev)    :call <SID>prev()<CR>
 nnoremap <silent> <Plug>(InfoMenu)    :<C-U>call <SID>menuPrompt(v:count)<CR>
-nnoremap <silent> <Plug>(InfoFollow)  :call <SID>followPrompt()<CR>
+nnoremap <silent> <Plug>(InfoFollow)  :<C-U>call <SID>followPrompt(v:count)<CR>
 nnoremap <silent> <Plug>(InfoGoto)    :call <SID>gotoPrompt()<CR>
 
 augroup InfoFiletype
@@ -405,7 +405,7 @@ endfunction
 
 " 'Follow' functions {{{1
 
-function s:followPrompt()
+function s:followPrompt(count)
 	if !has_key(b:info, 'XRefs')
 		echohl ErrorMsg
 		echo 'No cross reference in this node.'
@@ -413,12 +413,16 @@ function s:followPrompt()
 		return
 	endif
 
-	let l:firstItem = b:info['XRefs'][0]['Name']
-	let l:pattern = input('Follow xref ('.l:firstItem.'): ', '', 'customlist,'.s:SID().'completeFollow')
-	if empty(l:pattern)
-		let l:pattern = l:firstItem
+	if !a:count || !exists('b:info.XRefs[a:count-1]')
+		let l:firstItem = b:info['XRefs'][0]['Name']
+		let l:pattern = input('Follow xref ('.l:firstItem.'): ', '', 'customlist,'.s:SID().'completeFollow')
+		if empty(l:pattern)
+			let l:pattern = l:firstItem
+		endif
+		call s:follow(l:pattern)
+	else
+		call s:follow(b:info.XRefs[a:count-1].Name)
 	endif
-	call s:follow(l:pattern)
 endfunction
 
 " Follow the cross-reference under the cursor.

@@ -168,6 +168,8 @@ CTRL-]                                                           *info-CTRL-]*
     `f`.  See also `:Follow`.  If no argument  is given the first cross-reference
     is followed.
 
+    If a [count] is provided follow the reference without displaying a prompt.
+
 
 <Plug>(InfoGoto)                                            *<Plug>(InfoGoto)*
 
