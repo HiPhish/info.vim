@@ -770,9 +770,13 @@ endfunction
 " Call an ex-command with the URI. This will make sure the URI is properly
 " escaped.
 function! s:executeURI(ex_cmd, uri)
-	" We have to escape the percent signs or it will be replaced with the
-	" file name in the ':edit'
-	let l:uri = substitute(a:uri, '\v\%', '\\%', 'g')
+	" The URI will be spliced into the command, it will not be used as a raw
+	" string. Therefore we need to escape backslashes and potentially othere
+	" characters. It is important to escape backslashes first, otherwise the
+	" escaping backslash will be escaped, thus un-escaping previous escapes
+	let l:uri = substitute(a:uri, '\v\\', '\\\\', 'g')
+	" Percent characters stand for the current file name
+	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
 	execute a:ex_cmd l:uri
 endfunction
 
@@ -785,7 +789,6 @@ function! s:verifyInfoVersion()
 
 	let l:version = matchstr(system(g:infoprg.' --version'), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
-	" let l:minor = matchstr(l:version, '\v\d+\.\zs\d+\ze')
 
 	if l:major < 6
 		echohl WarningMsg

@@ -17,3 +17,5 @@ There can be non-entries in between.
 * Nul: Nil	Non-existing node
 * :Foo: Foo	Name containing a colon
 * Foo: Bar. 	Description containing: a colon
+* \Foo: Bar	Name containing a backslash
+* \Foo::	Name containing a backslash
