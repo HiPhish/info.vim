@@ -328,7 +328,7 @@ endfunction
 " 'Menu' functions {{{1
 
 " If a count is provided jump to that entry without even displaying a prompt.
-function s:menuPrompt(count)
+function! s:menuPrompt(count)
 	if !has_key(b:info, 'Menu')
 		echohl ErrorMsg
 		echo 'No menu in this node.'
@@ -405,7 +405,7 @@ endfunction
 
 " 'Follow' functions {{{1
 
-function s:followPrompt(count)
+function! s:followPrompt(count)
 	if !has_key(b:info, 'XRefs')
 		echohl ErrorMsg
 		echo 'No cross reference in this node.'
@@ -739,7 +739,7 @@ endfunction
 
 " Encode a reference into an info command call. The 'kwargs' is for
 " redirection of stdin and stderr
-function s:encodeCommand(ref, kwargs)
+function! s:encodeCommand(ref, kwargs)
 	let l:cmd = g:infoprg
 	if has_key(a:ref, 'File')
 		let l:cmd .= ' --file '.shellescape(a:ref['File'])
