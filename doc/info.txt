@@ -8,7 +8,7 @@
                   |_|_| |_|_|  \___(_)_/ |_|_| |_| |_|~
 
 
-Version: 0.1.0
+Version: 0.2.0
 Author: Alejandro "HiPhish" Sanchez
 License: MIT License
 
@@ -261,26 +261,32 @@ Info URI                                                            *info-uri*
 
 If an editor  with an Info  URI is edited  the document from  the URI  will be
 loaded into the  buffer as if it was  opened with `:Info`.  This would allow you
-to open a new window and execute
+to open a new window and execute a command like one of the following:
 >
-    :edit info://bash
+    :edit info:bash
+    :edit info:bash.info#What%20is%20Bash%3f
+    :edit info:bash.info?line=3&column=7#What%20is%20Bash%3f
 <
 and have the manual for  the Bourne Again Shell loaded into the buffer.  There
-is absolutely no difference between an Info buffer loaded like this and by the
+is absolutely no difference between an Info  buffer loaded like this or by the
 use of `:Info`.
 
-It is possible to specify the node as a path following the host of the URI:
->
-    :edit info://bash.info/What%20is%20Bash%3f/
-<
-Note  We have to  percent-encode reserved  characters like space  and question
-      mark.
+A valid URI follows the (unofficial) syntax exemplified in the Texinfo manual,
+with the addition  of a query part;  see `info:texinfo.info#Info%20Files`.  Here
+is how Info.vim implements the URI syntax:
 
-Additional Information  can be included  in the query;  currently only a line-
-and column number are supported:
->
-    :edit info://bash.info/What%20is%20Bash%3f/?line=3&column=7
-<
+    Scheme~
+        Always `info`
+    Authority~
+	None (will add support for one later)
+    Path~
+	The name of the Info file
+    Query~
+	Instructions for Vim (optional):
+	    `line`    Line number to place the cursor on
+	    `column`  Column number to place the cursor on
+    Fragment~
+	Node within the info file (optional)
 
 
 ==============================================================================

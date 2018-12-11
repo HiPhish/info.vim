@@ -16,7 +16,7 @@ Execute (Next node):
   InfoNext
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
   quit
 
 
@@ -25,7 +25,7 @@ Execute (Previous node):
   InfoPrev
 
 Then:
-  AssertEqual 'info://test/Bar/', expand('%')
+  AssertEqual 'info:test#Bar', expand('%')
   quit
 
 
@@ -34,7 +34,7 @@ Execute (Up node):
   InfoUp
 
 Then:
-  AssertEqual 'info://dir/Top/', expand('%')
+  AssertEqual 'info:dir#Top', expand('%')
   quit
 
 
@@ -43,5 +43,5 @@ Execute (Go to a specific node):
   GotoNode Foo
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
   quit

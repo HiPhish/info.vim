@@ -44,7 +44,7 @@ Execute (The ':Follow' command with argument):
   silent Follow Foo Bar
 
 Then:
-  AssertEqual 'info://test/Foo%20Bar/', expand('%')
+  AssertEqual 'info:test#Foo%20Bar', expand('%')
   quit
 
 
@@ -54,7 +54,7 @@ Execute (Following the reference under the cursor):
   normal K
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
   quit
 
 
@@ -63,7 +63,7 @@ Execute (Not following non-existing reference under the cursor):
   normal K
 
 Then (We have stayed in the same node):
-  AssertEqual 'info://test/Top/', expand('%')
+  AssertEqual 'info:test#Top', expand('%')
   quit
 
 
@@ -73,7 +73,7 @@ Execute (Following reference under cursor with line break):
   normal K
 
 Then:
-  AssertEqual 'info://test/Foo%20Bar/', expand('%')
+  AssertEqual 'info:test#Foo%20Bar', expand('%')
   quit
 
 
@@ -82,5 +82,5 @@ Execute (Dead link):
   silent Follow Nul
 
 Then:
-  AssertEqual 'info://test/X-Ref/', expand('%')
+  AssertEqual 'info:test#X-Ref', expand('%')
   quit

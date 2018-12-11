@@ -17,7 +17,7 @@ Execute (No arguments):
   silent Info
 
 Then (Load up the 'dir' node):
-  AssertEqual 'info://dir/Top/', expand('%')
+  AssertEqual 'info:dir#Top', expand('%')
   quit
 
 
@@ -25,7 +25,7 @@ Execute (Top node is implied):
   silent Info test
 
 Then:
-  AssertEqual 'info://test/Top/', expand('%')
+  AssertEqual 'info:test#Top', expand('%')
   quit
 
 
@@ -33,7 +33,7 @@ Execute (File and node specified):
   silent Info test Foo
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
   quit
 
 

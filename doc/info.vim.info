@@ -273,27 +273,28 @@ File: info.vim.info,  Node: URI-Scheme,  Next: Location List,  Prev: Mappings an
 2.2 The URI-Scheme
 ==================
 
-Info.vim  uses  a URI  scheme  to  identify  files  and nodes.  Currently  This
-mechanism is unique to Info.vim, but other  Info reader could adopt it as well.
-An Info URI looks like this:
+Info.vim uses a URI scheme to identify files and nodes. The URI syntax is the
+same as the one in described in *note (texinfo)Info Files::, except that the
+authority part is not yet supported. An Info URI looks like this (query and
+fragment are optional):
 
-     info://file/node/?key1=value1&key2=value2
+     info:file?key1=value1&key2=value2#node
 
-The ‘file’ is the name of the file and  ‘node’ is the name of the node. The URI
-query can contain further information for the  reader, such as a line or column
+The ‘file’ is the name of the file and ‘node’ is the name of the node. The URI
+query can contain further information for the reader, such as a line or column
 number to jump to. See the manual for details.
 
-    After a URI has been processed by  Info.vim the query part is stripped away
-and the URI is set as the file name of the buffer.  This allows you to identify
+    After a URI has been processed by Info.vim the query part is stripped away
+and the URI is set as the file name of the buffer. This allows you to identify
 any node uniquely by its URI.
 
     All URIs are "normalised" by filling in omitted information. If the node is
 not specified it is set to ‘Top’, and if the file it not specified it is set to
 ‘dir’. This is consistent with how standalone Info treats omitted arguments.
 
-    Similar URI schemes are use by Neovim's terminal and other Vim plugins like
-Fugitive or Man.vim.  The normalisation  removes any ambiguity,  making it well
-suited for any custom scripting.
+    Similar URI schemes are used by Neovim's terminal and other Vim plugins
+like Fugitive or Man.vim. The normalisation removes any ambiguity, making it
+well suited for any custom scripting.
 
 
 File: info.vim.info,  Node: Location List,  Next: Invoking Info,  Prev: URI-Scheme,  Up: Advanced

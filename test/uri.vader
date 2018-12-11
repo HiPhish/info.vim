@@ -1,6 +1,6 @@
-##########################
-# The info:// URI scheme #
-##########################
+########################
+# The info: URI scheme #
+########################
 
 Before (Store old info binary so it can be restored):
   let g:old_infoprg = g:infoprg
@@ -10,29 +10,22 @@ After (Restore the original info binary):
   let g:infoprg = g:old_infoprg
 
 
-Execute (No path):
-  silent edit info://
-
-Then (Load up the 'dir' node):
-  AssertEqual 'info://dir/Top/', expand('%')
-
-
 Execute (Top node is implied):
-  silent edit info://test
+  silent edit info:test
 
 Then:
-  AssertEqual 'info://test/Top/', expand('%')
+  AssertEqual 'info:test#Top', expand('%')
 
 
 Execute (File and node specified):
-  silent edit info://test/Foo
+  silent edit info:test\#Foo
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
 
 
 Execute (Existence of 'b:info' variable and value of its keys):
-  silent edit info://test
+  silent edit info:test
 
 Then:
   Assert exists('b:info')

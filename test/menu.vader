@@ -51,18 +51,18 @@ Execute (The ':Menu' command without arguments):
   Menu
 
 Expect qf (Location list contains menu entries):
-  info://test/Foo%20Bar/|1| Foo Bar
-  info://test/Foo/|1| Foo
-  info://test/Bar/|1| Bar
-  info://test/Bar/|1| Foo
-  info://bar/Baz/|1| Foo
-  info://test/Bar/|1| Foo
-  info://test/Bar/|1| Foo
-  info://test/Nil/|1| Nul
-  info://test/Foo/|1| :Foo
-  info://test/Bar/|1| Foo
-  info://test/Bar/|1| \Foo
-  info://test/\Foo/|1| \Foo
+  info:test#Foo%20Bar|1| Foo Bar
+  info:test#Foo|1| Foo
+  info:test#Bar|1| Bar
+  info:test#Bar|1| Foo
+  info:bar#Baz|1| Foo
+  info:test#Bar|1| Foo
+  info:test#Bar|1| Foo
+  info:test#Nil|1| Nul
+  info:test#Foo|1| :Foo
+  info:test#Bar|1| Foo
+  info:test#Bar|1| \Foo
+  info:test#\Foo|1| \Foo
 
 
 Execute (The ':Menu' command with argument):
@@ -70,7 +70,7 @@ Execute (The ':Menu' command with argument):
   silent Menu Foo
 
 Then (We have successfully opened another node):
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
   quit
 
 
@@ -79,7 +79,7 @@ Execute (Follow a reference with a name contained in another reference):
   silent Menu Bar
 
 Then (The matcher prefers exact matches over regex matches):
-  AssertEqual 'info://test/Bar/', expand('%')
+  AssertEqual 'info:test#Bar', expand('%')
   quit
 
 
@@ -88,7 +88,7 @@ Execute (Follow a partial reference contained in another reference):
   silent Menu ba
 
 Then (The mather prefers matches are beginning over general matches):
-  AssertEqual 'info://test/Bar/', expand('%')
+  AssertEqual 'info:test#Bar', expand('%')
   quit
 
 
@@ -98,7 +98,7 @@ Execute (Following reference under cursor):
   normal K
 
 Then:
-  AssertEqual 'info://test/Foo/', expand('%')
+  AssertEqual 'info:test#Foo', expand('%')
   quit
 
 
@@ -107,5 +107,5 @@ Execute (Dead link):
   silent Menu Nul
 
 Then:
-  AssertEqual 'info://test/Menu/', expand('%')
+  AssertEqual 'info:test#Menu', expand('%')
   quit

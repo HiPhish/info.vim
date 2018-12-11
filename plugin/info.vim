@@ -44,8 +44,8 @@ if !exists('s:did_load')
 	augroup InfoLazyLoading  " These load the rest of script as needed
 		autocmd!
 		exe 'autocmd FuncUndefined *info    source '.expand('<sfile>')
-		exe 'autocmd BufReadCmd    info://* source '.expand('<sfile>').
-		    \'| call '.s:SID().'readReference('.s:SID().'decodeURI(expand(''<amatch>'')))'
+		exe 'autocmd BufReadCmd    info:* source '.expand('<sfile>').
+		    \'| call '.s:SID().'readReference('.s:SID().'decodeURI(expand(''<afile>'')))'
 	augroup END
 	finish
 endif
@@ -98,7 +98,7 @@ augroup InfoFiletype
 				\endif
 
 	" Opening a file with Info URI
-	autocmd BufReadCmd info://* call <SID>readReference(<SID>decodeURI(expand('<amatch>')))
+	autocmd BufReadCmd info:* call <SID>readReference(<SID>decodeURI(expand('<afile>')))
 augroup END
 
 
@@ -157,7 +157,7 @@ function! s:info(mods, ...)
 
 	let l:uri = s:encodeURI(l:reference)
 
-	" The following will trigger the autocommand of editing an info:// file
+	" The following will trigger the autocommand of editing an info: file
 	if a:mods !~# 'tab' && s:find_info_window()
 		call s:executeURI('silent edit ', l:uri)
 	else
@@ -563,43 +563,29 @@ function! s:gotoNode(node)
 	call s:executeURI('silent edit ', l:uri)
 endfunction
 " URI-handling function {{{1
+" See RFC 3986 for the URI standard: https://tools.ietf.org/html/rfc3986
 
 " Decodes a URI into a node reference
 function! s:decodeURI(uri)
-	" URI-parsing regex from [RFC 3986]:
-	"    https://tools.ietf.org/html/rfc3986#appendix-B
+	" URI-parsing regex from https://tools.ietf.org/html/rfc3986#appendix-B
 	let l:uriMatches = matchlist(a:uri, '\v^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
 
-	let l:authority = s:percentDecode(l:uriMatches[4])
-	let l:path      = s:percentDecode(l:uriMatches[5])
-	let l:query     = s:percentDecode(l:uriMatches[7])
+	let l:path     = s:percentDecode(l:uriMatches[5])
+	let l:query    = s:percentDecode(l:uriMatches[7])
+	let l:fragment = s:percentDecode(l:uriMatches[9])
 
-	let l:file = empty(l:authority) ? '' : l:authority
+	let l:ref = {'File': l:path}
 
-	" Strip leading and trailing slashes from the path
-	let l:node = substitute(l:path, '\v(^\/)|(\/$)', '', 'g')
-	if empty(l:node)
-		let l:node = ''
+	if !empty(l:fragment)
+		let l:ref['Node'] = l:fragment
 	endif
 
-	let l:line   = matchstr(l:query, '\vline\=\zs\d+')
-	let l:column = matchstr(l:query, '\vcolumn\=\zs\d+')
-
-	let l:ref = {}
-	if !empty(l:file)
-		let l:ref['File'] = l:file
-	endif
-	if !empty(l:node)
-		let l:ref['Node'] = l:node
-	endif
-
-	if !empty(l:line)
-		let l:ref['line'] = l:line
-	endif
-
-	if !empty(l:column)
-		let l:ref['column'] = l:column
-	endif
+	for l:prop in ['line','column']
+		let l:val = matchstr(l:query, '\v'.l:prop.'\=\zs\d+')
+		if !empty(l:val)
+			let l:ref[l:prop] = l:val
+		endif
+	endfor
 
 	return l:ref
 endfunction
@@ -607,31 +593,29 @@ endfunction
 
 " Encodes a node reference into a URI
 function! s:encodeURI(reference)
-	let l:file   = s:percentEncode(get(a:reference,   'File', ''))
-	let l:node   = s:percentEncode(get(a:reference,   'Node', ''))
-	let l:line   = s:percentEncode(get(a:reference,   'line', ''))
-	let l:column = s:percentEncode(get(a:reference, 'column', ''))
+	" The scheme is hard-coded, the path has a mandatory default
+	let l:uri = 'info:' . s:percentEncode(get(a:reference, 'File', 'dir'))
 
-	let l:uri = 'info://'
-
-	if !empty(l:file)
-		let l:uri .= l:file.'/'
-		if !empty(l:node)
-			let l:uri .= l:node.'/'
+	" Build up the query dictionary
+	let l:query_props = ['line', 'column']  " Hard-coded URI properties
+	let l:query  = {}
+	for l:prop in l:query_props
+		if get(a:reference, l:prop, 0)
+			let l:query[l:prop] = get(a:reference, l:prop)
 		endif
+	endfor
+	" Insert the query into the URI
+	if !empty(l:query)
+		let l:uri .= '?'
+		for [l:prop, l:val] in items(l:query)
+			let l:uri .= l:prop . '=' . l:val . '&'
+		endfor
+		let l:uri = l:uri[:-2]  " Strip away the last '&'
 	endif
 
-	if !empty(l:line) || !empty(l:column)
-		let l:uri .= '?'
-		if !empty(l:line)
-			let l:uri .= 'line='.l:line
-			if !empty(l:column)
-				let l:uri .= '&'
-			endif
-		endif
-		if !empty(l:column)
-			let l:uri .= 'column='.l:column
-		endif
+	" Insert the fragment into the URI
+	if has_key(a:reference, 'Node')
+		let l:uri .= '#' . s:percentEncode(get(a:reference, 'Node'))
 	endif
 
 	return l:uri
@@ -771,10 +755,11 @@ endfunction
 " escaped.
 function! s:executeURI(ex_cmd, uri)
 	" The URI will be spliced into the command, it will not be used as a raw
-	" string. Therefore we need to escape backslashes and potentially othere
+	" string. Therefore we need to escape backslashes and potentially other
 	" characters. It is important to escape backslashes first, otherwise the
 	" escaping backslash will be escaped, thus un-escaping previous escapes
 	let l:uri = substitute(a:uri, '\v\\', '\\\\', 'g')
+	let l:uri = substitute(a:uri, '\v\#',  '\\#', 'g')
 	" Percent characters stand for the current file name
 	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
 	execute a:ex_cmd l:uri
