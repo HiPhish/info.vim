@@ -29,9 +29,11 @@ Execute (Existence of 'b:info' variable and value of its keys):
 
 Then:
   Assert exists('b:info')
-  AssertEqual  'test', get(b:info, 'File')
-  AssertEqual   'Top', get(b:info, 'Node')
-  AssertEqual   'Foo', get(b:info, 'Next')
-  AssertEqual   'Bar', get(b:info, 'Prev')
-  AssertEqual '(dir)', get(b:info, 'Up')
+
+  AssertEqual 'test', get(b:info, 'File')
+  AssertEqual  'Top', get(b:info, 'Node')
+
+  AssertEqual {'Name': 'Foo', 'File': 'test', 'Node':   'Foo'}, b:info['Next']
+  AssertEqual {'Name': 'Bar', 'File': 'test', 'Node':   'Bar'}, b:info['Prev']
+  AssertEqual {               'File':  'dir', 'Name': '(dir)'}, b:info[  'Up']
   quit

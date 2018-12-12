@@ -53,9 +53,10 @@ Execute (Values of the 'b:info' dictionary):
   silent Info test
 
 Then:
-  AssertEqual   'test', b:info['File']
-  AssertEqual    'Top', b:info['Node']
-  AssertEqual    'Foo', b:info['Next']
-  AssertEqual    'Bar', b:info['Prev']
-  AssertEqual  '(dir)', b:info[  'Up']
+  AssertEqual 'test', b:info['File']
+  AssertEqual  'Top', b:info['Node']
+
+  AssertEqual {'Name': 'Foo', 'File': 'test', 'Node':   'Foo'}, b:info['Next']
+  AssertEqual {'Name': 'Bar', 'File': 'test', 'Node':   'Bar'}, b:info['Prev']
+  AssertEqual {               'File':  'dir', 'Name': '(dir)'}, b:info[  'Up']
   quit

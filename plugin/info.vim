@@ -212,6 +212,22 @@ function! s:readReference(ref)
 		let b:info[l:key] = l:value
 	endfor
 
+	" Parse the raw string into a proper reference
+	for l:property in ['Up', 'Next', 'Prev']
+		if !has_key(b:info, l:property)
+			continue
+		endif
+		let l:matches = matchlist(b:info[l:property], '\v^(\((.+)\))?(.+)?')
+		let [l:file, l:node] = l:matches[2:3] | unlet l:matches
+		let b:info[l:property] = {'File': empty(l:file) ? b:info.File : l:file}
+		if empty(l:node)
+			let b:info[l:property]['Name'] = '('.l:file.')'
+		else
+			let b:info[l:property]['Name'] = l:node
+			let b:info[l:property]['Node'] = l:node
+		endif
+	endfor
+
 	" Normalise the URI (it might contain abbreviations, but we want full
 	" names)
 	let l:uri = s:encodeURI({'File': b:info['File'], 'Node': b:info['Node']})
@@ -225,10 +241,7 @@ function! s:readReference(ref)
 	endif
 
 	" Jump to the given position or second line so header concealing can work
-	let l:cursor = [
-		\ get(a:ref,   'line', 2),
-		\ get(a:ref, 'column', 1),
-	\ ]
+	let l:cursor = [get(a:ref, 'line', 2), get(a:ref, 'column', 1)]
 	call cursor(l:cursor)
 
 	" Assemble the menu and cross-references
@@ -301,23 +314,7 @@ function! s:jumpToProperty(property)
 		return
 	endif
 
-	" The node name might contain a file name: (file)Node
-	let l:property = b:info[a:property]
-
-	let l:ref = {}
-
-	let l:file = matchstr(l:property, '\v^\(\zs[^)]+\ze\)')
-	if empty(l:file)
-		let l:ref['File'] = b:info['File']
-	endif
-
-	let l:node = matchstr(l:property, '\v^(\([^)]+\))?\zs[^(]+')
-	if !empty(l:node)
-		let l:ref['Node'] = l:node
-	endif
-
-	let l:uri = s:encodeURI(l:ref)
-	call s:executeURI('silent edit ', l:uri)
+	call s:executeURI('silent edit ', s:encodeURI(b:info[a:property]))
 endfunction
 
 
