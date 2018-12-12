@@ -33,6 +33,20 @@ setlocal shiftwidth=8
 
 nnoremap <buffer> g? :call <SID>help()<CR>
 
+" Settings inside this condition only apply rendered Info files, not on-disc
+" Info files.
+if &buftype =~? 'nofile'
+	setlocal bufhidden=hide
+	setlocal noswapfile
+	setlocal nonumber
+	setlocal nomodified
+	setlocal foldcolumn=0
+	setlocal colorcolumn=0
+	setlocal nolist
+	setlocal nospell
+	setlocal concealcursor="nc"
+	setlocal conceallevel=2
+endif
 
 " Echo a quick instruction list
 function! s:help()

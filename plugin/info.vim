@@ -181,11 +181,8 @@ function! s:readReference(ref)
 	endif
 
 	" We will lock it after assembly
-	setlocal modifiable
-	setlocal readonly
-	setlocal noswapfile
 	setlocal buftype=nofile
-	setlocal bufhidden=hide
+	setlocal modifiable
 
 	" Make sure to redirect the standard error into the void
 	let l:cmd = s:encodeCommand(a:ref, {'stderr': '/dev/null'})
@@ -248,18 +245,10 @@ function! s:readReference(ref)
 	call s:buildMenu()
 	call s:collectXRefs()
 
-	" Now lock the file and set all the remaining options
+	" Now lock the file, this will set all the remaining options
 	setlocal filetype=info
-	setlocal nonumber
-	setlocal norelativenumber
 	setlocal nomodifiable
-	setlocal nomodified
-	setlocal foldcolumn=0
-	setlocal colorcolumn=0
-	setlocal nolist
-	setlocal nospell
-	setlocal concealcursor="nc"
-	setlocal conceallevel=2
+	setlocal readonly
 endfunction
 
 
