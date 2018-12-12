@@ -88,14 +88,10 @@ augroup InfoFiletype
 
 	" Look up the reference under the cursor (for cross-references and menus)
 	autocmd FileType info if &buftype =~? 'nofile' | 
-				\nnoremap <silent> <buffer> K :call <SID>xRefUnderCursor()<CR> | 
-				\endif
-	autocmd FileType info if &buftype =~? 'nofile' | 
-				\nnoremap <silent> <buffer> <2-LeftMouse> :call <SID>xRefUnderCursor()<CR> | 
-				\endif
-	autocmd FileType info if &buftype =~? 'nofile' | 
-				\nnoremap <silent> <buffer> <C-]> K | 
-				\endif
+			\nnoremap <silent> <buffer> K :call <SID>xRefUnderCursor()<CR> | 
+			\nnoremap <silent> <buffer> <2-LeftMouse> :call <SID>xRefUnderCursor()<CR> | 
+			\nnoremap <silent> <buffer> <C-]> :call <SID>xRefUnderCursor()<CR> | 
+		\endif
 
 	" Opening a file with Info URI
 	autocmd BufReadCmd info:* call <SID>readReference(<SID>decodeURI(expand('<afile>')))
