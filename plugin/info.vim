@@ -146,8 +146,16 @@ function! s:info(mods, ...)
 		let l:reference['Node'] = l:node
 	endif
 
-	if !s:verifyReference(l:reference)
-		return
+	silent let l:verified = s:verifyReference(l:reference)
+	if !l:verified
+		let l:itemref = {'Items': a:000}
+		if !s:verifyReference(l:itemref)
+			return
+		endif
+		" Make sure to redirect the standard error into the void
+		let l:cmd = s:encodeCommand(l:itemref, {'stderr': '/dev/null'})
+		let l:header = systemlist(l:cmd)[0]
+		let l:reference = s:parseHeader(l:header)
 	endif
 
 
@@ -723,6 +731,11 @@ function! s:encodeCommand(ref, kwargs)
 	" The path to the 'doc' directory has been added so we can find the
 	" documents included with the plugin. Output is directed stdout
 	let l:cmd .= ' -d '.s:doc_path.' --output -'
+
+	if has_key(a:ref, 'Items')
+		let l:cmd .= ' -- '.join(map(
+			\ copy(a:ref['Items']), 'shellescape(v:val)'))
+	endif
 
 	if has_key(a:kwargs, 'stderr')
 		let l:cmd .= ' 2>'.a:kwargs['stderr']
