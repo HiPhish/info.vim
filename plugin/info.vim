@@ -164,6 +164,44 @@ function! s:info(mods, ...)
 endfunction
 
 
+" Parse the node header to reference.
+function! s:parseHeader(header)
+	let l:info = {}
+
+	" Split the header into key-value pairs.
+	let l:headerPairs = split(a:header, ',')
+
+	for l:pair in l:headerPairs
+		" A key is terminated by a colon and might have leading whitespace.
+		let l:key = matchstr(l:pair, '\v^\s*\zs[^:]+\ze\:')
+		if empty(l:key)
+			continue
+		endif
+		" The value might have leading whitespace as well
+		let l:value = matchstr(l:pair, '\v\:\s*\zs[^,]+')
+		let l:info[l:key] = l:value
+	endfor
+
+	" Parse the raw string into a proper reference
+	for l:property in ['Up', 'Next', 'Prev']
+		if !has_key(l:info, l:property)
+			continue
+		endif
+		let l:matches = matchlist(l:info[l:property], '\v^(\((.+)\))?(.+)?')
+		let [l:file, l:node] = l:matches[2:3] | unlet l:matches
+		let l:info[l:property] = {'File': empty(l:file) ? l:info.File : l:file}
+		if empty(l:node)
+			let l:info[l:property]['Name'] = '('.l:file.')'
+		else
+			let l:info[l:property]['Name'] = l:node
+			let l:info[l:property]['Node'] = l:node
+		endif
+	endfor
+
+	return l:info
+endfunction
+
+
 " Jump to a particular reference. Here the heavy heavy lifting happens: we set
 " the options for the buffer and load the info document.
 function! s:readReference(ref)
@@ -191,39 +229,8 @@ function! s:readReference(ref)
 	" Putting has produced an empty line at the top, remove that
     silent keepjumps 1delete _
 
-	" Parse the node header
-	let b:info = {}
-
-	" We assume that the header is the first line. Split the header into
-	" key-value pairs.
-	let l:headerPairs = split(getline(1), ',')
-
-	for l:pair in l:headerPairs
-		" A key is terminated by a colon and might have leading whitespace.
-		let l:key = matchstr(l:pair, '\v^\s*\zs[^:]+\ze\:')
-		if empty(l:key)
-			continue
-		endif
-		" The value might have leading whitespace as well
-		let l:value = matchstr(l:pair, '\v\:\s*\zs[^,]+')
-		let b:info[l:key] = l:value
-	endfor
-
-	" Parse the raw string into a proper reference
-	for l:property in ['Up', 'Next', 'Prev']
-		if !has_key(b:info, l:property)
-			continue
-		endif
-		let l:matches = matchlist(b:info[l:property], '\v^(\((.+)\))?(.+)?')
-		let [l:file, l:node] = l:matches[2:3] | unlet l:matches
-		let b:info[l:property] = {'File': empty(l:file) ? b:info.File : l:file}
-		if empty(l:node)
-			let b:info[l:property]['Name'] = '('.l:file.')'
-		else
-			let b:info[l:property]['Name'] = l:node
-			let b:info[l:property]['Node'] = l:node
-		endif
-	endfor
+	" We assume that the header is the first line.
+	let b:info = s:parseHeader(getline(1))
 
 	" Normalise the URI (it might contain abbreviations, but we want full
 	" names)
