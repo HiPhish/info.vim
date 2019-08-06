@@ -119,6 +119,26 @@ the prompt to something more convenient:
    endif
 
 
+Other cool stuff
+################
+
+You can set Vim as your default standalone Info reader with this little trick:
+
+.. code-block:: sh
+
+   # Create a shell function as a wrapper
+   viminfo () {
+       vim -R -M -c "Info $1 $2" +only
+   }
+   # Alias info to our new function
+   alias info=viminfo
+
+This snippet creates a shell function which invokes Vim with the `:Info`
+command and splices in the command-line arguments. We can alias it to `info` if
+we want to replace the standalone Info reader. Add the above lines to your
+shell configuration file to make it permanent.
+
+
 Stuff left to do
 ################
 
