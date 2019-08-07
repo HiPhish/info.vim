@@ -26,9 +26,16 @@ if exists('g:loaded_info')
   finish
 endif
 
-" This is the program that assembles info files
-if !exists('g:infoprg')
-	let g:infoprg = 'info'
+if !exists("s:did_load")
+	" This is the program that assembles info files
+	if !exists('g:infoprg')
+		let g:infoprg = 'info'
+	endif
+
+	" Fallback action if the file is not found
+	if !exists('g:infofallback')
+		let g:Infofallback = {t, m -> execute(m . ' Man ' . t) ? '' : 'Info.vim: falling back to manpage'}
+	endif
 endif
 
 " A handy function for constructing function names that use <SID>
@@ -147,6 +154,11 @@ function! s:info(mods, ...)
 	endif
 
 	if !s:verifyReference(l:reference)
+		if exists('g:Infofallback')
+			echohl ErrorMsg
+			echo g:Infofallback(l:file, a:mods)
+			echohl NONE
+		endif
 		return
 	endif
 
@@ -779,9 +791,11 @@ function! s:verifyReference(ref)
 	if !empty(l:stderr)
 		" The message might contain line breaks.
 		let l:stderr = substitute(l:stderr, '\v\_s+', ' ', 'g')
-		echohl ErrorMsg
-		echom l:stderr
-		echohl NONE
+		if !exists('g:Infofallback')
+			echohl ErrorMsg
+			echom l:stderr
+			echohl NONE
+		endif
 		return 0
 	endif
 
