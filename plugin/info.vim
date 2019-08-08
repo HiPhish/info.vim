@@ -38,7 +38,7 @@ if !exists("s:did_load")
 		echo 'Info.vim: falling back to manpage'
 		echohl NONE
 		if !has('nvim')
-			" do stuff
+			runtime ftplugin/man.vim
 		endif
 		execute a:mods 'Man' a:topic
 	endfunction
