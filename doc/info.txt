@@ -86,17 +86,16 @@ Default: 'info'~
 
 ------------------------------------------------------------------------------
 g:Infofallback                                                *g:Infofallback*
-Default: function('<lambda>')~
+Default: {topic, mods -> ...}~
 
     A fallback function for the |:Info| command which will be called if the
-    topic could not be found. It takes two arguments and returns a string
-    value . The first argument is the first argument to the |:Info| command
-    and the second argument is the |<mods>| in quoted form (`<q-mods>`) of the
-    command. The returned string will be |:echo|ed with |ErrorMsg|
-    highlighting.
+    topic could not be found. It takes two arguments and returns nothing. The
+    first argument is the first argument to the |:Info| command and the second
+    argument is the |<mods>| in quoted form (`<q-mods>`) of the command.
 
     The default fallback executes |:Man| on the topic to try to open a man
-    page. This is similar to how standalone Info behaves.
+    page. This is similar to how standalone Info behaves. In Vim as a side
+    effect `runtime ftplugin/man.vim` will be executed.
 
     If you wish to disable any fallback entirely you can |:unlet| this
     variable.

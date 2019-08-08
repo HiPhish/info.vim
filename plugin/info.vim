@@ -33,8 +33,17 @@ if !exists("s:did_load")
 	endif
 
 	" Fallback action if the file is not found
-	if !exists('g:infofallback')
-		let g:Infofallback = {t, m -> execute(m . ' Man ' . t) ? '' : 'Info.vim: falling back to manpage'}
+	function! s:fallback(topic, mods)
+		echohl ErrorMsg
+		echo 'Info.vim: falling back to manpage'
+		echohl NONE
+		if !has('nvim')
+			" do stuff
+		endif
+		execute a:mods 'Man' a:topic
+	endfunction
+	if !exists('g:Infofallback')
+		let g:Infofallback = function('s:fallback')
 	endif
 endif
 
@@ -155,9 +164,7 @@ function! s:info(mods, ...)
 
 	if !s:verifyReference(l:reference)
 		if exists('g:Infofallback')
-			echohl ErrorMsg
-			echo g:Infofallback(l:file, a:mods)
-			echohl NONE
+			call g:Infofallback(l:file, a:mods)
 		endif
 		return
 	endif
