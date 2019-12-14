@@ -78,10 +78,14 @@ controls similar to standalone Info you should look into the |info-mappings|.
 VARIABLES                                                     *info-variables*
 
 g:infoprg                                                          *g:infoprg*
+t:infoprg                                                          *t:infoprg*
+b:infoprg                                                          *b:infoprg*
+
 Default: 'info'~
 
-    Name or  path to  the standalone  GNU Info program;  set this  variable to
-    override your system's default. You need at least version 6.4.
+    Name or path to the standalone GNU Info program in increasing order of
+    precedence; set one of these variables to override your system's default.
+    You need at least version 6.4 of GNU Info.
 
 
 ------------------------------------------------------------------------------

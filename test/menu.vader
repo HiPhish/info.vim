@@ -4,12 +4,11 @@
 
 
 Before (Store old info binary so it can be restored):
-  let g:old_infoprg = g:infoprg
-  let g:infoprg = 'sh '.substitute(g:vader_file, '\v[^/]+\.vader$', '', '').'mock-info.sh'
+  let g:infoprg = 'test/bin/info.sh'
   silent! unlet g:Infofallback
 
 After (Restore the original info binary):
-  let g:infoprg = g:old_infoprg
+  unlet g:infoprg
 
 
 Execute (Absence of the 'Menu' key):

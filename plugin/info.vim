@@ -26,12 +26,8 @@ if exists('g:loaded_info')
   finish
 endif
 
-if !exists("s:did_load")
-	" This is the program that assembles info files
-	if !exists('g:infoprg')
-		let g:infoprg = 'info'
-	endif
 
+if !has_key(s:, 'did_load')
 	" Fallback action if the file is not found
 	function! s:fallback(topic, mods)
 		echohl ErrorMsg
@@ -725,7 +721,7 @@ endfunction
 " Encode a reference into an info command call. The 'kwargs' is for
 " redirection of stdin and stderr
 function! s:encodeCommand(ref, kwargs)
-	let l:cmd = g:infoprg
+	let l:cmd = s:infoprg()
 	if has_key(a:ref, 'File')
 		let l:cmd .= ' --file '.shellescape(a:ref['File'])
 	endif
@@ -773,7 +769,7 @@ function! s:verifyInfoVersion()
 		return
 	endif
 
-	let l:version = matchstr(system(g:infoprg.' --version'), '\v\d+\.\d+')
+	let l:version = matchstr(system([s:infoprg(), '--version']), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
 
 	if l:major < 6
@@ -807,5 +803,14 @@ function! s:verifyReference(ref)
 	endif
 
 	return 1
+endfunction
+
+
+" Return the current 'info' binary; respects the order of precedence for
+" scopes. We do not cache the result in a variable because the user might have
+" changed settings since the last time this function was called.
+function! s:infoprg()
+	echom get(b:, 'infoprg', get(t:, 'infoprg', get(g:, 'infoprg', 'info')))
+	return get(b:, 'infoprg', get(t:, 'infoprg', get(g:, 'infoprg', 'info')))
 endfunction
 " vim:tw=78:ts=4:noexpandtab:norl:

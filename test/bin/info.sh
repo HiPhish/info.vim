@@ -25,10 +25,7 @@ while [ -n "$1" ]; do
 	esac
 done
 
-# The $(dirname $0) is save only as long as the script is invoked with its full
-# path, which will be true as long as the test cases use 'g:vader_file' to
-# construct the path.
-TARGET="$(dirname "$0")/mock/$FILE.$NODE.info"
+TARGET="$(dirname "$0")/../mock/$FILE.$NODE.info"
 if [ ! -f "$TARGET" ]; then
 	# The >&2 means "redirect address of FD 1 to FD 2"
 	>&2 echo "info: '$FILE': No such file or directory"
