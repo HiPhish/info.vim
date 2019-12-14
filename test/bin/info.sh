@@ -25,7 +25,7 @@ while [ -n "$1" ]; do
 	esac
 done
 
-TARGET="$(dirname "$0")/../mock/$FILE.$NODE.info"
+TARGET="$(dirname "$0")/../info/$FILE.$NODE.info"
 if [ ! -f "$TARGET" ]; then
 	# The >&2 means "redirect address of FD 1 to FD 2"
 	>&2 echo "info: '$FILE': No such file or directory"

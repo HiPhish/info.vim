@@ -4,10 +4,10 @@
  Testing Info.vim
 ##################
 
-We use Vader_  for testing. All tests  are stored under `test/`,  one test file
-per command. If you fixed a bug please add  a test case for the bug so it never
-comes back  again. If you added  a new feature add  tests for it so  it remains
-functional.
+We use Vader_ for testing. All tests are stored in the `vader/` directory, one
+test file per Vim command. If you fixed a bug please add a test case for the
+bug so it never comes back again. If you added a new feature add tests for it
+so it remains functional.
 
 Always use  the `info` file  type for `Given` and  `Expected` blocks and  add a
 comment describing what the purpose of the  test is. Avoid terms like "test" or
@@ -33,7 +33,35 @@ name and append the mock binary.
 As for the files to test against, use the pre-rendered Info files included with
 the test suite. The file name pattern is `<file>.<node>.info`.
 
-.. _Vader: https://github.com/junegunn/vader.vim/
+
+Running tests
+#############
+
+Tests must be run from the root directory of the project. You can run a test
+manually by executing the following line of code:
+
+.. code-block:: vim
+
+   Vader test/vader/name-of-test.vader
+
+Substitute `name-of-test` for the name of the test file, or alternatively use
+`*` to run all tests. You can also run all tests from the command-line using
+the included makefile:
+
+.. code-block:: sh
+
+   make check
+
+This might only work with Neovim_ though, I have not tested it with Vim_.
+
+
+Directory overview
+##################
+
+- `bin` contains all mock binaries
+- `vader` contains all Vader test scripts
+- `info` contains all pre-rendered Info nodes; the mock Info scripts will just
+  echo out the file contents
 
 
 The mock Info script
@@ -43,4 +71,20 @@ The shell script `mock-info.sh` serves as a replacement for the Info binary. It
 accepts the same arguments, but instead of searching the user's system for Info
 files and extracting nodes it only echoes back an existing text file.
 
-Those files are found under `test/mock/`.
+
+The mock Info files
+###################
+
+These text files are what the output of Info would look like. They are served
+by the mock Info script for testing. The naming scheme is `<file>.<node>.info`.
+The name is important so the mock Info can locate the files.
+
+When writing mock files only add as much information as necessary, but if an
+existing file would be suitable for your additions prefer that over creating a
+new file.
+
+
+.. ----------------------------------------------------------------------------
+.. _Vader: https://github.com/junegunn/vader.vim/
+.. _Neovim: https://neovim.io/
+.. _Vim: https://www.vim.org/

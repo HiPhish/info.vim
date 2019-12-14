@@ -2,6 +2,7 @@
 # Health check using Neovim's :checkhealth #
 ############################################
 
+
 After (Restore the original info binary):
   unlet g:infoprg
 
