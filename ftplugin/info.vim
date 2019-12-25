@@ -25,39 +25,31 @@
 
 " The tab-related settings are needed to ensure proper display because info
 " files use tabs for alignment of text.
-setlocal noexpandtab
-setlocal tabstop=8
-setlocal softtabstop=8
-setlocal shiftwidth=8
-
-
-nnoremap <buffer> g? :call <SID>help()<CR>
+setlocal noexpandtab tabstop=8 softtabstop=8 shiftwidth=8
 
 " Settings inside this condition only apply rendered Info files, not on-disc
 " Info files.
 if &buftype =~? 'nofile'
+	nnoremap <buffer> g? :call <SID>help()<CR>
 	setlocal bufhidden=hide
-	setlocal noswapfile
-	setlocal nonumber
-	setlocal nomodified
-	setlocal foldcolumn=0
-	setlocal colorcolumn=0
-	setlocal nolist
-	setlocal nospell
-	setlocal concealcursor="nc"
-	setlocal conceallevel=2
+	setlocal noswapfile nonumber nomodified nolist nospell
+	setlocal foldcolumn=0 colorcolumn=0
+	setlocal concealcursor="nc" conceallevel=2
 endif
+
+let s:help_message =
+	\"Execute ':Info info.vim' for an interactive tutorial. The following\n"
+	\.."commands are defined in 'info' buffers:\n"
+	\.."  :Menu [entry]   Jump to a menu entry or open menu in location list\n"
+	\.."  :Follow [xRef]  Follow reference and cross-references\n"
+	\.."  :InfoUp         Go to parent node\n"
+	\.."  :InfoNext       Go to next node\n"
+	\.."  :InfoPrev       Go to previous node\n"
+	\.."See ':help info.vim' for more details and mappings."
 
 " Echo a quick instruction list
 function! s:help()
-	echomsg 'Execute '':Info info.vim'' for an interactive tutorial. The following'
-	echomsg 'commands are defined in ''info'' buffers:'
-	echomsg '  :Menu [entry]   Jump to a menu entry or open menu in location list'
-	echomsg '  :Follow [xRef]  Follow reference and cross-references'
-	echomsg '  :InfoUp         Go to parent node'
-	echomsg '  :InfoNext       Go to next node'
-	echomsg '  :InfoPrev       Go to previous node'
-	echomsg 'See '':help info.vim'' for more details and mappings.'
+	echo s:help_message
 endfunction
 
 " vim:tw=78:ts=4:noexpandtab:norl:
