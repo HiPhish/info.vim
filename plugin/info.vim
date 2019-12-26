@@ -57,7 +57,7 @@ if !exists('s:did_load')
 		autocmd!
 		exe 'autocmd FuncUndefined *info    source '.expand('<sfile>')
 		exe 'autocmd BufReadCmd    info:* source '.expand('<sfile>').
-		    \'| call '.s:SID().'readReference('.s:SID().'decodeURI(expand(''<afile>'')))'
+		    \'| call ' ..s:SID() .. 'readReference(info#uri#decode(expand("<afile>")))'
 	augroup END
 	finish
 endif
@@ -71,9 +71,9 @@ let s:doc_path = expand('<sfile>:p:h:h').'/doc/'
 
 
 " Public interface {{{1
-nnoremap <silent> <Plug>(InfoUp)      :call <SID>up()<CR>
-nnoremap <silent> <Plug>(InfoNext)    :call <SID>next()<CR>
-nnoremap <silent> <Plug>(InfoPrev)    :call <SID>prev()<CR>
+nnoremap <silent> <Plug>(InfoUp)      :InfoUp<CR>
+nnoremap <silent> <Plug>(InfoNext)    :InfoNext<CR>
+nnoremap <silent> <Plug>(InfoPrev)    :InfoPrev<CR>
 nnoremap <silent> <Plug>(InfoMenu)    :<C-U>call <SID>menuPrompt(v:count)<CR>
 nnoremap <silent> <Plug>(InfoFollow)  :<C-U>call <SID>followPrompt(v:count)<CR>
 nnoremap <silent> <Plug>(InfoGoto)    :call <SID>gotoPrompt()<CR>
@@ -93,11 +93,6 @@ augroup InfoFiletype
 	autocmd FileType info command! -buffer -nargs=?
 		\ GotoNode call <SID>gotoNode(<q-args>)
 
-	" Set up mappings for inside manuals
-	autocmd FileType info command! -buffer InfoUp    call <SID>up()
-	autocmd FileType info command! -buffer InfoNext  call <SID>next()
-	autocmd FileType info command! -buffer InfoPrev  call <SID>prev()
-
 	" Look up the reference under the cursor (for cross-references and menus)
 	autocmd FileType info if &buftype =~? 'nofile' | 
 			\nnoremap <silent> <buffer> K :call <SID>xRefUnderCursor()<CR> | 
@@ -106,7 +101,7 @@ augroup InfoFiletype
 		\endif
 
 	" Opening a file with Info URI
-	autocmd BufReadCmd info:* call <SID>readReference(<SID>decodeURI(expand('<afile>')))
+	autocmd BufReadCmd info:* call <SID>readReference(info#uri#decode(expand('<afile>')))
 augroup END
 
 
@@ -165,14 +160,13 @@ function! s:info(mods, ...)
 		return
 	endif
 
-
-	let l:uri = s:encodeURI(l:reference)
+	let l:uri = info#uri#encode(l:reference)
 
 	" The following will trigger the autocommand of editing an info: file
 	if a:mods !~# 'tab' && s:find_info_window()
-		call s:executeURI('silent edit ', l:uri)
+		execute 'silent edit' info#uri#exescape(l:uri)
 	else
-		call s:executeURI('silent '.a:mods.' split ', l:uri)
+		execute 'silent' a:mods 'split' info#uri#exescape(l:uri)
 	endif
 
 	echo 'Welcome to Info. Type g? for help.'
@@ -242,14 +236,14 @@ function! s:readReference(ref)
 
 	" Normalise the URI (it might contain abbreviations, but we want full
 	" names)
-	let l:uri = s:encodeURI({'File': b:info['File'], 'Node': b:info['Node']})
+	let l:uri = info#uri#encode({'File': b:info['File'], 'Node': b:info['Node']})
 
 	if bufexists(l:uri) && bufnr(l:uri) != bufnr('%')
 		let l:winbufnr = winbufnr(0)
-		call s:executeURI('silent edit ', l:uri)
+		execute 'silent' 'edit' info#uri#exescape(l:uri)
 		execute 'silent '.l:winbufnr.'bwipeout'
 	elseif bufname('%') != l:uri
-		call s:executeURI('silent file ', l:uri)
+		execute 'silent' 'file' info#uri#exescape(l:uri)
 	endif
 
 	" Jump to the given position or second line so header concealing can work
@@ -289,36 +283,6 @@ function! s:find_info_window() abort
 			return 0
 		endif
 	endwhile
-endfunction
-
-
-" Navigation functions (up, next, prev) {{{1
-
-" Jump to the next node
-function! s:next()
-	call s:jumpToProperty('Next')
-endfunction
-
-" Jump to the next node
-function! s:prev()
-	call s:jumpToProperty('Prev')
-endfunction
-
-" Jump to the next node
-function! s:up()
-	call s:jumpToProperty('Up')
-endfunction
-
-" Common code for next, previous, and so on nodes
-function! s:jumpToProperty(property)
-	if !has_key(b:info, a:property)
-		echohl ErrorMsg
-		echo 'No '''.a:property.''' pointer for this node.'
-		echohl None
-		return
-	endif
-
-	call s:executeURI('silent edit ', s:encodeURI(b:info[a:property]))
 endfunction
 
 
@@ -365,8 +329,8 @@ function! s:menu(pattern)
 		return
 	endif
 
-	let l:uri = s:encodeURI(l:entry)
-	call s:executeURI('silent edit ', l:uri)
+	let l:uri = info#uri#encode(l:entry)
+	execute 'silent' 'edit' info#uri#exescape(l:uri)
 endfunction
 
 
@@ -388,7 +352,7 @@ function! s:buildMenu()
 		" The line might contain the description of the entry, so we need to
 		" strip it out. This is the same regex as used by syntax
 		let l:entry = matchstr(l:entry, '\v^\*\s+.{-}\:(:|\s+.{-}(,|\. |:|	|$))')
-		call add(l:menu, s:decodeRefString(l:entry))
+		call add(l:menu, info#reference#decode(l:entry, b:info))
 		let l:entryLine = search('\v^\*[^:]+\:', 'W')
 	endwhile
 
@@ -449,8 +413,8 @@ function! s:follow(pattern)
 		return
 	endif
 
-	let l:uri = s:encodeURI(l:xRef)
-	call s:executeURI('silent edit ', l:uri)
+	let l:uri = info#uri#encode(l:xRef)
+	execute 'silent' 'edit' info#uri#exescape(l:uri)
 endfunction
 
 
@@ -473,7 +437,7 @@ function! s:collectXRefs()
 		" Due to line breaks the strings might contain newline and multiple
 		" spaces, replace them with one space only.
 		let l:string = substitute(l:xRefString, '\v\_s+', ' ', 'g')
-		let l:xRef = s:decodeRefString(l:string)
+		let l:xRef = info#reference#decode(l:string, b:info)
 		call add(l:xRefs, l:xRef)
 	endfor
 
@@ -520,8 +484,8 @@ function! s:xRefUnderCursor()
 
 		if l:col < l:end
 			let l:xRefString = matchstr(l:line, l:referencePattern)
-			let l:xRef = s:decodeRefString(l:xRefString)
-			call s:executeURI('silent edit ', s:encodeURI(l:xRef))
+			let l:xRef = info#reference#decode(l:xRefString, b:info)
+			execute 'silent' 'edit' info#uri#exescape(info#uri#encode(l:xRef))
 			return
 		endif
 
@@ -556,120 +520,30 @@ function! s:gotoNode(node)
 		return
 	endif
 
-	let l:uri = s:encodeURI(l:ref)
-	call s:executeURI('silent edit ', l:uri)
-endfunction
-" URI-handling function {{{1
-" See RFC 3986 for the URI standard: https://tools.ietf.org/html/rfc3986
-
-" Decodes a URI into a node reference
-function! s:decodeURI(uri)
-	" URI-parsing regex from https://tools.ietf.org/html/rfc3986#appendix-B
-	let l:uriMatches = matchlist(a:uri, '\v^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?')
-
-	let l:path     = s:percentDecode(l:uriMatches[5])
-	let l:query    = s:percentDecode(l:uriMatches[7])
-	let l:fragment = s:percentDecode(l:uriMatches[9])
-
-	let l:ref = {'File': l:path}
-
-	if !empty(l:fragment)
-		let l:ref['Node'] = l:fragment
-	endif
-
-	for l:prop in ['line','column']
-		let l:val = matchstr(l:query, '\v'.l:prop.'\=\zs\d+')
-		if !empty(l:val)
-			let l:ref[l:prop] = l:val
-		endif
-	endfor
-
-	return l:ref
-endfunction
-
-
-" Encodes a node reference into a URI
-function! s:encodeURI(reference)
-	" The scheme is hard-coded, the path has a mandatory default
-	let l:uri = 'info:' . s:percentEncode(get(a:reference, 'File', 'dir'))
-
-	" Build up the query dictionary
-	let l:query_props = ['line', 'column']  " Hard-coded URI properties
-	let l:query  = {}
-	for l:prop in l:query_props
-		if get(a:reference, l:prop, 0)
-			let l:query[l:prop] = get(a:reference, l:prop)
-		endif
-	endfor
-	" Insert the query into the URI
-	if !empty(l:query)
-		let l:uri .= '?'
-		for [l:prop, l:val] in items(l:query)
-			let l:uri .= l:prop . '=' . l:val . '&'
-		endfor
-		let l:uri = l:uri[:-2]  " Strip away the last '&'
-	endif
-
-	" Insert the fragment into the URI
-	if has_key(a:reference, 'Node')
-		let l:uri .= '#' . s:percentEncode(get(a:reference, 'Node'))
-	endif
-
-	return l:uri
-endfunction
-
-function! s:percentEncode(string)
-	" Important: encode the percent symbol first
-	let l:subst = [
-		\ ['%', '25'], [' ', '20'], ['!', '21'], ['#', '23'],
-		\ ['$', '24'], ['&', '26'], ["'", '27'], ['(', '28'],
-		\ [')', '29'], ['*', '2a'], ['+', '2b'], [',', '2c'],
-		\ ['/', '2f'], [':', '3a'], [';', '3b'], ['=', '3d'],
-		\ ['?', '3f'], ['@', '40'], ['[', '5b'], [']', '5d'],
-	\ ]
-	let l:string = a:string
-	for [symbol, substitution] in l:subst
-		let l:string = substitute(l:string, '\v\'.symbol, '%'.substitution, 'g')
-	endfor
-
-	return l:string
-endfunction
-
-function! s:percentDecode(string)
-	" Important: Decode the percent symbol last
-	let l:subst = [
-		\ [' ', '20'], ['!', '21'], ['#', '23'], ['$', '24'],
-		\ ['\&','26'], ["'", '27'], ['(', '28'], [')', '29'], 
-		\ ['*', '2a'], ['+', '2b'], [',', '2c'], ['/', '2f'], 
-		\ [':', '3a'], [';', '3b'], ['=', '3d'], ['?', '3f'], 
-		\ ['@', '40'], ['[', '5b'], [']', '5d'], ['%', '25'],
-	\ ]
-	let l:string = a:string
-	for [symbol, substitution] in l:subst
-		let l:string = substitute(l:string, '\v\%'.substitution, symbol, 'g')
-	endfor
-
-	return l:string
+	let l:uri = info#uri#encode(l:ref)
+	execute 'silent' 'edit' info#uri#exescape(l:uri)
 endfunction
 
 
 " Generally useful functions {{{1
 
-function! s:findReferenceInList(pattern, list)
+" Return the first reference from 'references' which matches 'pattern'. If
+" none match, then return an empty reference.
+function! s:findReferenceInList(pattern, references)
 	" Try exact matches first
-	for l:item in a:list
+	for l:item in a:references
 		if l:item['Name'] ==? a:pattern
 			return l:item
 		endif
 	endfor
 	" Prefer matching at the beginning of the pattern
-	for l:item in a:list
+	for l:item in a:references
 		if l:item['Name'] =~? '\v^' . a:pattern
 			return l:item
 		endif
 	endfor
 	" Finially, try regex matches
-	for l:item in a:list
+	for l:item in a:references
 		if l:item['Name'] =~? a:pattern
 			return l:item
 		endif
@@ -681,7 +555,7 @@ endfunction
 function! s:populateLocList(title, items)
 	function! ReferenceToEntry(index, reference)
 		return {
-			\ 'filename': s:encodeURI(a:reference), 
+			\ 'filename': info#uri#encode(a:reference), 
 			\ 'lnum': get(a:reference, 'line', 1),
 			\ 'text': a:reference.Name,
 		\ }
@@ -691,37 +565,10 @@ function! s:populateLocList(title, items)
 	let w:quickfix_title = a:title
 endfunction
 
-" Parse a reference string into a reference object.
-function! s:decodeRefString(string)
-	" Strip away the leading cruft first: '* ' and '*Note '
-	let l:reference = matchstr(a:string, '\v^\*([Nn]ote\s+)?\s*\zs.+')
-	" Try the '* Note::' type of reference first
-	let l:name = matchstr(l:reference, '\v^\zs[^:]+\ze\:\:')
-
-	if empty(l:name)
-		" The format is '* Name: (file)Node.*
-		let [l:name, l:node] = split(l:reference, '\v\:\s')
-
-		let l:file = matchstr(l:node, '\v^\s*\(\zs[^)]+\ze\)')
-		" If there is no file the current one is implied
-		if empty(l:file)
-			let l:file = b:info['File']
-		endif
-
-		let l:node = matchstr(l:node, '\v^\s*(\([^)]+\))?\zs[^.,[:tab:]]+')
-	else
-		let l:node = l:name
-		let l:file = b:info['File']
-	endif
-
-	return {'Name': l:name, 'File': l:file, 'Node': l:node}
-endfunction
-
-
 " Encode a reference into an info command call. The 'kwargs' is for
 " redirection of stdin and stderr
 function! s:encodeCommand(ref, kwargs)
-	let l:cmd = s:infoprg()
+	let l:cmd = info#prog()
 	if has_key(a:ref, 'File')
 		let l:cmd .= ' --file '.shellescape(a:ref['File'])
 	endif
@@ -747,29 +594,13 @@ function! s:encodeCommand(ref, kwargs)
 	return l:cmd
 endfunction
 
-
-" Call an ex-command with the URI. This will make sure the URI is properly
-" escaped.
-function! s:executeURI(ex_cmd, uri)
-	" The URI will be spliced into the command, it will not be used as a raw
-	" string. Therefore we need to escape backslashes and potentially other
-	" characters. It is important to escape backslashes first, otherwise the
-	" escaping backslash will be escaped, thus un-escaping previous escapes
-	let l:uri = substitute(a:uri, '\v\\', '\\\\', 'g')
-	let l:uri = substitute(a:uri, '\v\#',  '\\#', 'g')
-	" Percent characters stand for the current file name
-	let l:uri = substitute(l:uri, '\v\%', '\\%', 'g')
-	execute a:ex_cmd l:uri
-endfunction
-
-
 " Check the version of info installed, display a warning if it is too low.
 function! s:verifyInfoVersion()
 	if exists('s:infoVersion')
 		return
 	endif
 
-	let l:version = matchstr(system([s:infoprg(), '--version']), '\v\d+\.\d+')
+	let l:version = matchstr(system([info#prog(), '--version']), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
 
 	if l:major < 6
@@ -806,11 +637,5 @@ function! s:verifyReference(ref)
 endfunction
 
 
-" Return the current 'info' binary; respects the order of precedence for
-" scopes. We do not cache the result in a variable because the user might have
-" changed settings since the last time this function was called.
-function! s:infoprg()
-	echom get(b:, 'infoprg', get(t:, 'infoprg', get(g:, 'infoprg', 'info')))
-	return get(b:, 'infoprg', get(t:, 'infoprg', get(g:, 'infoprg', 'info')))
-endfunction
+" =============================================================================
 " vim:tw=78:ts=4:noexpandtab:norl:

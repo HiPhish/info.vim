@@ -8,7 +8,7 @@
                   |_|_| |_|_|  \___(_)_/ |_|_| |_| |_|~
 
 
-Version: 0.4.0
+Version: 0.5.0
 Author: Alejandro "HiPhish" Sanchez
 License: MIT License
 
@@ -23,7 +23,11 @@ TABLE OF CONTENTS                                              *info-contents*
     3. Variables ........................................ |info-variables|
     4. Key mappings ..................................... |info-mappings|
     5. Commands ......................................... |info-commands|
-    6. Advanced ......................................... |info-advanced|
+    6. API .............................................. |info-api|
+       6.1. References .................................. |info-reference|
+       6.2. Context ..................................... |info-context|
+       6.3. URI scheme .................................. |info-uri|
+       6.4. Info functions .............................. |info-functions|
 
 
 
@@ -103,48 +107,6 @@ Default: {topic, mods -> ...}~
 
     If you wish to disable any fallback entirely you can |:unlet| this
     variable.
-
-
-------------------------------------------------------------------------------
-b:info                                                                *b:info*
-                                               *b:info['File']* *b:info['Node']*
-                                      *b:info['Up']* *b:info[Next]* *b:info[Prev]*
-
-    Dictionary describing a number of properties of the current node. Use this
-    for scripting. Most of it is reflecting the node header:
-
-    b:info['File']~
-	Name of the Info file (document).
-    b:info['Node']~
-	Name of the current node.
-
-    The following entries are |info-reference| dictionaries:
-
-    b:info['Up']~
-	Reference to the parent node.
-    b:info['Next']~
-	Reference to the next node.
-    b:info['Prev']~
-	Reference to the previous node.
-
-    Not all of these keys have to be present in a node. There is also a number
-    of extra keys which warrant a more detailed explanation further below.
-
-
-------------------------------------------------------------------------------
-b:info['Menu']                                                *b:info['Menu']*
-
-    A list of menu item entries, each entry is an |info-reference| dictionary.
-
-    Note  The menu is built lazily, it will not exists until executing a menu-
-          related command.
-
-
-------------------------------------------------------------------------------
-b:info['XRefs']                                              *b:info['XRefs']*
-
-    A  list  of  cross-reference  entries,  each  entry  is an  |info-reference|
-    dictionary.
 
 
 
@@ -258,7 +220,15 @@ COMMANDS                                                       *info-commands*
 
 
 ==============================================================================
-ADVANCED                                                       *info-advanced*
+API                                                                 *info-api*
+
+Info.vim exposes an API so that other plugins can make use of its features.
+The API defined a reference type (|info-reference|), a URI scheme (|info-uri|)
+and a number of functions inside the `info#` namespace.
+
+Some functions accept a `context` argument, this is the Info context which is
+usually stored inside the variable |b:info|. By passing the context explicitly
+we can use the API without having to be inside the Info buffer.
 
 
 ------------------------------------------------------------------------------
@@ -278,6 +248,47 @@ If an entry is  missing there will either  be a default value used  (e.g. line
 number 1),  or the  value will  be deduced  from context  (e.g.  if {file}  is
 missing use the current file),  or it is an actual error (e.g. menu references
 without {name}).
+
+
+------------------------------------------------------------------------------
+b:info                                                          *info-context*
+                                                                      *b:info*
+                                               *b:info['File']* *b:info['Node']*
+                                      *b:info['Up']* *b:info[Next]* *b:info[Prev]*
+
+Dictionary describing a number of properties of the current node. Use this for
+scripting. Most of it is reflecting the node header:
+
+    b:info['File']~
+	Name of the Info file (document).
+    b:info['Node']~
+	Name of the current node.
+
+The following entries are |info-reference| dictionaries:
+
+    b:info['Up']~
+	Reference to the parent node.
+    b:info['Next']~
+	Reference to the next node.
+    b:info['Prev']~
+	Reference to the previous node.
+
+Not all of these keys have to be present in a node. There is also a number of
+extra keys which warrant a more detailed explanation further below.
+
+
+b:info['Menu']                                                *b:info['Menu']*
+
+    A list of menu item entries, each entry is an |info-reference| dictionary.
+
+    Note  The menu is built lazily, it will not exists until executing a menu-
+          related command.
+
+
+b:info['XRefs']                                              *b:info['XRefs']*
+
+    A  list  of  cross-reference  entries,  each  entry  is an  |info-reference|
+    dictionary.
 
 
 ------------------------------------------------------------------------------
@@ -311,6 +322,49 @@ is how Info.vim implements the URI syntax:
 	    `column`  Column number to place the cursor on
     Fragment~
 	Node within the info file (optional)
+
+
+------------------------------------------------------------------------------
+Info functions                                                *info-functions*
+
+           
+info#prog()                                                      *info#prog()*
+
+    Returns the name of the standalone Info binary, respecting |g:infoprg|,
+    |t:infoprg| and |b:infoprg|
+
+
+------------------------------------------------------------------------------
+Info URI functions                                                  *info#uri*
+
+                                                            
+info#uri#encode({reference}, {context})                      *info#uri#encode*
+
+    Encode an |info-reference| into a URI. The |info-context| is needed to
+    fill in information which might by implicitly in the reference, such as
+    the name of the Info file.
+
+
+info#uri#decode({uri})                                       *info#uri#decode*
+
+    Decode an |info-uri| into an |info-reference|.
+
+
+info#uri#exescape({uri})
+
+    Escape an |info-uri| such that it can be used within an ex-command. A
+    valid URI may contain a number of characters which have special meaning in
+    an ex-command, and this function escapes them.
+
+
+------------------------------------------------------------------------------
+Info reference functions                                      *info#reference*
+
+
+info#reference#decode({string}, {context})             *info#reference#decode*
+
+    Decodes a reference string as found within an Info file into an
+    |info-reference| object.
 
 
 ==============================================================================

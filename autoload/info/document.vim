@@ -28,31 +28,41 @@
 " current file. It does not mean that the functions operate on the entire
 " document or between documents.
 
-
-function! info#document#next()
-	let l:current_file = b:info.File
-	let l:menu_entries = copy(get(b:info, 'Menu', []))
+" Return a reference to the node following in linear order. If the current node
+" has a menu it is the first element of the menu, otherwise it is the next
+" node, and otherwise it is an empty reference.
+"
+" There is one problem though: if there is no next node and no menu, we would
+" have to go one node up and then step forward. But to do this we would need a
+" reference to the parent node, its next node and its menu, all from the
+" current node.
+function! info#document#forward(context)
+	let l:current_file = a:context.File
+	let l:menu_entries = copy(get(a:context, 'Menu', []))
 	call filter(l:menu_entries, {_,v->v['File'] =~# l:current_file})
 	if !empty(l:menu_entries)
 		return l:menu_entries[0]
 	endif
 	unlet l:menu_entries
 
-	" if has_key(b:info, 'Next') && b:info.Next.File =~# l:current_file
-	" 	return b:info.Next.File
-	" endif
+	if has_key(a:context, 'Next') && a:context.Next.File =~# l:current_file
+		return a:context.Next.File
+	endif
 
-	echoerr 'No more nodes within this document'
+	return {}
 endfunction
 
-function! info#document#prev()
-	let l:current_file = b:info.File
+" Return a reference to the preceding node in linear order. If the current node
+" has a previous node return it, otherwise return the parent node, otherwise
+" return an empty reference.
+function! info#document#backward(context)
+	let l:current_file = a:context.File
 
 	for l:direction in ['Prev', 'Up']
-		if has_key(b:info, l:direction) && b:info[l:direction].File =~# l:current_file
-			return b:info[l:direction].File
+		if has_key(a:context, l:direction) && a:context[l:direction].File =~# l:current_file
+			return a:context[l:direction].File
 		endif
 	endfor
 
-	echoerr 'No ''Prev'' or ''Up'' for this node within this document'
+	return {}
 endfunction

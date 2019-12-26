@@ -50,10 +50,10 @@ a buffer with a URI pattern like this:
 .. code-block:: vim
 
    :edit info://
-   :edit info://<file>
-   :edit info://<file>/<node>
+   :edit info:<file>
+   :edit info:<file>#<node>
 
-You could call `:e info://bash` in a buffer to open the same document as above.
+You could call `:e info:bash` in a buffer to open the same document as above.
 
 Use the `:Menu` command to follow a node's menu entries.
 
