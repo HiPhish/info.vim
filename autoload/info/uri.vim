@@ -72,7 +72,7 @@ function! info#uri#decode(uri)
 	endif
 
 	for l:prop in ['line','column']
-		let l:val = matchstr(l:query, '\v'..l:prop..'\=\zs\d+')
+		let l:val = matchstr(l:query, '\v' . l:prop . '\=\zs\d+')
 		if !empty(l:val)
 			let l:ref[l:prop] = l:val
 		endif
@@ -85,7 +85,7 @@ endfunction
 " Encodes a node reference into a URI
 function! info#uri#encode(reference)
 	" The scheme is hard-coded, the path has a mandatory default
-	let l:uri = 'info:' .. s:percentEncode(get(a:reference, 'File', 'dir'))
+	let l:uri = 'info:' . s:percentEncode(get(a:reference, 'File', 'dir'))
 
 	" Build up the query dictionary
 	let l:query_props = ['line', 'column']  " Hard-coded URI properties
@@ -99,14 +99,14 @@ function! info#uri#encode(reference)
 	if !empty(l:query)
 		let l:uri .= '?'
 		for [l:prop, l:val] in items(l:query)
-			let l:uri .= l:prop .. '=' .. l:val .. '&'
+			let l:uri .= l:prop . '=' . l:val . '&'
 		endfor
 		let l:uri = l:uri[:-2]  " Strip away the last '&'
 	endif
 
 	" Insert the fragment into the URI
 	if has_key(a:reference, 'Node')
-		let l:uri .= '#' .. s:percentEncode(get(a:reference, 'Node'))
+		let l:uri .= '#' . s:percentEncode(get(a:reference, 'Node'))
 	endif
 
 	return l:uri
@@ -118,7 +118,7 @@ function! s:percentEncode(string)
 	" Important: encode the percent symbol first
 	let l:string = substitute(a:string, '\v\%', '%25', 'g')
 	for [l:char, l:code] in s:char_to_code
-		let l:string = substitute(l:string, '\v\'..l:char, '%'..l:code, 'g')
+		let l:string = substitute(l:string, '\v\' . l:char, '%' . l:code, 'g')
 	endfor
 
 	return l:string
@@ -128,7 +128,7 @@ function! s:percentDecode(string)
 	" Important: Decode the percent symbol last
 	let l:string = a:string
 	for [l:code, l:char] in s:char_to_code
-		let l:string = substitute(l:string, '\v\%'..l:char, l:code, 'g')
+		let l:string = substitute(l:string, '\v\%' . l:char, l:code, 'g')
 	endfor
 	return substitute(l:string, '\v\%25', '%', 'g')
 endfunction

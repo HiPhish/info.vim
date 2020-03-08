@@ -57,7 +57,7 @@ if !exists('s:did_load')
 		autocmd!
 		exe 'autocmd FuncUndefined *info    source '.expand('<sfile>')
 		exe 'autocmd BufReadCmd    info:* source '.expand('<sfile>').
-		    \'| call ' ..s:SID() .. 'readReference(info#uri#decode(expand("<afile>")))'
+		    \'| call ' . s:SID() . 'readReference(info#uri#decode(expand("<afile>")))'
 	augroup END
 	finish
 endif

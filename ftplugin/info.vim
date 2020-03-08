@@ -58,13 +58,13 @@ let s:functions_defined = v:true
 
 let s:help_message =
 	\"Execute ':Info info.vim' for an interactive tutorial. The following\n"
-	\.."commands are defined in 'info' buffers:\n"
-	\.."  :Menu [entry]   Jump to a menu entry or open menu in location list\n"
-	\.."  :Follow [xRef]  Follow reference and cross-references\n"
-	\.."  :InfoUp         Go to parent node\n"
-	\.."  :InfoNext       Go to next node\n"
-	\.."  :InfoPrev       Go to previous node\n"
-	\.."See ':help info.vim' for more details and mappings."
+	\."commands are defined in 'info' buffers:\n"
+	\."  :Menu [entry]   Jump to a menu entry or open menu in location list\n"
+	\."  :Follow [xRef]  Follow reference and cross-references\n"
+	\."  :InfoUp         Go to parent node\n"
+	\."  :InfoNext       Go to next node\n"
+	\."  :InfoPrev       Go to previous node\n"
+	\."See ':help info.vim' for more details and mappings."
 
 " Echo a quick instruction list
 function! s:help()
@@ -76,7 +76,7 @@ function! s:jumpTo(where)
 	let l:reference = get(b:info, a:where, {})
 	if empty(l:reference)
 		echohl ErrorMsg
-		echo 'No '''..a:where..''' pointer for this node.'
+		echo 'No ''' . a:where . ''' pointer for this node.'
 		echohl None
 		return
 	endif
