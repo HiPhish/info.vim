@@ -26,7 +26,7 @@ function! health#info#check() abort
 	let l:infoprg = get(b:,'infoprg',get(t:,'infoprg',get(g:,'infoprg','info')))
 	call health#report_start('info.vim')
 
-	let l:version = matchstr(system([l:infoprg, '--version']), '\v\d+\.\d+')
+	let l:version = matchstr(system(l:infoprg . ' --version'), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
 	let l:minor = matchstr(l:version, '\v\d+\.\zs\d+\ze')
 

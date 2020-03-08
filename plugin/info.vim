@@ -600,7 +600,7 @@ function! s:verifyInfoVersion()
 		return
 	endif
 
-	let l:version = matchstr(system([info#prog(), '--version']), '\v\d+\.\d+')
+	let l:version = matchstr(system(info#prog() . ' --version'), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
 
 	if l:major < 6
