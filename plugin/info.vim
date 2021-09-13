@@ -581,10 +581,6 @@ function! s:encodeCommand(ref, kwargs)
 
 	if has_key(a:kwargs, 'stderr')
 		let l:cmd .= ' 2>'.a:kwargs['stderr']
-		" Adjust the redirection syntax for special snowflake shells
-		if &shell =~# 'fish$'
-			let l:cmd = substitute(l:cmd, '\v\zs2\>\ze\/dev\/null$', '^', '')
-		endif
 	endif
 
 	if has_key(a:kwargs, 'stdout')
