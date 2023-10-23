@@ -35,7 +35,7 @@ function! health#info#check() abort
 		let l:sug1 = 'Install at least version 6.4 of GNU Texinfo.'
 		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
 		call health#report_error(l:msg, [l:sug1, l:sug2])
-	elseif l:major < 6 || l:minor < 4
+	elseif l:major < 6 || (l:major == 6 && l:minor < 4)
 		let l:msg = 'You need at least version 6.4 of standalone info.'
 		let l:sug1 = 'Install at least version 6.4 of GNU Texinfo.'
 		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
