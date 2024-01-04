@@ -24,7 +24,7 @@
 
 function! health#info#check() abort
 	let l:infoprg = get(b:,'infoprg',get(t:,'infoprg',get(g:,'infoprg','info')))
-	call health#report_start('info.vim')
+	call v:lua.vim.health.start('info.vim')
 
 	let l:version = matchstr(system(l:infoprg . ' --version'), '\v\d+\.\d+')
 	let l:major = matchstr(l:version, '\v\zs\d+\ze\.\d+')
@@ -34,13 +34,13 @@ function! health#info#check() abort
 		let l:msg  = 'No standalone info binary found.'
 		let l:sug1 = 'Install at least version 6.4 of GNU Texinfo.'
 		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
-		call health#report_error(l:msg, [l:sug1, l:sug2])
+		call v:lua.vim.health.error(l:msg, [l:sug1, l:sug2])
 	elseif l:major < 6 || (l:major == 6 && l:minor < 4)
 		let l:msg = 'You need at least version 6.4 of standalone info.'
 		let l:sug1 = 'Install at least version 6.4 of GNU Texinfo.'
 		let l:sug2 = 'Set ''g:infoprg'' to the path of the standalone info binary.'
-		call health#report_error(l:msg, [l:sug1, l:sug2])
+		call v:lua.vim.health.error(l:msg, [l:sug1, l:sug2])
 	else
-		call health#report_ok('Version '.l:version.' of standalone info installed.')
+		call v:lua.vim.health.ok('Version '.l:version.' of standalone info installed.')
 	endif
 endfunction
