@@ -214,7 +214,7 @@ function! s:readReference(ref)
 			continue
 		endif
 		" The value might have leading whitespace as well
-		let l:value = matchstr(l:pair, '\v\:\s*\zs[^,]+')
+		let l:value = matchstr(l:pair, '\v\:\s*\zs[^,\t]+')
 		let b:info[l:key] = l:value
 	endfor
 
