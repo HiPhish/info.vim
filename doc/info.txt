@@ -209,7 +209,7 @@ COMMANDS                                                       *info-commands*
 
     Follow the given  cross-reference.  Without argument  the location list is
     populated with all cross references in the current node. The argument does
-    not have to be a perfect mtach, it only needs to match at the head.
+    not have to be a perfect match, it only needs to match at the head.
 
 
 ------------------------------------------------------------------------------
