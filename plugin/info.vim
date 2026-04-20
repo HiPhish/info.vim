@@ -23,7 +23,7 @@
 " }}}
 
 if exists('g:loaded_info')
-  finish
+	finish
 endif
 
 
@@ -90,7 +90,8 @@ augroup InfoFiletype
 		\ -complete=customlist,<SID>completeFollow -nargs=?
 		\ Follow call <SID>follow(<q-args>)
 
-	autocmd FileType info command! -buffer -nargs=?
+	autocmd FileType info command! -buffer
+		\ -complete=customlist,<SID>completeGotoNode -nargs=1
 		\ GotoNode call <SID>gotoNode(<q-args>)
 
 	" Look up the reference under the cursor (for cross-references and menus)
@@ -126,6 +127,20 @@ function! s:completeFollow(ArgLead, CmdLine, CursorPos)
 	return s:completePrompt(a:ArgLead, b:info['XRefs'])
 endfunction
 
+function! s:completeGotoNode(ArgLead, CmdLine, CursorPos)
+	let l:file = b:info['File']
+	let l:cmd = printf(
+		\'%s --subnodes "%s" | grep -Eoe "^File:\s[^,]+,\s+Node:\s[^,]+" | sed -E "s/^File:\s[^,]+,\s+Node:\s(.+)/\1/" | sort',
+		\info#prog(),
+		\b:info.File
+	\)
+	let l:candidates = systemlist(l:cmd)
+
+	if empty(a:ArgLead)
+		return l:candidates
+	endif
+	return filter(l:candidates, {_, val -> match(val, '\v^' . a:ArgLead) != -1})
+endfunction
 
 " 'Info' functions {{{1
 
@@ -198,7 +213,7 @@ function! s:readReference(ref)
 
 	put =system(l:cmd)
 	" Putting has produced an empty line at the top, remove that
-    silent keepjumps 1delete _
+	silent keepjumps 1delete _
 
 	" Parse the node header
 	let b:info = {}
